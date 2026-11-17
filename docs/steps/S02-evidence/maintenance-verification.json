@@ -1,0 +1,24 @@
+{
+  "fixed_outputs_match_previous_evidence": {
+    "archive-checksum.json": true,
+    "contact_selection.json": true,
+    "contact_sheet.png": true,
+    "dhash_groups.json": true,
+    "exact_duplicates.json": true,
+    "manifest.csv": true,
+    "similar_hash_pairs.csv": true,
+    "summary_except_time": true
+  },
+  "contact_only_retry_matches_full_run": {
+    "manifest.csv": true,
+    "summary.json": true,
+    "archive-checksum.json": true,
+    "contact_sheet.png": true,
+    "contact_selection.json": true
+  },
+  "excluded_summary_fields": [
+    "generated_utc",
+    "duration_seconds"
+  ],
+  "result": "all comparisons passed"
+}
