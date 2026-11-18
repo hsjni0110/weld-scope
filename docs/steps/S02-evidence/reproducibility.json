@@ -1,0 +1,25 @@
+{
+  "byte_equal": {
+    "archive-checksum.json": true,
+    "contact_selection.json": true,
+    "contact_sheet.png": true,
+    "dhash_groups.json": true,
+    "exact_duplicates.json": true,
+    "manifest.csv": true,
+    "similar_hash_pairs.csv": true,
+    "summary_except_time": true
+  },
+  "sha256": {
+    "archive-checksum.json": "ea62aa10454df4af4af593277fb19b11dfc6409bb7aa65f9764b68b9fe23f7a2",
+    "contact_selection.json": "fb3ef6165d0cc52dedd2d1ee4ddb2422f5b78ab7b239dcda0fe6df134205a163",
+    "contact_sheet.png": "a135ea34ad34da9311dff628f8c6482dd1675aa391929c3bb16cfecdd44348dd",
+    "dhash_groups.json": "e2ca74b97f98a32218fe1269b2fef3ceef35c23648d8123b16140baf48a958d2",
+    "exact_duplicates.json": "10a12610f8d81a38937d706685bb4a4ef9e12ddb568094a96caaf76a2a205a59",
+    "manifest.csv": "0f5f002834e629496e024a7d376065ac75e9bad58b92784afad0dae7f5264fa3",
+    "similar_hash_pairs.csv": "6fe44cfcaabb46c5dc4517fd43a0c27f7cba1963456d35646a0c78021cd0b325"
+  },
+  "excluded_summary_fields": [
+    "generated_utc",
+    "duration_seconds"
+  ]
+}

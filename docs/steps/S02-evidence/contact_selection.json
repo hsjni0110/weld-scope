@@ -1,0 +1,18 @@
+[
+  "train/OK/image_1.png",
+  "train/OK/image_10.png",
+  "train/OK/image_100.png",
+  "train/OK/image_1000.png",
+  "train/OK/image_10000.png",
+  "train/OK/image_10001.png",
+  "train/OK/image_10002.png",
+  "train/OK/image_10003.png",
+  "train/KO/image_1.png",
+  "train/KO/image_10.png",
+  "train/KO/image_100.png",
+  "train/KO/image_1000.png",
+  "train/KO/image_1001.png",
+  "train/KO/image_1002.png",
+  "train/KO/image_1003.png",
+  "train/KO/image_1004.png"
+]

@@ -1,0 +1,117 @@
+﻿{
+    "created":  "2024-11-01T23:10:30.775925+00:00",
+    "modified":  "2024-11-01T23:10:30.912522+00:00",
+    "id":  14025630,
+    "conceptrecid":  "14025629",
+    "doi":  "10.5281/zenodo.14025630",
+    "conceptdoi":  "10.5281/zenodo.14025629",
+    "doi_url":  "https://doi.org/10.5281/zenodo.14025630",
+    "metadata":  {
+                     "title":  "2D image dataset for the presence or absence of aesthetical defects on EV battery welds.",
+                     "doi":  "10.5281/zenodo.14025630",
+                     "publication_date":  "2024-11-01",
+                     "description":  "\u003cp\u003eA 2D image dataset of EV car battery welds is used to train AI/ML models on weld classification for quality inspection applications or other purposes.\u003c/p\u003e\n\u003cp\u003e\u0026nbsp;\u003c/p\u003e\n\u003cp\u003eIncludes 1 zip file with 61,670 greyscale images of 409x40 resolution split in\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003etraining set [ 43,169 images]\u003c/li\u003e\n\u003cli\u003evalidation set [ 9,250 images]\u003c/li\u003e\n\u003cli\u003etesting set [ 9,251 images]\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u0026nbsp;\u003c/p\u003e\n\u003cp\u003eand the following 2 classes:\u003c/p\u003e\n\u003cp\u003e1] OK --\u0026gt; indicating the absence of aesthetical defects\u003c/p\u003e\n\u003cp\u003e2] KO --\u0026gt; indicating the presense of aesthetical defects\u003c/p\u003e",
+                     "access_right":  "open",
+                     "creators":  [
+                                      {
+                                          "name":  "OPENZDM",
+                                          "affiliation":  null
+                                      }
+                                  ],
+                     "resource_type":  {
+                                           "title":  "Dataset",
+                                           "type":  "dataset"
+                                       },
+                     "license":  {
+                                     "id":  "cc-by-4.0"
+                                 },
+                     "communities":  [
+                                         {
+                                             "id":  "eu"
+                                         },
+                                         {
+                                             "id":  "openzdm"
+                                         }
+                                     ],
+                     "relations":  {
+                                       "version":  [
+                                                       {
+                                                           "index":  0,
+                                                           "is_last":  true,
+                                                           "parent":  {
+                                                                          "pid_type":  "recid",
+                                                                          "pid_value":  "14025629"
+                                                                      }
+                                                       }
+                                                   ]
+                                   }
+                 },
+    "title":  "2D image dataset for the presence or absence of aesthetical defects on EV battery welds.",
+    "links":  {
+                  "self":  "https://zenodo.org/api/records/14025630",
+                  "self_html":  "https://zenodo.org/records/14025630",
+                  "preview_html":  "https://zenodo.org/records/14025630?preview=1",
+                  "doi":  "https://doi.org/10.5281/zenodo.14025630",
+                  "self_doi":  "https://doi.org/10.5281/zenodo.14025630",
+                  "self_doi_html":  "https://zenodo.org/doi/10.5281/zenodo.14025630",
+                  "reserve_doi":  "https://zenodo.org/api/records/14025630/draft/pids/doi",
+                  "parent":  "https://zenodo.org/api/records/14025629",
+                  "parent_html":  "https://zenodo.org/records/14025629",
+                  "parent_doi":  "https://doi.org/10.5281/zenodo.14025629",
+                  "parent_doi_html":  "https://zenodo.org/doi/10.5281/zenodo.14025629",
+                  "self_iiif_manifest":  "https://zenodo.org/api/iiif/record:14025630/manifest",
+                  "self_iiif_sequence":  "https://zenodo.org/api/iiif/record:14025630/sequence/default",
+                  "files":  "https://zenodo.org/api/records/14025630/files",
+                  "media_files":  "https://zenodo.org/api/records/14025630/media-files",
+                  "latest":  "https://zenodo.org/api/records/14025630/versions/latest",
+                  "latest_html":  "https://zenodo.org/records/14025630/latest",
+                  "versions":  "https://zenodo.org/api/records/14025630/versions",
+                  "draft":  "https://zenodo.org/api/records/14025630/draft",
+                  "access_links":  "https://zenodo.org/api/records/14025630/access/links",
+                  "access_grants":  "https://zenodo.org/api/records/14025630/access/grants",
+                  "access_users":  "https://zenodo.org/api/records/14025630/access/users",
+                  "access_request":  "https://zenodo.org/api/records/14025630/access/request",
+                  "access":  "https://zenodo.org/api/records/14025630/access",
+                  "communities":  "https://zenodo.org/api/records/14025630/communities",
+                  "communities-suggestions":  "https://zenodo.org/api/records/14025630/communities-suggestions",
+                  "request_deletion":  "https://zenodo.org/api/records/14025630/request-deletion",
+                  "file_modification":  "https://zenodo.org/api/records/14025630/file-modification",
+                  "quota_increase":  "https://zenodo.org/api/records/14025630/quota-increase",
+                  "requests":  "https://zenodo.org/api/records/14025630/requests"
+              },
+    "updated":  "2024-11-01T23:10:30.912522+00:00",
+    "recid":  "14025630",
+    "revision":  4,
+    "files":  [
+                  {
+                      "id":  "291fb5df-7303-4ce3-802d-c1fdc43a97e9",
+                      "key":  "Weld Aesthetical Defects.zip",
+                      "size":  1153183844,
+                      "checksum":  "md5:f187dac063cf656bb627327fa9771d16",
+                      "links":  {
+                                    "self":  "https://zenodo.org/api/records/14025630/files/Weld%20Aesthetical%20Defects.zip/content"
+                                }
+                  }
+              ],
+    "swh":  {
+
+            },
+    "owners":  [
+                   {
+                       "id":  "1096884"
+                   }
+               ],
+    "status":  "published",
+    "stats":  {
+                  "downloads":  1028,
+                  "unique_downloads":  386,
+                  "views":  795,
+                  "unique_views":  711,
+                  "version_downloads":  1028,
+                  "version_unique_downloads":  386,
+                  "version_unique_views":  711,
+                  "version_views":  795
+              },
+    "state":  "done",
+    "submitted":  true
+}

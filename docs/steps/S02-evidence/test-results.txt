@@ -1,0 +1,24 @@
+test_audit_records_corruption_unknown_label_and_exact_label_conflict (test_prepare_openzdm.PreparationTests.test_audit_records_corruption_unknown_label_and_exact_label_conflict) ... ok
+test_checksum_mismatch_leaves_original_untouched (test_prepare_openzdm.PreparationTests.test_checksum_mismatch_leaves_original_untouched) ... ok
+test_cli_contact_only_does_not_repeat_audit_or_replace_summary (test_prepare_openzdm.PreparationTests.test_cli_contact_only_does_not_repeat_audit_or_replace_summary) ... ok
+test_cli_reuses_verified_checksum_from_download (test_prepare_openzdm.PreparationTests.test_cli_reuses_verified_checksum_from_download) ... ok
+test_distinguishes_identical_pixels_from_identical_file_bytes (test_prepare_openzdm.PreparationTests.test_distinguishes_identical_pixels_from_identical_file_bytes) ... ok
+test_download_resumes_partial_and_rejects_server_ignoring_range (test_prepare_openzdm.PreparationTests.test_download_resumes_partial_and_rejects_server_ignoring_range) ... ok
+test_empty_archive_is_not_evaluation_ready (test_prepare_openzdm.PreparationTests.test_empty_archive_is_not_evaluation_ready) ... ok
+test_existing_download_returns_checksum_after_one_verification (test_prepare_openzdm.PreparationTests.test_existing_download_returns_checksum_after_one_verification) ... ok
+test_existing_output_is_not_overwritten (test_prepare_openzdm.PreparationTests.test_existing_output_is_not_overwritten) ... ok
+test_font_failure_preserves_audit_and_contact_sheet_can_be_retried (test_prepare_openzdm.PreparationTests.test_font_failure_preserves_audit_and_contact_sheet_can_be_retried) ... ok
+test_manifest_is_repeatable_and_contact_sheet_excludes_test (test_prepare_openzdm.PreparationTests.test_manifest_is_repeatable_and_contact_sheet_excludes_test) ... ok
+test_maps_official_val_directory_without_changing_original_path (test_prepare_openzdm.PreparationTests.test_maps_official_val_directory_without_changing_original_path) ... ok
+test_oversized_decoded_image_is_reported_and_following_files_are_audited (test_prepare_openzdm.PreparationTests.test_oversized_decoded_image_is_reported_and_following_files_are_audited) ... ok
+test_rejects_oversized_member (test_prepare_openzdm.PreparationTests.test_rejects_oversized_member) ... ok
+test_rejects_zip_paths_that_escape_or_collide_on_windows (test_prepare_openzdm.PreparationTests.test_rejects_zip_paths_that_escape_or_collide_on_windows) ... ok
+test_reports_native_dimensions_and_color_without_changing_pixels (test_prepare_openzdm.PreparationTests.test_reports_native_dimensions_and_color_without_changing_pixels) ... ok
+test_similar_candidates_include_five_bits_but_not_six (test_prepare_openzdm.PreparationTests.test_similar_candidates_include_five_bits_but_not_six) ... ok
+test_similarity_counts_group_sizes_and_cross_split_pairs (test_prepare_openzdm.PreparationTests.test_similarity_counts_group_sizes_and_cross_split_pairs) ... ok
+test_similarity_index_matches_bruteforce_on_fixed_hashes (test_prepare_openzdm.PreparationTests.test_similarity_index_matches_bruteforce_on_fixed_hashes) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 1.004s
+
+OK
