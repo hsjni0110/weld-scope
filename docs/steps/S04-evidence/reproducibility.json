@@ -1,0 +1,12 @@
+{
+  "compared_images": 43169,
+  "compared_debug_pngs": 64,
+  "all_non_timing_result_fields_equal": true,
+  "debug_pngs_byte_identical": true,
+  "score_tolerance": 0,
+  "config_sha256": "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2",
+  "csv_sha256": [
+    "1860182fa2e0671d734399cea59f7f19592e74eb4ac6745a907f5e877b24a906",
+    "c9cce21090e10f654721a5e21748beb8de5b3b3b5891cb5bbbd39f86fefeec77"
+  ]
+}

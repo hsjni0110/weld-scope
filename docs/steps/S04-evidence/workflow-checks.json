@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "Completed ERROR run still creates its report and returns 2",
+    "FullTrain rejects the 16-image sample cache before inspection",
+    "Single-file report preserves unspecified provenance without dataset attribution"
+  ]
+}

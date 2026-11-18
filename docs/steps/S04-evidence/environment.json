@@ -1,0 +1,53 @@
+{
+  "recorded_utc": "2026-11-18T07:16:52.938537+00:00",
+  "windows": [
+    "11",
+    "10.0.26300",
+    "SP0",
+    "Multiprocessor Free"
+  ],
+  "machine": "ARM64",
+  "hardware": {
+    "Manufacturer": "QEMU",
+    "Model": "QEMU Virtual Machine",
+    "NumberOfLogicalProcessors": 4,
+    "TotalPhysicalMemory": 8583380992
+  },
+  "processor": {
+    "Name": "virt-9.1",
+    "NumberOfCores": 4,
+    "NumberOfLogicalProcessors": 4
+  },
+  "msvc_tools": "14.52.37025",
+  "compiler": "19.52.37029.0",
+  "platform_toolset": "v145",
+  "cmake": "4.3.1-msvc1",
+  "windows_sdk": "10.0.26100.0",
+  "configuration": "Release",
+  "cpp_runtime": "/MD",
+  "opencv_version": "4.13.0",
+  "opencv_static": true,
+  "opencv_modules": [
+    "core",
+    "imgproc",
+    "imgcodecs"
+  ],
+  "opencv_threads": 1,
+  "input_repetitions": 2,
+  "timing_samples_per_input_per_run": 1,
+  "python": "3.13.9",
+  "pillow": "13.0.0",
+  "executable_sha256": "6e4f7b208101495e6950917d07ad0b18e84d7e68521f2b898b617b143715824c",
+  "pe_machine": "0xaa64",
+  "config_sha256": "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2",
+  "not_verified": [
+    "Held-out accuracy",
+    "Part-level independence",
+    "x64/Win32",
+    "Debug",
+    "Clean machine deployment"
+  ],
+  "upstream_configuration_warnings": [
+    "OpenCV sets deprecated CMake OLD policies CMP0146 and CMP0148; no warning suppression flags used."
+  ]
+}
