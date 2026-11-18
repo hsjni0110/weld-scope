@@ -17,7 +17,7 @@ docker compose up -d --wait --wait-timeout 120
 docker compose ps
 ```
 
-Mac에서는 소유자만 `.secrets` 디렉터리에 접근할 수 있다. 개별 파일은 컨테이너의 MySQL 사용자도 마운트 경로에서 읽을 수 있게 한다. 기존 수동 컨테이너가 3307 포트를 쓰고 있으면 해당 컨테이너만 중지하고 다시 실행한다. 이 구성은 전용 볼륨을 사용하므로 수동 컨테이너의 DB와 별개다.
+Mac에서는 소유자만 `.secrets` 디렉터리에 접근할 수 있다. 개별 파일은 컨테이너의 MySQL 사용자도 마운트 경로에서 읽을 수 있게 한다. 기본 포트가 사용 중이면 `WELDSCOPE_MYSQL_PORT=3310 docker compose up -d --wait --wait-timeout 120`처럼 빈 포트를 지정한다. 이 구성은 전용 볼륨을 사용하므로 수동 컨테이너의 DB와 별개다.
 
 앱 계정과 실제 서버 버전을 확인한다.
 
@@ -25,10 +25,10 @@ Mac에서는 소유자만 `.secrets` 디렉터리에 접근할 수 있다. 개�
 docker compose exec mysql sh -c 'MYSQL_PWD="$(cat /run/secrets/mysql_app_password)" mysql --protocol=TCP -h 127.0.0.1 -u weldscope_app -D weldscope_s05 -e "SELECT DATABASE(), VERSION(); SHOW GRANTS;"'
 ```
 
-초기화는 비어 있는 전용 볼륨에서 한 번 실행된다. 기본 게시 주소는 Mac의 `127.0.0.1:3307`이다. UTM Emulated VLAN을 쓰면 Windows PowerShell에서 아래처럼 확인한다. UTM의 Host Address를 따로 설정했다면 해당 값을 사용한다.
+초기화는 비어 있는 전용 볼륨에서 한 번 실행된다. 기본 게시 주소는 Mac의 `127.0.0.1:3309`다. UTM Emulated VLAN을 쓰면 Windows PowerShell에서 아래처럼 확인한다. UTM의 Host Address나 게시 포트를 변경했다면 실제 값을 사용한다.
 
 ```powershell
-Test-NetConnection -ComputerName 10.0.2.2 -Port 3307
+Test-NetConnection -ComputerName 10.0.2.2 -Port 3309
 ```
 
 Shared Network에서는 Mac의 VM 접속용 인터페이스 주소를 확인한 뒤 `WELDSCOPE_MYSQL_BIND_IP`에 지정하고 Compose를 다시 실행한다. Windows에서도 그 주소로 접속한다. Mac의 Wi-Fi 주소를 고정 설정에 넣지 않는다.

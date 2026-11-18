@@ -10,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_app_password
     ports:
-      - "${WELDSCOPE_MYSQL_BIND_IP:-127.0.0.1}:3307:3306"
+      - "${WELDSCOPE_MYSQL_BIND_IP:-127.0.0.1}:${WELDSCOPE_MYSQL_PORT:-3309}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/s05/01-app-permissions.sql:/docker-entrypoint-initdb.d/01-app-permissions.sql:ro
