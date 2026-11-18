@@ -1,0 +1,28 @@
+{
+  "author": "OPENZDM",
+  "title": "2D image dataset for the presence or absence of aesthetical defects on EV battery welds.",
+  "source": "https://zenodo.org/records/14025630",
+  "doi": "10.5281/zenodo.14025630",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "changes": "Original PNG bytes unchanged. Display scales proportionally. Candidate rectangle is a synthetic UI overlay.",
+  "images": [
+    {
+      "resource": "normal.png",
+      "source_member": "train/OK/image_1.png",
+      "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+      "width": 315,
+      "height": 34
+    },
+    {
+      "resource": "defect.png",
+      "source_member": "train/KO/image_1.png",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "width": 414,
+      "height": 40
+    }
+  ],
+  "synthetic": [
+    "corrupt.png"
+  ],
+  "review_fixture": "defect.png reused with a predefined review verdict; no review ground truth claim"
+}

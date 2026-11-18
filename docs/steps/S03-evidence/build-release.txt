@@ -1,0 +1,5 @@
+
+  WeldScope.AppDlg.cpp
+  코드를 생성하고 있습니다.
+  코드를 생성했습니다.
+  WeldScope.App.vcxproj -> C:\dev\weld-scope\artifacts\S03\ARM64\Release\WeldScope.App.exe

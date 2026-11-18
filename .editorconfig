@@ -1,0 +1,13 @@
+root = true
+
+[*.{cpp,h,py,ps1,cmd,md,json,manifest}]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cpp,h,py}]
+indent_style = space
+indent_size = 4
+
+[*.rc]
+charset = utf-16le

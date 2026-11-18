@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-18",
+  "windows": [
+    "11",
+    "10.0.26300",
+    "SP0",
+    "Multiprocessor Free"
+  ],
+  "architecture": "ARM64",
+  "msvc_tools": "14.52.37025",
+  "platform_toolset": "v145",
+  "python": "3.13.9",
+  "pillow": "13.0.0",
+  "release_pe_machine": "0xaa64",
+  "release_sha256": "420b5e9d8089cc8bed7380941326b6b7864186ecfe7c9323dcef8eec3f84d920",
+  "actual_window_dpi": 96,
+  "gui_check_count": 25,
+  "capture_count": 13,
+  "not_verified": [
+    "Other physical DPI scales and monitor transitions",
+    "x64 and Win32 runtime",
+    "Clean machine installation",
+    "Inspection accuracy or latency"
+  ]
+}
