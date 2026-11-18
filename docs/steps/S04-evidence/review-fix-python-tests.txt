@@ -1,0 +1,48 @@
+test_audit_records_corruption_unknown_label_and_exact_label_conflict (test_prepare_openzdm.PreparationTests.test_audit_records_corruption_unknown_label_and_exact_label_conflict) ... ok
+test_checksum_mismatch_leaves_original_untouched (test_prepare_openzdm.PreparationTests.test_checksum_mismatch_leaves_original_untouched) ... ok
+test_cli_contact_only_does_not_repeat_audit_or_replace_summary (test_prepare_openzdm.PreparationTests.test_cli_contact_only_does_not_repeat_audit_or_replace_summary) ... ok
+test_cli_reuses_verified_checksum_from_download (test_prepare_openzdm.PreparationTests.test_cli_reuses_verified_checksum_from_download) ... ok
+test_distinguishes_identical_pixels_from_identical_file_bytes (test_prepare_openzdm.PreparationTests.test_distinguishes_identical_pixels_from_identical_file_bytes) ... ok
+test_download_resumes_partial_and_rejects_server_ignoring_range (test_prepare_openzdm.PreparationTests.test_download_resumes_partial_and_rejects_server_ignoring_range) ... {
+  "file_count": 0,
+  "valid_image_count": 0,
+  "invalid_file_count": 0,
+  "evaluation_hold_reasons": []
+}
+Downloaded 6/6 bytes
+Downloaded 6/6 bytes
+ok
+test_empty_archive_is_not_evaluation_ready (test_prepare_openzdm.PreparationTests.test_empty_archive_is_not_evaluation_ready) ... ok
+test_existing_download_returns_checksum_after_one_verification (test_prepare_openzdm.PreparationTests.test_existing_download_returns_checksum_after_one_verification) ... ok
+test_existing_output_is_not_overwritten (test_prepare_openzdm.PreparationTests.test_existing_output_is_not_overwritten) ... ok
+test_font_failure_preserves_audit_and_contact_sheet_can_be_retried (test_prepare_openzdm.PreparationTests.test_font_failure_preserves_audit_and_contact_sheet_can_be_retried) ... ok
+test_manifest_is_repeatable_and_contact_sheet_excludes_test (test_prepare_openzdm.PreparationTests.test_manifest_is_repeatable_and_contact_sheet_excludes_test) ... ok
+test_maps_official_val_directory_without_changing_original_path (test_prepare_openzdm.PreparationTests.test_maps_official_val_directory_without_changing_original_path) ... ok
+test_oversized_decoded_image_is_reported_and_following_files_are_audited (test_prepare_openzdm.PreparationTests.test_oversized_decoded_image_is_reported_and_following_files_are_audited) ... ok
+test_rejects_oversized_member (test_prepare_openzdm.PreparationTests.test_rejects_oversized_member) ... ok
+test_rejects_zip_paths_that_escape_or_collide_on_windows (test_prepare_openzdm.PreparationTests.test_rejects_zip_paths_that_escape_or_collide_on_windows) ... ok
+test_reports_native_dimensions_and_color_without_changing_pixels (test_prepare_openzdm.PreparationTests.test_reports_native_dimensions_and_color_without_changing_pixels) ... ok
+test_similar_candidates_include_five_bits_but_not_six (test_prepare_openzdm.PreparationTests.test_similar_candidates_include_five_bits_but_not_six) ... ok
+test_similarity_counts_group_sizes_and_cross_split_pairs (test_prepare_openzdm.PreparationTests.test_similarity_counts_group_sizes_and_cross_split_pairs) ... ok
+test_similarity_index_matches_bruteforce_on_fixed_hashes (test_prepare_openzdm.PreparationTests.test_similarity_index_matches_bruteforce_on_fixed_hashes) ... ok
+test_cached_sample_cannot_claim_full_train (test_prepare_s04_inputs.TrainPreparationTests.test_cached_sample_cannot_claim_full_train) ... ok
+test_extracts_only_sorted_train_bytes_and_marks_selected_debug_rows (test_prepare_s04_inputs.TrainPreparationTests.test_extracts_only_sorted_train_bytes_and_marks_selected_debug_rows) ... ok
+test_hash_failure_leaves_no_final_directory_and_retry_works (test_prepare_s04_inputs.TrainPreparationTests.test_hash_failure_leaves_no_final_directory_and_retry_works) ... ok
+test_refuses_existing_output_and_debug_outside_train (test_prepare_s04_inputs.TrainPreparationTests.test_refuses_existing_output_and_debug_outside_train) ... ok
+test_rejects_wrong_hash_unsafe_path_nontrain_and_duplicate (test_prepare_s04_inputs.TrainPreparationTests.test_rejects_wrong_hash_unsafe_path_nontrain_and_duplicate) ... ok
+test_bad_config_existing_output_and_huge_image_are_errors (test_s04_cli.CliTests.test_bad_config_existing_output_and_huge_image_are_errors) ... skipped 'Run this integration file with the C++ executable argument'
+test_large_debug_flag_is_rejected_before_narrowing (test_s04_cli.CliTests.test_large_debug_flag_is_rejected_before_narrowing) ... skipped 'Run this integration file with the C++ executable argument'
+test_mixed_errors_are_recorded_without_scores_and_do_not_skip_valid_input (test_s04_cli.CliTests.test_mixed_errors_are_recorded_without_scores_and_do_not_skip_valid_input) ... skipped 'Run this integration file with the C++ executable argument'
+test_rejects_manifest_escape_duplicate_nontrain_unsorted_and_hash_mismatch (test_s04_cli.CliTests.test_rejects_manifest_escape_duplicate_nontrain_unsorted_and_hash_mismatch) ... skipped 'Run this integration file with the C++ executable argument'
+test_single_batch_repeat_unicode_hashes_and_debug_artifacts_match (test_s04_cli.CliTests.test_single_batch_repeat_unicode_hashes_and_debug_artifacts_match) ... skipped 'Run this integration file with the C++ executable argument'
+test_invalid_explicit_selection_does_not_fall_back (test_s04_python.PythonResolutionTests.test_invalid_explicit_selection_does_not_fall_back) ... ok
+test_venv_precedes_embedded_and_explicit_selection_is_shared (test_s04_python.PythonResolutionTests.test_venv_precedes_embedded_and_explicit_selection_is_shared) ... ok
+test_arbitrary_single_image_has_no_dataset_attribution (test_s04_report.DevelopmentReportTests.test_arbitrary_single_image_has_no_dataset_attribution) ... ok
+test_counts_errors_and_keeps_sizes_separate (test_s04_report.DevelopmentReportTests.test_counts_errors_and_keeps_sizes_separate) ... ok
+test_extreme_aspect_ratios_produce_real_report_images (test_s04_report.ReportFileTests.test_extreme_aspect_ratios_produce_real_report_images) ... ok
+test_failed_report_can_retry_and_completed_report_is_not_overwritten (test_s04_report.ReportFileTests.test_failed_report_can_retry_and_completed_report_is_not_overwritten) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 14.075s
+
+OK (skipped=5)

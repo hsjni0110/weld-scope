@@ -1,0 +1,19 @@
+{
+  "fixed": [
+    "int64 validation before narrowing",
+    "shared Python resolver (.venv, embedded, PATH or explicit)",
+    "positive display dimensions and atomic report promotion"
+  ],
+  "cpp_ctest_groups_passed": 2,
+  "actual_cli_integration_tests_passed": 5,
+  "python_tests_passed": 30,
+  "cli_tests_skipped_in_python_discovery": 5,
+  "compared_sample_rows": 16,
+  "compared_pngs": 64,
+  "non_timing_result_fields_equal": true,
+  "png_bytes_equal": true,
+  "full_train_rerun_after_this_fix": false,
+  "current_executable_sha256": "dcbf7da0f8b4620fc4598e3f878be29e339aa9a3ded7166ba721cd61edaabf0c",
+  "historical_full_train_environment": "environment.json",
+  "fresh_machine_installation_verified": false
+}

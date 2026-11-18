@@ -1,0 +1,22 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- OpenCV ARCH: ARM64
+-- OpenCV RUNTIME: vc18
+-- OpenCV STATIC: ON
+-- Found OpenCV 4.13.0 in C:/dev/weld-scope/.tools/opencv/install-arm64/ARM64/vc18/staticlib
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/dev/weld-scope/artifacts/S04/build
+msbuild 버전 18.12.2-1.26514.2+04f6ca984(.NET Framework용)
+
+  weldscope_baseline.vcxproj -> C:\dev\weld-scope\artifacts\S04\build\Release\weldscope_baseline.lib
+  weldscope_inspect.vcxproj -> C:\dev\weld-scope\artifacts\S04\build\Release\weldscope_inspect.exe
+  baseline_inspection_tests.vcxproj -> C:\dev\weld-scope\artifacts\S04\build\Release\baseline_inspection_tests.exe
+Test project C:/dev/weld-scope/artifacts/S04/build
+    Start 1: baseline_engine
+1/2 Test #1: baseline_engine ..................   Passed    0.06 sec
+    Start 2: baseline_cli
+2/2 Test #2: baseline_cli .....................   Passed    1.36 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   1.44 sec
