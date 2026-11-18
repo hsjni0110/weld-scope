@@ -24,3 +24,6 @@ ARM64/
 __pycache__/
 /data/openzdm/
 /artifacts/
+
+# Local MySQL credentials
+/.secrets/
