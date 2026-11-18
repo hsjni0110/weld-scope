@@ -36,3 +36,5 @@ Shared Network에서는 Mac의 VM 접속용 인터페이스 주소를 확인한 
 DB 이름은 `weldscope_s05`, 콘솔 계정은 `weldscope_app`이다. 비밀번호는 Mac의 `.secrets/mysql-app-password`에 있다. Windows 포트 확인 이후에는 S05 콘솔에서 실제 로그인과 `SELECT VERSION()`을 확인한다. 검사 이력 테이블은 S05 구현에서 추가한다.
 
 중지와 재시작은 `docker compose stop mysql`과 `docker compose start mysql`을 사용한다. 볼륨에는 데이터와 초기화된 계정이 남는다. 비밀번호 파일을 다시 만들어도 기존 DB 계정 비밀번호는 바뀌지 않는다.
+
+이전 `weldscope-s05` 프로젝트를 실행했다면 `docker compose -p weldscope-s05 stop mysql`로 이전 컨테이너를 중지해 포트를 비운다. 새 프로젝트의 기본 볼륨은 `weldscope_mysql_data`다. 이전 볼륨의 데이터를 이어 쓰려면 루트의 로컬 `.env`에 `WELDSCOPE_MYSQL_VOLUME=weldscope-s05_mysql_data`를 설정하고 기존 비밀번호 파일로 실행한다.
