@@ -1,0 +1,3 @@
+
+  WeldScope.AppDlg.cpp
+  WeldScope.App.vcxproj -> C:\dev\weld-scope\artifacts\S03\ARM64\Debug\WeldScope.App.exe
