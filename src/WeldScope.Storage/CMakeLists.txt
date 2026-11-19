@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.24)
+project(WeldScopeHistory LANGUAGES CXX)
+
+set(MYSQL_ROOT "" CACHE PATH "MySQL 8.4 C client distribution")
+find_path(MYSQL_INCLUDE_DIR mysql.h HINTS "${MYSQL_ROOT}/include" REQUIRED)
+find_library(MYSQL_LIBRARY NAMES libmysql mysqlclient HINTS "${MYSQL_ROOT}/lib" REQUIRED)
+
+add_library(weldscope_storage STATIC InspectionHistory.cpp)
+target_include_directories(weldscope_storage PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(weldscope_storage SYSTEM PRIVATE "${MYSQL_INCLUDE_DIR}")
+target_link_libraries(weldscope_storage PRIVATE "${MYSQL_LIBRARY}")
+target_compile_features(weldscope_storage PUBLIC cxx_std_17)
+
+add_executable(weldscope_history main.cpp)
+target_link_libraries(weldscope_history PRIVATE weldscope_storage)
+if(MSVC)
+    foreach(target weldscope_storage weldscope_history)
+        target_compile_options(${target} PRIVATE /W4 /WX /EHsc /utf-8 /permissive-)
+    endforeach()
+    target_compile_definitions(weldscope_history PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+if(WIN32)
+    find_file(MYSQL_RUNTIME libmysql.dll HINTS "${MYSQL_ROOT}/lib" "${MYSQL_ROOT}/bin" REQUIRED)
+    find_file(MYSQL_SSL_RUNTIME libssl-3-x64.dll HINTS "${MYSQL_ROOT}/bin" REQUIRED)
+    find_file(MYSQL_CRYPTO_RUNTIME libcrypto-3-x64.dll HINTS "${MYSQL_ROOT}/bin" REQUIRED)
+    add_custom_command(TARGET weldscope_history POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MYSQL_RUNTIME}" "${MYSQL_SSL_RUNTIME}" "${MYSQL_CRYPTO_RUNTIME}"
+        "$<TARGET_FILE_DIR:weldscope_history>" VERBATIM)
+endif()

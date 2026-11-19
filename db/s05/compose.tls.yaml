@@ -1,0 +1,8 @@
+services:
+  mysql:
+    command:
+      - --ssl-ca=/etc/mysql/weldscope-tls/ca.pem
+      - --ssl-cert=/etc/mysql/weldscope-tls/server-cert.pem
+      - --ssl-key=/etc/mysql/weldscope-tls/server-key.pem
+    volumes:
+      - ./.secrets/mysql-tls:/etc/mysql/weldscope-tls:ro
