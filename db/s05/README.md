@@ -33,7 +33,25 @@ Test-NetConnection -ComputerName 10.0.2.2 -Port 3309
 
 Shared Network에서는 Mac의 VM 접속용 인터페이스 주소를 확인한 뒤 `WELDSCOPE_MYSQL_BIND_IP`에 지정하고 Compose를 다시 실행한다. Windows에서도 그 주소로 접속한다. Mac의 Wi-Fi 주소를 고정 설정에 넣지 않는다.
 
-DB 이름은 `weldscope_s05`, 콘솔 계정은 `weldscope_app`이다. 비밀번호는 Mac의 `.secrets/mysql-app-password`에 있다. Windows 포트 확인 이후에는 S05 콘솔에서 실제 로그인과 `SELECT VERSION()`을 확인한다. 검사 이력 테이블은 S05 구현에서 추가한다.
+DB 이름은 `weldscope_s05`, 콘솔 계정은 `weldscope_app`이다. 비밀번호는 Mac의 `.secrets/mysql-app-password`에 있다. Mac에서 관리자 계정으로 이력 스키마를 적용한다. 새 볼륨과 기존 볼륨에 같은 명령을 사용한다. 재실행하면 기존 행이 보존된다.
+
+```zsh
+docker compose exec -T mysql sh -c 'MYSQL_PWD="$(cat /run/secrets/mysql_root_password)" mysql -u root weldscope_s05' < db/s05/schema.sql
+```
+
+Windows에서 [S05 빌드와 시연](../../docs/steps/S05-storage-history.md)을 실행한다.
+
+## Windows VM에서 서버 인증
+
+원격 시연에는 Mac MySQL 서버 이름이 DNS SAN에 포함된 서버 인증서가 필요하다. 예시 서버 이름은 `weldscope-mysql.test`다. 준비한 CA 인증서, 서버 인증서, 서버 개인 키를 Mac의 `.secrets/mysql-tls` 아래 `ca.pem`, `server-cert.pem`, `server-key.pem`으로 둔다. CA 개인 키는 이 디렉터리 밖에 보관한다. Mac에서는 상위 `.secrets`를 소유자만 접근할 수 있게 유지하고, Docker 컨테이너의 MySQL 사용자에게 파일 읽기 권한을 준다. 예시 설정은 기존 MySQL 볼륨을 사용해 컨테이너를 재구성한다.
+
+```zsh
+chmod 755 .secrets/mysql-tls
+chmod 644 .secrets/mysql-tls/ca.pem .secrets/mysql-tls/server-cert.pem .secrets/mysql-tls/server-key.pem
+docker compose -f compose.yaml -f db/s05/compose.tls.yaml up -d --wait --wait-timeout 120
+```
+
+Windows VM에서 서버 이름을 VM이 접속하는 Mac 주소로 해석하도록 DNS 또는 hosts 파일을 설정한다. Emulated VLAN의 기본 예시는 `10.0.2.2 weldscope-mysql.test`다. 신뢰할 경로로 CA 인증서 `ca.pem`을 Windows에 복사한다. Windows 접속 변수에는 인증서의 서버 이름과 복사한 CA 경로를 지정한다. 서버 개인 키는 Mac에 둔다.
 
 중지와 재시작은 `docker compose stop mysql`과 `docker compose start mysql`을 사용한다. 볼륨에는 데이터와 초기화된 계정이 남는다. 비밀번호 파일을 다시 만들어도 기존 DB 계정 비밀번호는 바뀌지 않는다.
 
