@@ -4,7 +4,7 @@ project(WeldScopeDevice LANGUAGES CXX)
 add_library(weldscope_device_protocol STATIC Protocol.cpp)
 target_compile_features(weldscope_device_protocol PUBLIC cxx_std_17)
 
-add_executable(weldscope_device main.cpp)
+add_executable(weldscope_device main.cpp LoopbackServer.cpp)
 target_link_libraries(weldscope_device PRIVATE weldscope_device_protocol ws2_32)
 
 enable_testing()

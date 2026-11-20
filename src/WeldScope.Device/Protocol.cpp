@@ -59,8 +59,12 @@ std::optional<Request> ParseRequest(std::string_view frame) {
     return Request{fields[0], fields[1], fields[2]};
 }
 
-std::string ResultFrame(std::string_view requestId, std::string_view inspectionId) {
-    return std::string("RESULT\t").append(requestId).append("\t").append(inspectionId).append("\tFAIL\n");
+std::string ResultFrame(std::string_view requestId, std::string_view inspectionId, std::string_view decision) {
+    return std::string("RESULT\t").append(requestId).append("\t").append(inspectionId).append("\t").append(decision).append("\n");
+}
+
+std::string StatusFrame(std::string_view requestId, std::string_view inspectionId, std::string_view status) {
+    return std::string("STATUS\t").append(requestId).append("\t").append(inspectionId).append("\t").append(status).append("\n");
 }
 
 std::string ErrorFrame(std::string_view requestId, std::string_view code) {

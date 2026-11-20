@@ -3,13 +3,17 @@
 #include "WeldScope.AppDlg.h"
 #include "afxdialogex.h"
 #include <algorithm>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <opencv2/imgproc.hpp>
 
 namespace {
 using namespace weldscope;
-using State = InspectionJobState;
 constexpr UINT_PTR inspectionTimerId = 1;
+
+#ifndef WELDSCOPE_S10
+using State = InspectionJobState;
 
 const wchar_t* VerdictText(const std::optional<BaselineDecision>& verdict)
 {
@@ -29,6 +33,7 @@ const wchar_t* StateText(State state)
     default: return L"대기";
     }
 }
+#endif
 
 std::filesystem::path BaselineConfigPath()
 {
@@ -39,6 +44,34 @@ std::filesystem::path BaselineConfigPath()
     executable.resize(length);
     return std::filesystem::path(executable).parent_path() / L"baseline.json";
 }
+
+#ifdef WELDSCOPE_S10
+const wchar_t* StoredDecision(InspectionWorkState workState, std::string_view decision) {
+    if (workState == InspectionWorkState::Cancelled) return L"중지";
+    if (decision == "PASS") return L"정상";
+    if (decision == "FAIL") return L"불량";
+    if (decision == "REVIEW") return L"검토 필요";
+    return L"처리 오류";
+}
+
+std::optional<BaselineDecision> DisplayDecision(const std::string& decision) {
+    if (decision == "PASS") return BaselineDecision::Pass;
+    if (decision == "FAIL") return BaselineDecision::Fail;
+    return std::nullopt;
+}
+
+bool IntegrationBusy(IntegrationState state) {
+    return state == IntegrationState::Connecting || state == IntegrationState::Inspecting ||
+           state == IntegrationState::Saving;
+}
+
+bool PendingSave(IntegrationState state) {
+    return state == IntegrationState::Unsaved || state == IntegrationState::CommitUnknown ||
+           state == IntegrationState::Conflict;
+}
+
+std::wstring WideAscii(const std::string& text) { return {text.begin(), text.end()}; }
+#endif
 }
 
 BEGIN_MESSAGE_MAP(CWeldScopeAppDlg, CDialogEx)
@@ -57,6 +90,11 @@ BEGIN_MESSAGE_MAP(CWeldScopeAppDlg, CDialogEx)
     ON_BN_CLICKED(IDC_START, OnStart)
     ON_BN_CLICKED(IDC_STOP, OnStop)
     ON_BN_CLICKED(IDC_CANDIDATE, OnToggleCandidate)
+#ifdef WELDSCOPE_S10
+    ON_BN_CLICKED(IDC_SAVE_RETRY, OnRetrySave)
+    ON_BN_CLICKED(IDC_HISTORY_REFRESH, OnRefreshHistory)
+    ON_BN_CLICKED(IDC_HISTORY_OPEN, OnOpenHistory)
+#endif
 END_MESSAGE_MAP()
 
 CWeldScopeAppDlg::CWeldScopeAppDlg(CWnd* parent) : CDialogEx(IDD, parent) {}
@@ -102,6 +140,28 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
     history_.InsertColumn(2, L"파일", LVCFMT_LEFT, Dip(148));
     history_.InsertColumn(3, L"판정", LVCFMT_LEFT, Dip(130));
     history_.InsertColumn(4, L"원본 경로", LVCFMT_LEFT, Dip(300));
+#ifdef WELDSCOPE_S10
+    label(connectionState_, L"가상 장비 연결 대기", IDC_CONNECTION_STATE);
+    label(saveState_, L"DB 연결 확인", IDC_SAVE_STATE);
+    retrySave_.Create(L"재연결", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, CRect(), this, IDC_SAVE_RETRY);
+    refreshHistory_.Create(L"이력 새로 고침", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        CRect(), this, IDC_HISTORY_REFRESH);
+    openHistory_.Create(L"이력 열기", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        CRect(), this, IDC_HISTORY_OPEN);
+    LVCOLUMN idColumn{};
+    wchar_t idHeader[] = L"검사 ID";
+    idColumn.mask = LVCF_TEXT;
+    idColumn.pszText = idHeader;
+    history_.SetColumn(0, &idColumn);
+    try {
+        const auto config = BaselineConfigPath();
+        integration_ = std::make_unique<IntegratedInspection>(config, config.parent_path() / L"defect.png", 33361);
+        pollTimer_ = SetTimer(inspectionTimerId, 25, nullptr);
+        if (!pollTimer_) throw std::runtime_error("Inspection timer unavailable");
+    } catch (const std::exception&) {
+        detail_.SetWindowText(L"검사 준비 실패");
+    }
+#endif
     SetFonts();
     // Fit the initial window to this monitor rather than extending below the taskbar.
     MONITORINFO monitor{sizeof(monitor)};
@@ -180,12 +240,25 @@ void CWeldScopeAppDlg::Layout()
     int fixedWidth = 0;
     for (int index = 0; index < 4; ++index) { history_.SetColumnWidth(index, Dip(widths[index])); fixedWidth += Dip(widths[index]); }
     history_.SetColumnWidth(4, (std::max)(Dip(160), historyPanel_.Width() - 2 * gap - fixedWidth - Dip(22)));
+#ifdef WELDSCOPE_S10
+    move(connectionState_, margin + Dip(178), Dip(33), Dip(225), Dip(24));
+    move(saveState_, bounds.Width() - margin - Dip(254), Dip(33), Dip(140), Dip(24));
+    move(retrySave_, bounds.Width() - margin - Dip(110), Dip(24), Dip(110), Dip(36));
+    move(openHistory_, historyPanel_.right - Dip(105), historyPanel_.top + Dip(10), Dip(85), Dip(30));
+    move(refreshHistory_, historyPanel_.right - Dip(239), historyPanel_.top + Dip(10), Dip(125), Dip(30));
+    move(historyNote_, historyPanel_.right - Dip(440), historyPanel_.top + Dip(16), Dip(190), Dip(24));
+    history_.SetColumnWidth(0, Dip(220));
+#endif
     Invalidate(FALSE);
     isLayingOut_ = false;
 }
 
 void CWeldScopeAppDlg::Refresh()
 {
+#ifdef WELDSCOPE_S10
+    RefreshIntegration();
+    const bool closing = closeRequested_;
+#else
     const auto state = job_.state();
     const bool running = state == State::Running;
     const bool closing = state == State::Closing;
@@ -194,19 +267,25 @@ void CWeldScopeAppDlg::Refresh()
     filePicker_.EnableWindow(!running && !closing);
     verdict_.SetWindowText(VerdictText(verdictValue_));
     status_.SetWindowText(StateText(state));
+#endif
     const bool hasCandidate = image_.HasCandidate() && !closing;
     candidate_.EnableWindow(hasCandidate);
     image_.SetCandidateVisible(hasCandidate && candidate_.GetCheck() == BST_CHECKED);
+#ifndef WELDSCOPE_S10
     const HWND focus = ::GetFocus();
     if (!closing && focus && !::IsWindowEnabled(focus)) {
         (running ? static_cast<CWnd*>(&stop_) : static_cast<CWnd*>(&filePicker_))->SetFocus();
     }
+#endif
     Invalidate(FALSE);
 }
 
 void CWeldScopeAppDlg::ClearResult()
 {
     verdictValue_.reset();
+#ifdef WELDSCOPE_S10
+    verdict_.SetWindowText(L"판정 대기");
+#endif
     image_.SetImages({}, {});
     imageMeta_.SetWindowText(L"");
     detail_.SetWindowText(L"");
@@ -215,17 +294,40 @@ void CWeldScopeAppDlg::ClearResult()
 
 void CWeldScopeAppDlg::OnSelectFile()
 {
+#ifdef WELDSCOPE_S10
+    if (closeRequested_ || !integration_ || IntegrationBusy(integration_->Snapshot().state)) return;
+#else
     if (job_.state() == State::Running || job_.state() == State::Closing) return;
+#endif
     CFileDialog picker(TRUE, L"png", nullptr, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR,
         L"PNG 이미지 (*.png)|*.png||", this, 0, FALSE);
-    if (picker.DoModal() != IDOK || !job_.select(picker.GetPathName().GetString())) return;
+    if (picker.DoModal() != IDOK) return;
+    const std::filesystem::path path(picker.GetPathName().GetString());
+#ifdef WELDSCOPE_S10
+    if (closeRequested_) return;
+    selectedFile_ = path;
+    view_ = InspectionView::FileSelection;
+    historyOpenRevision_ = (std::numeric_limits<std::uint64_t>::max)();
+#else
+    if (!job_.select(path)) return;
+#endif
     ClearResult();
-    fileName_.SetWindowText(job_.selected_path().c_str());
+    fileName_.SetWindowText(path.c_str());
     Refresh();
 }
 
 void CWeldScopeAppDlg::OnStart()
 {
+#ifdef WELDSCOPE_S10
+    if (closeRequested_ || !integration_ || !pollTimer_) return;
+    try {
+        if (integration_->StartFile(selectedFile_)) {
+            view_ = InspectionView::Live;
+            ClearResult();
+        }
+    } catch (const std::exception&) { detail_.SetWindowText(L"검사 시작 실패"); }
+    Refresh();
+#else
     if (job_.busy() || job_.selected_path().empty() || job_.state() == State::Closing) return;
     ClearResult();
     if (!pollTimer_) pollTimer_ = SetTimer(inspectionTimerId, 25, nullptr);
@@ -244,24 +346,37 @@ void CWeldScopeAppDlg::OnStart()
     }
     Refresh();
     if (!started) status_.SetWindowText(L"처리 오류");
+#endif
 }
 
 void CWeldScopeAppDlg::OnStop()
 {
+#ifdef WELDSCOPE_S10
+    if (integration_) integration_->CancelInspection();
+#else
     if (job_.state() != State::Running) return;
     job_.cancel();
     ClearResult();
     Refresh();
+#endif
 }
 
 void CWeldScopeAppDlg::OnCancel()
 {
+#ifdef WELDSCOPE_S10
+    if (!integration_ || !pollTimer_) { CDialogEx::OnCancel(); return; }
+    closeRequested_ = true;
+    integration_->Pause(true);
+    integration_->CancelInspection();
+    Refresh();
+#else
     job_.request_close();
     if (job_.busy()) {
         Refresh();
         return;
     }
     CDialogEx::OnCancel();
+#endif
 }
 
 void CWeldScopeAppDlg::OnClose() { OnCancel(); }
@@ -295,6 +410,9 @@ void CWeldScopeAppDlg::OnTimer(UINT_PTR id)
         CDialogEx::OnTimer(id);
         return;
     }
+#ifdef WELDSCOPE_S10
+    PollIntegration();
+#else
     const auto result = job_.poll();
     if (job_.busy()) return;
     KillTimer(pollTimer_);
@@ -303,8 +421,14 @@ void CWeldScopeAppDlg::OnTimer(UINT_PTR id)
         CDialogEx::OnCancel();
         return;
     }
-    if (result) {
-        if (const auto* inspected = std::get_if<InspectedFile>(&*result)) {
+    if (result) ShowInspection(*result);
+    Refresh();
+#endif
+}
+
+void CWeldScopeAppDlg::ShowInspection(const FileInspectionResult& result)
+{
+        if (const auto* inspected = std::get_if<InspectedFile>(&result)) {
             verdictValue_ = inspected->decision;
             image_.SetImages(inspected->original, inspected->overlay);
             CString metadata, details;
@@ -313,8 +437,10 @@ void CWeldScopeAppDlg::OnTimer(UINT_PTR id)
                 inspected->score, inspected->loadMs, inspected->analysisMs);
             imageMeta_.SetWindowText(metadata);
             detail_.SetWindowText(details);
+#ifndef WELDSCOPE_S10
             AddHistory(*inspected);
-        } else if (const auto* error = std::get_if<FileInspectionFailure>(&*result)) {
+#endif
+        } else if (const auto* error = std::get_if<FileInspectionFailure>(&result)) {
             switch (*error) {
             case FileInspectionFailure::Configuration:
                 detail_.SetWindowText(L"기준 설정 오류\nbaseline.json 확인");
@@ -336,10 +462,9 @@ void CWeldScopeAppDlg::OnTimer(UINT_PTR id)
                 break;
             }
         }
-    }
-    Refresh();
 }
 
+#ifndef WELDSCOPE_S10
 void CWeldScopeAppDlg::AddHistory(const InspectedFile& inspected)
 {
     CString sequence;
@@ -351,6 +476,220 @@ void CWeldScopeAppDlg::AddHistory(const InspectedFile& inspected)
     history_.SetItemText(row, 3, VerdictText(inspected.decision));
     history_.SetItemText(row, 4, inspected.path.c_str());
 }
+#endif
+
+#ifdef WELDSCOPE_S10
+void CWeldScopeAppDlg::RefreshIntegration()
+{
+    const auto snapshot = integration_ ? integration_->Snapshot() : IntegrationSnapshot{};
+    const bool ready = snapshot.state == IntegrationState::Ready || snapshot.state == IntegrationState::Stored;
+    const bool inspecting = snapshot.state == IntegrationState::Inspecting;
+    const bool pending = PendingSave(snapshot.state);
+    start_.EnableWindow(!closeRequested_ && ready && !selectedFile_.empty());
+    filePicker_.EnableWindow(!closeRequested_ && integration_ && !IntegrationBusy(snapshot.state) && !pending);
+    stop_.EnableWindow(!closeRequested_ && inspecting);
+    retrySave_.EnableWindow(!closeRequested_ && (pending || snapshot.state == IntegrationState::Disconnected));
+    retrySave_.SetWindowText(pending ? L"저장 재시도" : L"재연결");
+    refreshHistory_.EnableWindow(!closeRequested_ && ready && !historyRefresh_.valid());
+    openHistory_.EnableWindow(!closeRequested_ && ready && !historyRows_.empty() && !historyOpen_.valid());
+    const wchar_t* task = L"대기";
+    const wchar_t* storage = L"DB 연결 확인";
+    switch (snapshot.state) {
+    case IntegrationState::Disconnected: storage = L"DB 연결 끊김"; break;
+    case IntegrationState::Ready: storage = L"DB 연결"; task = L"준비"; break;
+    case IntegrationState::Inspecting: storage = L"DB 연결"; task = L"검사 중"; break;
+    case IntegrationState::Saving: storage = L"저장 중"; task = L"완료"; break;
+    case IntegrationState::Stored: storage = L"저장 완료"; task = L"완료"; break;
+    case IntegrationState::Unsaved: storage = L"미저장"; task = L"완료"; break;
+    case IntegrationState::CommitUnknown: storage = L"저장 확인 필요"; task = L"완료"; break;
+    case IntegrationState::Conflict: storage = L"저장 ID 충돌"; task = L"완료"; break;
+    case IntegrationState::Connecting: break;
+    }
+    if (view_ == InspectionView::History) {
+        task = historyTask_;
+    } else if (view_ == InspectionView::FileSelection) {
+        task = inspecting ? L"장비 검사 중" : L"준비";
+        if (snapshot.state == IntegrationState::Stored) storage = L"DB 연결";
+    } else if (snapshot.result) {
+        if (std::holds_alternative<InspectionCancelled>(*snapshot.result)) task = L"중지";
+        if (std::holds_alternative<FileInspectionFailure>(*snapshot.result)) task = L"처리 오류";
+    }
+    status_.SetWindowText(closeRequested_ ? L"종료 대기" : task);
+    saveState_.SetWindowText(storage);
+    if (snapshot.listenerFailed) connectionState_.SetWindowText(L"가상 장비 연결 오류");
+    else if (snapshot.port) {
+        CString port;
+        port.Format(L"가상 장비 127.0.0.1:%u", static_cast<unsigned int>(snapshot.port));
+        connectionState_.SetWindowText(port);
+    }
+}
+
+void CWeldScopeAppDlg::OnRetrySave()
+{
+    if (integration_ && !closeRequested_) integration_->Retry();
+}
+
+void CWeldScopeAppDlg::OnRefreshHistory()
+{
+    if (closeRequested_ || historyRefresh_.valid()) return;
+    try {
+        historyRefresh_ = std::async(std::launch::async, [] {
+            return InspectionHistory(HistoryConnectionFromEnvironment()).Recent();
+        });
+        historyNote_.SetWindowText(L"이력 조회 중");
+    } catch (const std::exception&) { historyNote_.SetWindowText(L"이력 조회 실패"); }
+}
+
+void CWeldScopeAppDlg::OnOpenHistory()
+{
+    if (closeRequested_ || !integration_ || historyOpen_.valid()) return;
+    const int row = history_.GetNextItem(-1, LVNI_SELECTED);
+    if (row < 0 || static_cast<std::size_t>(row) >= historyRows_.size()) return;
+    historyOpenRevision_ = integration_->Snapshot().revision;
+    const auto inspectionId = historyRows_[static_cast<std::size_t>(row)].inspectionId;
+    try {
+        historyOpen_ = std::async(std::launch::async, [inspectionId] {
+            OpenedInspection opened;
+            auto stored = InspectionHistory(HistoryConnectionFromEnvironment()).Get(inspectionId);
+            if (!stored) throw std::runtime_error("Inspection history row unavailable");
+            opened.record = std::move(*stored);
+            const auto& record = opened.record.record;
+            try {
+                const auto bytes = read_bytes(std::filesystem::u8path(record.sourcePath), image_file_limit);
+                if (record.sourceSha256.empty()) opened.sourceStatus = L"원본 확인 불가";
+                else if (sha256(bytes) != record.sourceSha256) opened.sourceStatus = L"원본 변경";
+                else cv::cvtColor(decode_png(bytes), opened.image, cv::COLOR_BGR2BGRA);
+            } catch (const InspectionInputError& error) {
+                opened.sourceStatus = error.reason() == FileInspectionFailure::FileAccess ? L"원본 누락" : L"원본 열기 실패";
+            } catch (const std::exception&) { opened.sourceStatus = L"원본 열기 실패"; }
+            return opened;
+        });
+    } catch (const std::exception&) { historyNote_.SetWindowText(L"이력 열기 실패"); }
+    Refresh();
+}
+
+void CWeldScopeAppDlg::ShowHistory(std::vector<InspectionSummary> rows)
+{
+    history_.DeleteAllItems();
+    historyRows_ = std::move(rows);
+    for (const auto& record : historyRows_) {
+        const int row = history_.InsertItem(history_.GetItemCount(), WideAscii(record.inspectionId).c_str());
+        if (row < 0) break;
+        const auto path = std::filesystem::u8path(record.sourcePath);
+        history_.SetItemText(row, 1, WideAscii(record.createdAtUtc.substr(11, 8)).c_str());
+        history_.SetItemText(row, 2, path.filename().c_str());
+        history_.SetItemText(row, 3, StoredDecision(record.workState, record.decision));
+        history_.SetItemText(row, 4, path.c_str());
+    }
+    historyNote_.SetWindowText(historyRows_.empty() ? L"저장 이력 없음" : L"최근 저장 이력");
+}
+
+void CWeldScopeAppDlg::ShowOpenedInspection(const OpenedInspection& opened)
+{
+    selectedFile_.clear();
+    ClearResult();
+    const auto& record = opened.record.record;
+    view_ = InspectionView::History;
+    historyTask_ = record.workState == InspectionWorkState::Cancelled ? L"중지" :
+        record.decision == "ERROR" ? L"처리 오류" : L"완료";
+    verdictValue_ = DisplayDecision(record.decision);
+    verdict_.SetWindowText(StoredDecision(record.workState, record.decision));
+    fileName_.SetWindowText(std::filesystem::u8path(record.sourcePath).c_str());
+    image_.SetImages(opened.image, {});
+    imageMeta_.SetWindowText(opened.sourceStatus);
+    CString details;
+    if (!record.attempts.empty() && record.attempts.front().score) {
+        const auto& attempt = record.attempts.front();
+        details.Format(L"후보 점수 %.4f\n분석 %.2f ms\n%s",
+            *attempt.score, attempt.durationMs, WideAscii(record.algorithmVersion).c_str());
+    } else details = WideAscii(record.algorithmVersion).c_str();
+    detail_.SetWindowText(details);
+}
+
+void CWeldScopeAppDlg::PollIntegration()
+{
+    const auto snapshot = integration_->Snapshot();
+    const bool updated = snapshot.revision != integrationRevision_;
+    bool displayChanged = false;
+    const bool fromDevice = snapshot.record.requestId.compare(0, 5, "file-") != 0;
+    if (!closeRequested_ && view_ == InspectionView::PendingDeviceSave &&
+        (snapshot.state == IntegrationState::Stored || shownInspection_ != snapshot.record.inspectionId)) {
+        view_ = InspectionView::FileSelection;
+        ClearResult();
+        fileName_.SetWindowText(selectedFile_.c_str());
+        displayChanged = true;
+    }
+    if (!closeRequested_ && view_ == InspectionView::FileSelection && fromDevice &&
+        PendingSave(snapshot.state) && snapshot.result) {
+        view_ = InspectionView::PendingDeviceSave;
+        ShowCurrentInspection(snapshot);
+        displayChanged = true;
+    }
+    if (updated) {
+        integrationRevision_ = snapshot.revision;
+        if (snapshot.state == IntegrationState::Ready || snapshot.state == IntegrationState::Stored)
+            refreshHistoryPending_ = true;
+        if (!closeRequested_ && !snapshot.record.inspectionId.empty() && shownInspection_ != snapshot.record.inspectionId) {
+            const bool preserveSelection = fromDevice && view_ == InspectionView::FileSelection;
+            if (!preserveSelection) {
+                if (fromDevice) selectedFile_.clear();
+                view_ = InspectionView::Live;
+                ShowCurrentInspection(snapshot);
+            } else if (snapshot.result) {
+                shownInspection_ = snapshot.record.inspectionId;
+            }
+        }
+    }
+    using namespace std::chrono_literals;
+    if (historyRefresh_.valid() && historyRefresh_.wait_for(0ms) == std::future_status::ready) {
+        try {
+            auto rows = historyRefresh_.get();
+            if (!closeRequested_) ShowHistory(std::move(rows));
+        } catch (const std::exception&) { historyNote_.SetWindowText(L"이력 조회 실패"); }
+        Refresh();
+    }
+    if (historyOpen_.valid() && historyOpen_.wait_for(0ms) == std::future_status::ready) {
+        try {
+            const auto opened = historyOpen_.get();
+            if (!closeRequested_ && snapshot.revision == historyOpenRevision_) ShowOpenedInspection(opened);
+        } catch (const std::exception&) { historyNote_.SetWindowText(L"이력 열기 실패"); }
+        Refresh();
+    }
+    if (refreshHistoryPending_ && !closeRequested_ && !historyRefresh_.valid() &&
+        (snapshot.state == IntegrationState::Ready || snapshot.state == IntegrationState::Stored)) {
+        refreshHistoryPending_ = false;
+        OnRefreshHistory();
+    }
+    if (closeRequested_ && !closingIntegration_ && !IntegrationBusy(snapshot.state)) {
+        closingIntegration_ = true;
+        if (PendingSave(snapshot.state) &&
+            AfxMessageBox(L"미저장 검사 이력\n프로그램 종료", MB_OKCANCEL | MB_ICONWARNING) != IDOK) {
+            closingIntegration_ = false;
+            closeRequested_ = false;
+            integration_->Pause(false);
+        } else {
+            integration_->Close();
+        }
+        Refresh();
+    }
+    if (closingIntegration_ && integration_->Closed() && !historyOpen_.valid() && !historyRefresh_.valid()) {
+        CDialogEx::OnCancel();
+        return;
+    }
+    if (updated || displayChanged) Refresh();
+}
+
+void CWeldScopeAppDlg::ShowCurrentInspection(const IntegrationSnapshot& snapshot)
+{
+    ClearResult();
+    fileName_.SetWindowText(std::filesystem::u8path(snapshot.record.sourcePath).c_str());
+    if (snapshot.result) {
+        ShowInspection(*snapshot.result);
+        verdict_.SetWindowText(StoredDecision(snapshot.record.workState, snapshot.record.decision));
+        shownInspection_ = snapshot.record.inspectionId;
+    }
+}
+#endif
 
 BOOL CWeldScopeAppDlg::OnEraseBkgnd(CDC*) { return TRUE; }
 void CWeldScopeAppDlg::OnPaint()

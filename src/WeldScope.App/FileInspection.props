@@ -6,6 +6,7 @@
     <WeldScopeOpenCvSuffix Condition="'$(Configuration)' == 'Debug'">d</WeldScopeOpenCvSuffix>
     <WeldScopeOpenCvInstallSuffix Condition="'$(Configuration)' == 'Debug'">-debug</WeldScopeOpenCvInstallSuffix>
     <WeldScopeOpenCvRoot Condition="'$(WeldScopeOpenCvRoot)' == '' and '$(Platform)' == 'ARM64'">$(MSBuildThisFileDirectory)..\..\.tools\opencv\install-arm64$(WeldScopeOpenCvInstallSuffix)</WeldScopeOpenCvRoot>
+    <WeldScopeOpenCvRoot Condition="'$(WeldScopeOpenCvRoot)' == '' and '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)..\..\.tools\opencv\install-x64$(WeldScopeOpenCvInstallSuffix)</WeldScopeOpenCvRoot>
     <WeldScopeOpenCvLibDir>$(WeldScopeOpenCvRoot)\$(WeldScopeOpenCvArch)\vc18\staticlib</WeldScopeOpenCvLibDir>
     <WeldScopeOpenCvHal Condition="'$(Platform)' == 'ARM64'">tegra_hal.lib;</WeldScopeOpenCvHal>
     <WeldScopeBaselineConfig>$(MSBuildThisFileDirectory)..\..\config\baseline.json</WeldScopeBaselineConfig>
@@ -22,7 +23,7 @@
   </ItemDefinitionGroup>
   <Target Name="RequireWeldScopeOpenCv" BeforeTargets="PrepareForBuild">
     <Error Condition="'$(WeldScopeOpenCvRoot)' == '' or !Exists('$(WeldScopeOpenCvLibDir)\opencv_imgcodecs4130$(WeldScopeOpenCvSuffix).lib')"
-           Text="WeldScope needs the matching OpenCV 4.13.0 static install for $(Platform)|$(Configuration). ARM64: tools/setup-opencv-s04.ps1 -Configuration $(Configuration)." />
+           Text="WeldScope needs the matching OpenCV 4.13.0 static install for $(Platform)|$(Configuration). Run tools/setup-opencv-s04.ps1 -Platform $(Platform) -Configuration $(Configuration) for ARM64 or x64." />
   </Target>
   <Target Name="CopyWeldScopeBaselineConfig" AfterTargets="Build">
     <Copy SourceFiles="$(WeldScopeBaselineConfig)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />

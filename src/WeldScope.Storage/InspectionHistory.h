@@ -15,6 +15,7 @@ struct HistoryConnection {
     std::string password;
     std::string caFile;
 };
+HistoryConnection HistoryConnectionFromEnvironment();
 
 struct AnalysisAttempt {
     std::string stage;
@@ -25,6 +26,8 @@ struct AnalysisAttempt {
 
     bool operator==(const AnalysisAttempt& other) const;
 };
+
+enum class InspectionWorkState { Completed, Cancelled };
 
 struct InspectionRecord {
     std::string inspectionId;
@@ -38,11 +41,17 @@ struct InspectionRecord {
     std::string decision;
     std::string reason;
     std::vector<AnalysisAttempt> attempts;
+    InspectionWorkState workState = InspectionWorkState::Completed;
 };
 
 struct StoredInspection {
     InspectionRecord record;
     std::string createdAtUtc;
+};
+
+struct InspectionSummary {
+    std::string inspectionId, sourcePath, decision, createdAtUtc;
+    InspectionWorkState workState = InspectionWorkState::Completed;
 };
 
 enum class SaveStatus { Stored, Replay, Conflict };
@@ -57,8 +66,11 @@ public:
     explicit InspectionHistory(HistoryConnection settings);
 
     std::string Version() const;
+    void CheckReady() const;
     SaveStatus Save(const InspectionRecord& record) const;
     std::optional<StoredInspection> Get(const std::string& inspectionId) const;
+    std::optional<StoredInspection> GetByRequestId(const std::string& requestId) const;
+    std::vector<InspectionSummary> Recent() const;
 
 private:
     HistoryConnection settings_;

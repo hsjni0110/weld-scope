@@ -25,7 +25,8 @@ struct Request {
 
 // Parsed fields refer to the supplied frame.
 std::optional<Request> ParseRequest(std::string_view frame);
-std::string ResultFrame(std::string_view requestId, std::string_view inspectionId);
+std::string ResultFrame(std::string_view requestId, std::string_view inspectionId, std::string_view decision = "FAIL");
+std::string StatusFrame(std::string_view requestId, std::string_view inspectionId, std::string_view status);
 std::string ErrorFrame(std::string_view requestId, std::string_view code);
 
 } // namespace weldscope::device

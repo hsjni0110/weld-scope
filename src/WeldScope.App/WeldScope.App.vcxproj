@@ -276,6 +276,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <Import Project="FileInspection.props" />
+  <Import Project="IntegratedInspection.props" Condition="'$(Platform)' == 'x64'" />
   <ItemGroup>
     <ClInclude Include="FileInspectionJob.h" />
     <ClInclude Include="InspectionImageView.h" />
