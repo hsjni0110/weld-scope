@@ -23,7 +23,7 @@ struct InspectionAttempt {
     std::optional<double> score;
     InspectionOutcome outcome;
     std::string reason;
-    std::chrono::microseconds elapsed;
+    std::chrono::nanoseconds elapsed;
 };
 
 struct AnalysisOutput {

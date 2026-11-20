@@ -38,6 +38,13 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
+def write_checkpoint(path, value):
+    with TemporaryDirectory(prefix=f".{path.stem}-writing-", dir=path.parent) as temporary:
+        staged = Path(temporary) / path.name
+        write_json(staged, value)
+        staged.replace(path)
+
+
 def read_csv(path):
     with path.open(encoding="utf-8-sig", newline="") as stream:
         return list(csv.DictReader(stream))
@@ -226,8 +233,9 @@ def run_inspection(inspect, mode, configuration, manifest, output, split, freeze
     return read_inspection_result(mode, configuration, manifest, output)
 
 
-def read_inspection_result(mode, configuration, manifest, output):
-    summary = read_json(output / "summary.json")
+def read_inspection_result(mode, configuration, manifest, output, summary=None):
+    if summary is None:
+        summary = read_json(output / "summary.json")
     if summary.get("input_manifest_valid") != 1 or summary.get("manifest_sha256") != checksum(manifest):
         raise ValueError(f"{mode}: input manifest failed verification")
     if summary.get("config_sha256") != checksum(configuration) or summary.get("threads") != 1:
@@ -253,7 +261,7 @@ def highest_threshold(rows, ko_cap):
 def candidate_fields(rows, stage):
     for row in rows:
         score = row[f"{stage}_score"]
-        elapsed = row[f"{stage}_elapsed_us"]
+        elapsed = row[f"{stage}_elapsed_ns"]
         yield (float(score) if score else -1.0, int(elapsed) if elapsed else 0)
 
 
@@ -273,6 +281,20 @@ def candidate_rank(row):
 def policy_config(candidate, contrast_threshold, budget):
     return dict(schema_version=1, contrast_threshold=contrast_threshold, budget_us=budget,
                 **{name: candidate[name] for name in BOUNDARIES})
+
+
+def run_validation_path(inspect, mode, configuration, manifest, output):
+    if output.exists():
+        if (output / "summary.json").is_file():
+            return read_inspection_result(mode, configuration, manifest, output)
+        # Earlier runners could leave a partial output directly in this directory.
+        output.rename(output.with_name(f"{output.name}-incomplete-{uuid4().hex}"))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=f".{output.name}-running-", dir=output.parent) as temporary:
+        staging = Path(temporary) / "run"
+        rows = run_inspection(inspect, mode, configuration, manifest, staging, "validation")
+        staging.rename(output)
+        return rows
 
 
 def run_candidate(inspect, manifest, checked, config):
@@ -307,13 +329,8 @@ def confirm_ranked(output, inspect, manifest, search, selection, contrast_thresh
     if not ranked:
         return None
     attempts = list(selection.get("live_candidates", []))
-    if not attempts and "selective" in metrics:
-        row = metrics["selective"]
-        attempts.append(dict(rank=1, calibration=ranked[0], constraints=constraints(row, ko_cap),
-                             metrics={name: row[name] for name in ("ko_leak", "automatic", "precise", "ok_reject", "review", "error")}))
-    if attempts and all(attempts[-1]["constraints"].values()):
-        return dict(selection, status="accepted", measured_constraints=attempts[-1]["constraints"],
-                    live_candidates=attempts, modes=metrics)
+    if selection.get("status") == "accepted":
+        return selection
     checks = validation / "rechecks"
     for rank, candidate in enumerate(ranked[len(attempts):], start=len(attempts) + 1):
         checked = checks / f"candidate-{rank:04d}"
@@ -331,7 +348,7 @@ def confirm_ranked(output, inspect, manifest, search, selection, contrast_thresh
         snapshot = dict(selection, status="accepted" if eligible else "held_live_constraints",
                         calibration=candidate if eligible else selection["calibration"],
                         measured_constraints=passed, live_candidates=attempts, modes=metrics)
-        write_json(validation / "selection.json", snapshot)
+        write_checkpoint(validation / "selection.json", snapshot)
         if eligible:
             return snapshot
     return None
@@ -360,29 +377,80 @@ def freeze_validation(output, inspect, calibrator, inputs, provenance, runtime, 
     manifest = inputs / "validation.json"
     if checksum(inspect) != inspect_hash or checksum(calibrator) != calibrator_hash:
         raise ValueError("An evaluation executable changed during validation")
+    selection_file = validation / "selection.json"
+    selection_hash = checksum(selection_file)
+    selection = read_json(selection_file)
+    if selection["status"] != "accepted":
+        raise ValueError("Validation did not approve the frozen configuration")
+    ko_cap = selection["constraints"]["ko_leak_max_count"]
+    winner = selection["live_candidates"][-1]
+    selected_path = validation / "rechecks" / f"candidate-{winner['rank']:04d}" / "run"
+    # Rank 1 used the confirmed path before all selective candidates were staged identically.
+    if winner["rank"] == 1 and not selected_path.exists():
+        selected_path = validation / "confirmed" / "selective"
     mode_summaries = {}
     for mode in MODES:
-        if mode == "selective":
-            last = read_json(validation / "selection.json")["live_candidates"][-1]
-            if last["rank"] > 1:
-                mode_summaries[mode] = validation / "rechecks" / f"candidate-{last['rank']:04d}" / "run" / "summary.json"
-                continue
-        mode_summaries[mode] = validation / "confirmed" / mode / "summary.json"
+        run = selected_path if mode == "selective" else validation / "confirmed" / mode
+        summary = read_json(run / "summary.json")
+        rows = read_inspection_result(mode, configs / f"{mode}.json", manifest, run, summary)
+        metrics = evaluate_metrics(rows)
+        if metrics != selection["modes"][mode]:
+            raise ValueError(f"{mode}: confirmed metrics differ from validation selection")
+        if mode == "baseline" and metrics["ko_leak"]["count"] != ko_cap:
+            raise ValueError("Confirmed baseline differs from validation KO leak ceiling")
+        if mode == "selective" and not all(constraints(metrics, ko_cap).values()):
+            raise ValueError("Selective confirmation did not meet validation constraints")
+        mode_summaries[mode] = summary
+    if checksum(selection_file) != selection_hash:
+        raise ValueError("Validation selection changed during freeze")
     freeze = dict(
         schema_version=1, established_utc=datetime.now(timezone.utc).isoformat(),
         executable_sha256=inspect_hash, calibrator_sha256=calibrator_hash,
         test_manifest_sha256=checksum(inputs / "test.json"), test_primary_sha256=checksum(inputs / "test-primary.json"),
         validation_manifest_sha256=checksum(manifest), excluded_sha256=checksum(inputs / "excluded.json"),
         source_archive_sha256=provenance["source_archive_sha256"], provenance_sha256=checksum(inputs / "provenance.json"),
-        config_sha256={mode: checksum(configs / f"{mode}.json") for mode in MODES},
-        validation_selection_sha256=checksum(validation / "selection.json"), environment=runtime,
-        algorithm_version={mode: read_json(summary)["algorithm_version"] for mode, summary in mode_summaries.items()},
+        config_sha256={mode: summary["config_sha256"] for mode, summary in mode_summaries.items()},
+        validation_selection_sha256=selection_hash, environment=runtime,
+        algorithm_version={mode: summary["algorithm_version"] for mode, summary in mode_summaries.items()},
         metric_denominators=dict(ko_leak="KO", ok_reject="OK", automatic_error="PASS+FAIL",
                                  review="all", error="all", automatic="all", precise="all"),
     )
-    write_json(output / "freeze.json", freeze)
+    write_checkpoint(output / "freeze.json", freeze)
     print("Validation constraints satisfied. Freeze written.")
     return 0
+
+
+def calibrate_validation(output, inspect, calibrator, baseline, local_contrast, settings, manifest):
+    configs, validation = output / "config", output / "validation"
+    shutil.copyfile(baseline, configs / "baseline.json")
+    observations = {mode: run_validation_path(inspect, mode, baseline if mode == "baseline" else local_contrast,
+                                              manifest, validation / "observations" / mode)
+                    for mode in MODES[:3]}
+    ko_cap = evaluate_metrics(observations["baseline"])["ko_leak"]["count"]
+    for mode in ("fast", "precise"):
+        write_checkpoint(configs / f"{mode}.json", dict(settings, fail_ratio=highest_threshold(observations[mode], ko_cap)))
+    paired = list(zip(candidate_fields(observations["fast"], "fast"),
+                      candidate_fields(observations["precise"], "precise"), strict=True))
+    times_ns = [fast_ns + precise_ns for ((fast, fast_ns), (precise, precise_ns)) in paired
+                if min(fast, precise) >= 0]
+    budget = max(1, (nearest_rank(times_ns, 95) + 999) // 1_000)
+    payload = [f"nanoseconds {len(paired)} {budget} {ko_cap} {MIN_AUTOMATIC_PERCENT} {MAX_PRECISE_PERCENT}\n"]
+    for row, ((fast, fast_ns), (precise, precise_ns)) in zip(observations["baseline"], paired, strict=True):
+        payload.append(f"{int(row['label'] == 'KO')} {fast:.17g} {fast_ns} {precise:.17g} {precise_ns}\n")
+    result = subprocess.run([str(calibrator)], input="".join(payload), capture_output=True,
+                            encoding="utf-8", check=True, timeout=300)
+    search = json.loads(result.stdout)
+    write_checkpoint(validation / "calibration.json", search)
+    margins = search["selected"]
+    selection = {"constraints": {"ko_leak_max_count": ko_cap, "automatic_min_percent": MIN_AUTOMATIC_PERCENT,
+                                 "precise_max_percent": MAX_PRECISE_PERCENT},
+                 "budget_us": budget, "valid_pairs": len(times_ns), "calibration": margins,
+                 "config_sha256": {mode: checksum(configs / f"{mode}.json") for mode in MODES[:3]}}
+    if not margins["eligible"]:
+        write_json(validation / "closest-selective.json", policy_config(margins, settings["contrast_threshold"], budget))
+    selection["status"] = "calibrated" if margins["eligible"] else "held_no_eligible_candidate"
+    write_checkpoint(validation / "selection.json", selection)
+    return search, selection
 
 
 def validate(output, inspect, calibrator, baseline, local_contrast, resume=False):
@@ -401,59 +469,33 @@ def validate(output, inspect, calibrator, baseline, local_contrast, resume=False
     if resume:
         if read_json(validation / "evaluation.json") != lock:
             raise ValueError("Cannot resume validation with a changed runner, observations, or environment")
-        search = read_json(validation / "calibration.json")
-        selection = read_json(validation / "selection.json")
-        settings = read_json(local_contrast)
-        selected = confirm_ranked(output, inspect, manifest, search, selection, settings["contrast_threshold"],
-                                  selection.get("modes", {}))
-        if selected is None:
-            print("Trial held: no eligible policy on live validation.")
-            return 3
-        write_json(validation / "selection.json", selected)
-        return freeze_validation(output, inspect, calibrator, inputs, provenance, runtime, inspect_hash, calibrator_hash)
-    configs.mkdir()
-    validation.mkdir()
-    write_json(validation / "evaluation.json", lock)
-    shutil.copyfile(baseline, configs / "baseline.json")
-    observations = {mode: run_inspection(inspect, mode, baseline if mode == "baseline" else local_contrast,
-                                         manifest, validation / "observations" / mode, "validation")
-                    for mode in MODES[:3]}
-    ko_cap = evaluate_metrics(observations["baseline"])["ko_leak"]["count"]
+    else:
+        configs.mkdir()
+        validation.mkdir()
+        write_checkpoint(validation / "evaluation.json", lock)
+
     settings = read_json(local_contrast)
-    for mode in ("fast", "precise"):
-        write_json(configs / f"{mode}.json", dict(settings, fail_ratio=highest_threshold(observations[mode], ko_cap)))
-    paired = list(zip(candidate_fields(observations["fast"], "fast"),
-                      candidate_fields(observations["precise"], "precise"), strict=True))
-    times = [(float(fast_row["analysis_ms"]) + float(precise_row["analysis_ms"])) * 1_000
-             for fast_row, precise_row, ((fast, _), (precise, _)) in
-             zip(observations["fast"], observations["precise"], paired, strict=True) if min(fast, precise) >= 0]
-    budget = max(1, math.ceil(nearest_rank(times, 95)))
-    payload = [f"{len(paired)} {budget} {ko_cap} {MIN_AUTOMATIC_PERCENT} {MAX_PRECISE_PERCENT}\n"]
-    for row, ((fast, fast_us), (precise, precise_us)) in zip(observations["baseline"], paired, strict=True):
-        payload.append(f"{int(row['label'] == 'KO')} {fast:.17g} {fast_us} {precise:.17g} {precise_us}\n")
-    result = subprocess.run([str(calibrator)], input="".join(payload), capture_output=True,
-                            encoding="utf-8", check=True, timeout=300)
-    search = json.loads(result.stdout)
-    write_json(validation / "calibration.json", search)
-    margins = search["selected"]
-    selection = {"constraints": {"ko_leak_max_count": ko_cap, "automatic_min_percent": MIN_AUTOMATIC_PERCENT,
-                                 "precise_max_percent": MAX_PRECISE_PERCENT},
-                 "budget_us": budget, "valid_pairs": len(times), "calibration": margins}
-    config = policy_config(margins, settings["contrast_threshold"], budget)
-    if not margins["eligible"]:
-        write_json(validation / "closest-selective.json", config)
-        write_json(validation / "selection.json", dict(selection, status="held_no_eligible_candidate"))
+    selection_file = validation / "selection.json"
+    if selection_file.is_file():
+        search = read_json(validation / "calibration.json")
+        selection = read_json(selection_file)
+    else:
+        search, selection = calibrate_validation(output, inspect, calibrator, baseline, local_contrast, settings, manifest)
+    if selection["status"] == "held_no_eligible_candidate":
         print("Trial held: no eligible policy on fixed validation observations.")
         return 3
-    write_json(configs / "selective.json", config)
-    metrics = {mode: evaluate_metrics(run_inspection(inspect, mode, configs / f"{mode}.json", manifest,
-                                                     validation / "confirmed" / mode, "validation"))
-               for mode in MODES}
+    for mode, expected in selection.get("config_sha256", {}).items():
+        if checksum(configs / f"{mode}.json") != expected:
+            raise ValueError(f"{mode}: calibrated config changed")
+    metrics = selection.get("modes")
+    if metrics is None:
+        metrics = {mode: evaluate_metrics(run_validation_path(inspect, mode, configs / f"{mode}.json", manifest,
+                                                              validation / "confirmed" / mode))
+                   for mode in MODES[:3]}
     selected = confirm_ranked(output, inspect, manifest, search, selection, settings["contrast_threshold"], metrics)
     if selected is None:
         print("Trial held: no eligible policy on live validation.")
         return 3
-    write_json(validation / "selection.json", selected)
     return freeze_validation(output, inspect, calibrator, inputs, provenance, runtime, inspect_hash, calibrator_hash)
 
 
@@ -477,15 +519,19 @@ def verify_freeze(output, inputs, inspect, freeze):
         raise ValueError("Frozen config changed")
 
 
-def evaluate_test(output, inspect, archive_path):
+def evaluate_test(output, inspect, archive_path, test_output=None):
     inputs, report = verified_inputs(output)
     freeze_file = output / "freeze.json"
     if not freeze_file.is_file():
         raise ValueError("Test requires an accepted validation freeze")
+    freeze_hash = checksum(freeze_file)
     freeze = read_json(freeze_file)
     verify_freeze(output, inputs, inspect, freeze)
     if freeze["source_archive_sha256"] != report["source_archive_sha256"]:
         raise ValueError("Prepared archive does not match freeze")
+    destination = test_output if test_output is not None else output / "test"
+    if destination.exists() or destination.is_symlink():
+        raise FileExistsError(f"Test output already exists: {destination}. Use a new --test-output.")
     manifest = inputs / "test.json"
     primary = {row["path"] for row in read_json(inputs / "test-primary.json")["rows"]}
     official = read_json(manifest)["rows"]
@@ -494,12 +540,23 @@ def evaluate_test(output, inspect, archive_path):
         match_archive(archive_path, freeze["source_archive_sha256"])
         with ZipFile(archive_path) as archive:
             materialize(archive, official, test_images)
-    results = []
-    for index, order in enumerate((MODES, MODES[::-1]), start=1):
-        folder = output / "test" / f"run-{index:02d}"
-        modes = {mode: run_inspection(inspect, mode, output / "config" / f"{mode}.json",
-                                     manifest, folder / mode, "test", freeze_file) for mode in order}
-        results.append(modes)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=f".{destination.name}-running-", dir=destination.parent) as temporary:
+        staging = Path(temporary) / "results"
+        results = []
+        for index, order in enumerate((MODES, MODES[::-1]), start=1):
+            folder = staging / f"run-{index:02d}"
+            modes = {mode: run_inspection(inspect, mode, output / "config" / f"{mode}.json",
+                                         manifest, folder / mode, "test", freeze_file) for mode in order}
+            results.append(modes)
+        if checksum(freeze_file) != freeze_hash:
+            raise ValueError("Freeze changed during test")
+        write_json(staging / "report.json", dict(freeze_sha256=freeze_hash, cohorts=test_comparisons(results, primary)))
+        staging.rename(destination)
+    print(f"Completed four paths across two frozen test repetitions in {destination}.")
+
+
+def test_comparisons(results, primary):
     comparisons = {}
     for cohort in ("primary", "official"):
         choose = (lambda row: row["source_path"] in primary) if cohort == "primary" else (lambda row: True)
@@ -512,8 +569,7 @@ def evaluate_test(output, inspect, archive_path):
             changes[mode] = [{"from": old, "to": new, "first_reason": why_old, "second_reason": why_new, "n": n}
                              for (old, new, why_old, why_new), n in sorted(counts.items())]
         comparisons[cohort] = dict(repeat=repeat, repeated_decision_changes=changes)
-    write_json(output / "test" / "report.json", dict(freeze_sha256=checksum(freeze_file), cohorts=comparisons))
-    print("Completed four paths across two frozen test repetitions.")
+    return comparisons
 
 
 def compare_demo(output, inspect, train):
@@ -564,6 +620,7 @@ def main():
     parser.add_argument("--inspect", type=Path)
     parser.add_argument("--calibrator", type=Path)
     parser.add_argument("--resume-validation", action="store_true")
+    parser.add_argument("--test-output", type=Path, help="New directory for test results (default: OUTPUT/test)")
     parser.add_argument("--baseline", type=Path, default=Path("config/baseline.json"))
     parser.add_argument("--local-contrast", type=Path, default=Path("config/local-contrast.json"))
     parser.add_argument("--train-inputs", type=Path, default=Path("artifacts/S04/inputs"))
@@ -578,7 +635,7 @@ def main():
     elif args.stage == "test":
         if not args.inspect:
             parser.error("test requires --inspect")
-        evaluate_test(args.output, args.inspect.resolve(strict=True), args.archive)
+        evaluate_test(args.output, args.inspect.resolve(strict=True), args.archive, args.test_output)
     else:
         if not args.inspect:
             parser.error("demo requires --inspect")

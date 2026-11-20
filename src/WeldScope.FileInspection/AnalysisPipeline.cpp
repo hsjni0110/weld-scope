@@ -41,11 +41,6 @@ void put_candidate(AnalysisOutput& output, LocalContrastResult result)
     output.continuousCandidateRatio = result.continuousCandidateRatio;
 }
 
-std::chrono::microseconds measured_us(Clock::duration duration)
-{
-    return std::chrono::duration_cast<std::chrono::microseconds>(duration);
-}
-
 AnalysisMeasurement observe_local(AnalysisOutput& output, const cv::Mat& bgr, int threshold,
     LocalContrastMode mode, ScoreBand band)
 {
@@ -57,13 +52,12 @@ AnalysisMeasurement observe_local(AnalysisOutput& output, const cv::Mat& bgr, in
         candidate = inspect_local_contrast(bgr, mode, threshold, band.failMin);
     } catch (const cv::Exception&) {
     } catch (const std::invalid_argument&) {}
-    const auto duration = Clock::now() - start;
+    const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start);
     output.analysisMs += std::chrono::duration<double, std::milli>(duration).count();
-    const auto elapsed = measured_us(duration);
     if (!candidate) {
         output.attempts.push_back({stage, std::nullopt, Outcome::Error,
-            precise ? "precise_analysis_error" : "fast_analysis_error", elapsed});
-        return {std::nullopt, elapsed};
+            precise ? "precise_analysis_error" : "fast_analysis_error", duration});
+        return AnalysisMeasurement::from_nanoseconds(std::nullopt, duration);
     }
     const double score = candidate->score;
     const auto outcome = SelectiveInspectionPolicy::classify_score(score, band);
@@ -71,8 +65,8 @@ AnalysisMeasurement observe_local(AnalysisOutput& output, const cv::Mat& bgr, in
         ? (precise ? "precise_uncertain" : "fast_uncertain")
         : (precise ? "precise_threshold" : "fast_threshold");
     put_candidate(output, std::move(*candidate));
-    output.attempts.push_back({stage, score, outcome, reason, elapsed});
-    return {score, elapsed};
+    output.attempts.push_back({stage, score, outcome, reason, duration});
+    return AnalysisMeasurement::from_nanoseconds(score, duration);
 }
 }
 
@@ -165,7 +159,8 @@ AnalysisOutput analyze_image(const cv::Mat& bgr, const InspectionParameters& par
         put_candidate(output, std::move(local));
     }
     output.analysisMs = std::chrono::duration<double, std::milli>(duration).count();
-    output.attempts.push_back({stage, output.score, output.outcome, output.reason, measured_us(duration)});
+    output.attempts.push_back({stage, output.score, output.outcome, output.reason,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(duration)});
     return output;
 }
 

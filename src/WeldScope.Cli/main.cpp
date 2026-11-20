@@ -131,15 +131,15 @@ void verify_freeze(const fs::path& file, const std::string& algorithm, const std
         throw std::invalid_argument("Executable SHA-256 differs from the evaluation freeze");
 }
 struct StageFields {
-    std::string elapsed, score, outcome, reason;
+    std::string elapsedUs, score, outcome, reason, elapsedNs;
 };
 StageFields stage_fields(const AnalysisOutput& result, const char* stage)
 {
     for (const auto& attempt : result.attempts) {
         if (attempt.stage == stage) {
-            return {std::to_string(attempt.elapsed.count()),
+            return {std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(attempt.elapsed).count()),
                     attempt.score ? format_score(*attempt.score) : "",
-                    outcome_name(attempt.outcome), attempt.reason};
+                    outcome_name(attempt.outcome), attempt.reason, std::to_string(attempt.elapsed.count())};
         }
     }
     return {};
@@ -215,7 +215,7 @@ int wmain(int argc, wchar_t** argv)
         if (local) csv << ",continuous_candidate_ratio";
         if (reportStages)
             csv << ",fast_elapsed_us,precise_elapsed_us,fast_score,precise_score,reason,"
-                   "fast_outcome,fast_reason,precise_outcome,precise_reason";
+                   "fast_outcome,fast_reason,precise_outcome,precise_reason,fast_elapsed_ns,precise_elapsed_ns";
         csv << '\n';
         int passed = 0, failed = 0, errors = 0, reviewed = 0;
         bool inputManifestValid = true;
@@ -273,8 +273,9 @@ int wmain(int argc, wchar_t** argv)
             if (reportStages) {
                 const auto fast = stage_fields(result, "FAST");
                 const auto precise = stage_fields(result, "PRECISE");
-                const std::string observations[] = {fast.elapsed, precise.elapsed, fast.score, precise.score,
-                    result.reason.empty() ? errorText : result.reason, fast.outcome, fast.reason, precise.outcome, precise.reason};
+                const std::string observations[] = {fast.elapsedUs, precise.elapsedUs, fast.score, precise.score,
+                    result.reason.empty() ? errorText : result.reason, fast.outcome, fast.reason, precise.outcome, precise.reason,
+                    fast.elapsedNs, precise.elapsedNs};
                 for (const auto& field : observations) csv << ',' << csv_field(field);
             }
             csv << '\n';

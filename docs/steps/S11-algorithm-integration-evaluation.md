@@ -18,7 +18,7 @@ OPENZDM 원본 ZIP의 SHA-256을 검증했다. S02의 동일 dHash와 해밍 거
 
 ## 시험 결과
 
-주 시험 8,104장의 첫 실행 결과다. 불량 유출률은 KO 중 PASS, 정상 오판률은 OK 중 FAIL이다. 보류율, 오류율, 자동 판정률, 정밀 호출률은 전체 8,104장이 분모다. 자동 판정 표본의 오류율과 원시 혼동 집계는 비교 데이터에 있다.
+커밋 `ea015e2`의 동결 실행 파일로 측정한 주 시험 8,104장의 첫 실행 결과다. 불량 유출률은 KO 중 PASS, 정상 오판률은 OK 중 FAIL이다. 보류율, 오류율, 자동 판정률, 정밀 호출률은 전체 8,104장이 분모다. 자동 판정 표본의 오류율과 원시 혼동 집계는 비교 데이터에 있다.
 
 | 경로 | 불량 유출률 | 정상 오판률 | 보류율 | 자동 판정률 | 정밀 호출률 |
 |---|---:|---:|---:|---:|---:|
@@ -84,7 +84,9 @@ $run = 'artifacts/S11/evaluation-new'
 & $python -m tools.evaluate_s11 test --output $run --inspect "$bin/weldscope_inspect.exe"
 ```
 
-`validate`가 실제 기준을 충족한 설정을 동결하면 `test`를 실행한다. 시간 측정 환경이 달라지면 검증 선택 결과가 바뀔 수 있다. 동결 자료와 정확히 같은 바이너리로 한 번 더 실행할 때는 해당 기존 평가 경로의 해시를 검증한다. 본 기록의 원시 CSV, 요약·시간 분포와 동결 파일은 현재 작업 폴더의 `artifacts/S11/evaluation`에 있다.
+`validate`가 실제 기준을 충족한 설정을 동결하면 `test`를 실행한다. `validation/evaluation.json`을 기록한 뒤 중단된 검증은 같은 입력과 실행 파일을 지정하고 `validate`에 `--resume-validation`을 추가해 재개한다. 시험은 두 반복과 집계가 모두 끝난 뒤 결과 폴더를 게시한다. 중단된 시험은 같은 명령으로 다시 실행한다.
+
+동결 기록과 일치하는 실행 파일로 시험을 반복할 때는 `--test-output <새 결과 폴더>`를 지정한다. 위 시험 결과의 원시 CSV, 시간 분포, 동결 파일은 `artifacts/S11/evaluation`에 있다. 시간 경계 수정 후의 실행 파일은 새 평가 경로에서 검증과 동결을 거친다. 새 실행에서는 단계별 나노초로 예산을 비교한다. 측정 환경이 달라지면 검증 선택 결과가 바뀔 수 있다.
 
 같은 train PNG의 네 경로 시연은 `tools.evaluate_s11 demo`로 실행한다. [S04 전체 train 입력](S04-baseline-inspection.md)을 준비한 뒤 아직 시연 결과가 없는 평가 경로를 지정한다.
 
@@ -92,17 +94,19 @@ $run = 'artifacts/S11/evaluation-new'
 & $python -m tools.evaluate_s11 demo --output $run --inspect "$bin/weldscope_inspect.exe"
 ```
 
-사용자가 검수할 MFC 빌드에는 위 평가에서 동결한 설정을 전달한다. 현재 Windows VM은 S10에서 확인한 스테이징 경로를 사용했다. 다른 환경의 Visual Studio 설치에 x64 MFC가 있으면 `-StagedMfc` 인자를 생략한다.
+TCP의 `selective-v1`을 검수할 MFC 빌드에는 S11에 등록된 아래 동결 설정을 전달한다. 현재 Windows VM은 S10에서 확인한 스테이징 경로를 사용했다. 다른 환경의 Visual Studio 설치에 x64 MFC가 있으면 `-StagedMfc` 인자를 생략한다.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-s10.ps1 -StagedMfc artifacts/S10/vs-x64 -SelectiveFreeze docs/steps/S11-evidence/freeze.json
 .\artifacts\S11\x64\Release\WeldScope.App.exe
 ```
 
-전용 테스트 MySQL이 준비된 상태에서 실제 창 회귀 검사를 실행한다. `image_10513.png`는 S04에서 추출한 train 원본이다.
+전용 테스트 MySQL이 준비된 상태에서 실제 창 회귀 검사를 실행한다. `image_10513.png`는 S04에서 추출한 train 원본이다. `--two-stage-source`를 지정하면 다섯 번의 시도 안에 정밀 분석 단계가 관찰돼야 검증이 통과한다.
 
 ```powershell
 & $python -m tools.verify_s11_gui artifacts/S11/x64/Release/WeldScope.App.exe artifacts/S11/gui-new --two-stage-source artifacts/S04/inputs/images/train/OK/image_10513.png --integration-host "$bin/s10_integration_host.exe"
 ```
 
-최종 x64 CTest 7건, S06 코덱과 TCP 시연, S09 ARM64 실제 창 검사 24건(96 DPI), S10 기준 모드 실제 창과 저장 장애 복구 검사, Python 일반 검사 52건이 통과했다. Python 발견 검사에서 건너뛴 CLI 11건은 CTest에서 통과했다. 기존 S07 고정 train 16장은 기준·빠른·정밀 경로의 시간 외 CSV와 PNG 192개가 기존 증거와 일치했다. S11 앱은 Windows ARM VM의 x64 Release에서 검증했다.
+최초 S11 검수에서는 x64 CTest 7건, S06 코덱과 TCP 시연, S09 ARM64 실제 창 검사 24건(96 DPI), S10 기준 모드 실제 창과 저장 장애 복구 검사, Python 일반 검사 52건이 통과했다. Python 발견 검사에서 건너뛴 CLI 11건은 CTest에서 통과했다. 기존 S07 고정 train 16장은 기준·빠른·정밀 경로의 시간 외 CSV와 PNG 192개가 기존 증거와 일치했다. S11 앱은 Windows ARM VM의 x64 Release에서 검증했다.
+
+코드 리뷰 반영 후에는 x64 CTest 7건과 Python 일반 검사 58건이 통과했다. train PNG 한 장으로 시험 입력 누락 후 재시도와 별도 결과 폴더 게시를 확인했다. 같은 Windows VM의 x64 MFC와 전용 MySQL에서 파일·TCP 검사, 이력 재조회, 재시작 후 재전송, 두 단계 분석을 다시 확인했다. 공식 시험 수치는 최초 동결 실행의 기록이다.

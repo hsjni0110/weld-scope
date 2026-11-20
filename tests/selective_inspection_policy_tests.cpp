@@ -60,6 +60,14 @@ void check_cases()
         {"Fast PASS consumes budget", {0.25, budget}, unusedPrecise, Outcome::Pass, Reason::FastThreshold, 0},
         {"Fast FAIL consumes budget", {0.75, budget}, unusedPrecise, Outcome::Fail, Reason::FastThreshold, 0},
         {"Fast decisive result returned late", {0.75, budget + 1us}, unusedPrecise, Outcome::Review, Reason::BudgetExhausted, 0},
+        {"Fast decisive result one nanosecond late", AnalysisMeasurement::from_nanoseconds(0.75, budget + 1ns),
+            unusedPrecise, Outcome::Review, Reason::BudgetExhausted, 0},
+        {"Fractional stages fit exactly", AnalysisMeasurement::from_nanoseconds(0.5, 2000us + 400ns),
+            AnalysisMeasurement::from_nanoseconds(0.125, 7999us + 600ns), Outcome::Pass, Reason::PreciseThreshold, 1},
+        {"Fractional stages exceed the budget", AnalysisMeasurement::from_nanoseconds(0.5, 2000us + 400ns),
+            AnalysisMeasurement::from_nanoseconds(0.125, 7999us + 601ns), Outcome::Review, Reason::BudgetExhausted, 1},
+        {"Negative fractional duration", AnalysisMeasurement::from_nanoseconds(0.5, -1ns), unusedPrecise,
+            Outcome::Error, Reason::InvalidFastMeasurement, 0},
         {"Fast failure", {std::nullopt, budget + 1us}, unusedPrecise, Outcome::Error, Reason::FastAnalysisError, 0},
         {"Late precise failure", uncertainFast, {std::nullopt, 8001us}, Outcome::Error, Reason::PreciseAnalysisError, 1},
         {"Fast score out of bounds", {-0.01, 1us}, unusedPrecise, Outcome::Error, Reason::InvalidFastMeasurement, 0},
@@ -87,7 +95,8 @@ void check_cases()
             const auto expected = sample.precise.score;
             const bool sameScore = actual == expected
                 || (actual && expected && std::isnan(*actual) && std::isnan(*expected));
-            if (!sameScore || result.precise->elapsed != sample.precise.elapsed)
+            if (!sameScore || result.precise->elapsed != sample.precise.elapsed
+                || result.precise->fraction() != sample.precise.fraction())
                 throw std::runtime_error(std::string(sample.name) + ": precise observation was not preserved");
         }
     }

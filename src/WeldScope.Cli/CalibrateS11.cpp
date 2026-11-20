@@ -8,12 +8,14 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <vector>
 
 namespace {
 using namespace weldscope;
 using std::chrono::microseconds;
+using std::chrono::nanoseconds;
 
 struct Observation {
     bool isKo;
@@ -88,9 +90,11 @@ void write_candidate(const Candidate& candidate) {
 }
 
 void calibrate() {
+    std::string observationUnit;
     std::int64_t budget = 0;
     int count = 0, maximumKo = 0, minimumAutomaticPercent = 0, maximumPrecisePercent = 0;
-    if (!(std::cin >> count >> budget >> maximumKo >> minimumAutomaticPercent >> maximumPrecisePercent) ||
+    if (!(std::cin >> observationUnit >> count >> budget >> maximumKo >> minimumAutomaticPercent >> maximumPrecisePercent) ||
+        observationUnit != "nanoseconds" ||
         count <= 0 || count > 100000 || budget <= 0 || maximumKo < 0 || maximumKo > count ||
         minimumAutomaticPercent < 0 || minimumAutomaticPercent > 100 ||
         maximumPrecisePercent < 0 || maximumPrecisePercent > 100)
@@ -103,15 +107,16 @@ void calibrate() {
     for (int index = 0; index < count; ++index) {
         int label = -1;
         double fastScore = 0, preciseScore = 0;
-        std::int64_t fastTime = 0, preciseTime = 0;
-        if (!(std::cin >> label >> fastScore >> fastTime >> preciseScore >> preciseTime) ||
-            (label != 0 && label != 1) || fastTime < 0 || preciseTime < 0)
+        std::int64_t fastNs = 0, preciseNs = 0;
+        if (!(std::cin >> label >> fastScore >> fastNs >> preciseScore >> preciseNs) ||
+            (label != 0 && label != 1) || fastNs < 0 || preciseNs < 0)
             throw std::invalid_argument("Invalid validation observation");
         auto fast = observed_score(fastScore);
         auto precise = observed_score(preciseScore);
         if (fast) fastScores.push_back(*fast);
         if (precise) preciseScores.push_back(*precise);
-        observations.push_back({label == 1, {fast, microseconds(fastTime)}, {precise, microseconds(preciseTime)}});
+        observations.push_back({label == 1, AnalysisMeasurement::from_nanoseconds(fast, nanoseconds(fastNs)),
+            AnalysisMeasurement::from_nanoseconds(precise, nanoseconds(preciseNs))});
     }
     std::cin >> std::ws;
     if (!std::cin.eof()) throw std::invalid_argument("Unexpected trailing observations");

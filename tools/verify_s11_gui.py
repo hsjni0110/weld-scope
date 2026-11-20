@@ -88,6 +88,10 @@ def check_pinned_registration(exe, out, freeze, baseline, selective):
 def verify(exe, out, review_fixture, two_stage_source, integration_host):
     exe, out = exe.resolve(strict=True), out.resolve()
     out.mkdir(parents=True, exist_ok=True)
+    report = out / "verification.json"
+    two_stage_capture = out / "04-frozen-two-stage.png"
+    report.unlink(missing_ok=True)
+    two_stage_capture.unlink(missing_ok=True)
     freeze = json.loads(exe.with_name("freeze.json").read_text(encoding="utf8"))
     config_bytes = exe.with_name("selective.json").read_bytes()
     settings = json.loads(config_bytes)
@@ -149,7 +153,8 @@ def verify(exe, out, review_fixture, two_stage_source, integration_host):
             assert len(file_stages) == len(tcp_trace) == 1 and file_stages[0] == tcp_trace[0][:-1]
             assert file_trace[0][0] == "FAST" and float(file_trace[0][1]) <= settings["fast_pass_max"]
             for trace, decision in ((file_trace, file_decision), (tcp_trace, selective[-1])):
-                over_budget = round(float(trace[0][-1]) * 1000) > settings["budget_us"]
+                elapsed_ns = round(float(trace[0][-1]) * 1_000_000)
+                over_budget = elapsed_ns > settings["budget_us"] * 1_000
                 assert decision == ("REVIEW" if over_budget else "PASS"), (trace, decision)
             paired_observations.append({
                 "file_inspection_id": file_id, "file_decision": file_decision, "file_attempts": file_trace,
@@ -186,13 +191,13 @@ def verify(exe, out, review_fixture, two_stage_source, integration_host):
                 if [item[0] for item in stages] == ["FAST", "PRECISE"]:
                     break
                 assert [item[0] for item in stages] == ["FAST"] and "시간 예산 초과" in label(1010), observed
-            reached_precise = len(stages) == 2
+            else:
+                raise AssertionError(f"PRECISE was never reached for {source.name}: {observed}")
             assert label(1007) == VERDICTS[decision]
-            if reached_precise:
-                assert all(name in label(1010) for name in STAGE_LABELS.values())
-                capture(hwnd, out / "04-frozen-two-stage.png")
+            assert all(name in label(1010) for name in STAGE_LABELS.values())
+            capture(hwnd, two_stage_capture)
             two_stage = {"inspection_id": two_stage_id, "source_name": source.name,
-                         "source_sha256": source_hash, "reached_precise": reached_precise, "observations": observed}
+                         "source_sha256": source_hash, "reached_precise": True, "observations": observed}
 
         baseline, _ = completed_request(baseline_id, "baseline-v1")
         assert baseline[-1] == "FAIL"
@@ -234,7 +239,7 @@ def verify(exe, out, review_fixture, two_stage_source, integration_host):
             timing.update({"db_save_including_connection_and_commit_ms": save_ms,
                            "db_timed_inspection_id": timed[2]})
 
-    (out / "verification.json").write_text(json.dumps({
+    report.write_text(json.dumps({
         "review_fixture": review_fixture, "config_sha256": config_hash, "source_sha256": image_hash,
         "file_inspection_id": file_id, "tcp_inspection_id": selective[2] if selective else None,
         "baseline_inspection_id": baseline[2], "pinned_registration": not review_fixture,
