@@ -1,0 +1,12 @@
+{
+  "db_reconnected": true,
+  "corrupt_verdict": "처리 오류",
+  "normal_verdict": "검토 필요",
+  "response": [
+    "RESULT",
+    "s12-guide-71fb1f48efc94b7fac99171e0e3c2b89",
+    "20ad452d-760b-4085-acff-6c387a951974",
+    "PASS"
+  ],
+  "replayed_row_count": 1
+}

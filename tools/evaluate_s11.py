@@ -499,7 +499,7 @@ def validate(output, inspect, calibrator, baseline, local_contrast, resume=False
     return freeze_validation(output, inspect, calibrator, inputs, provenance, runtime, inspect_hash, calibrator_hash)
 
 
-def verify_freeze(output, inputs, inspect, freeze):
+def verify_frozen_evidence(output, inputs, inspect, freeze):
     checks = {
         "executable_sha256": inspect,
         "test_manifest_sha256": inputs / "test.json",
@@ -513,10 +513,14 @@ def verify_freeze(output, inputs, inspect, freeze):
         raise ValueError("Test requires matching frozen evidence")
     if read_json(checks["validation_selection_sha256"]).get("status") != "accepted":
         raise ValueError("Validation did not approve the frozen configuration")
-    if environment(inspect) != freeze.get("environment"):
-        raise ValueError("Frozen evaluation environment changed")
     if any(checksum(output / "config" / f"{mode}.json") != freeze["config_sha256"][mode] for mode in MODES):
         raise ValueError("Frozen config changed")
+
+
+def verify_freeze(output, inputs, inspect, freeze):
+    verify_frozen_evidence(output, inputs, inspect, freeze)
+    if environment(inspect) != freeze.get("environment"):
+        raise ValueError("Frozen evaluation environment changed")
 
 
 def evaluate_test(output, inspect, archive_path, test_output=None):
