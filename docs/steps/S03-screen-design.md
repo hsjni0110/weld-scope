@@ -81,7 +81,7 @@ S02에서 확인한 train 이미지 두 장을 원본 바이트 그대로 실행
 
 ### 재현 절차
 
-아래 절차는 S03이 병합된 `c768222` 작업 트리에서 실행한다. 현재 MFC 진입점과 빌드 절차는 [S09 파일 검사](S09-file-inspection-integration.md)를 따른다. 당시 Visual Studio의 C++ ARM64 도구, ARM64 MFC와 Windows SDK가 설치된 환경에서 확인했다.
+프로젝트 루트의 PowerShell에서 실행한다. Visual Studio의 C++ ARM64 도구, ARM64 MFC와 Windows SDK가 설치된 현재 환경에서 확인했다.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-s03.ps1
