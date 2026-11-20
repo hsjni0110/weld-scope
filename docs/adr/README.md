@@ -26,5 +26,6 @@
 | [0005](0005-inspection-history.md) | MySQL 검사 이력과 재전송 규칙 | 제안 | x64 독립 콘솔과 MySQL 8.4.13에서 검증 후 main 병합 |
 | [0006](0006-virtual-device-protocol.md) | 가상 장비 TCP 요청과 재전송 | 승인 | ARM64 코덱 검사 및 루프백 시연 통과. 사용자 결과 검수 대기 |
 | [0007](0007-local-contrast-inspection.md) | 국소 대비와 다중 스케일 검사 | 승인 | [S07 단계 기록](../steps/S07-improved-inspection.md) |
+| [0008](0008-selective-inspection-policy.md) | 선택적 정밀 분석 정책과 시간 예산 | 승인 | [S08 단계 기록](../steps/S08-selective-inspection-policy.md) |
 
 엔진 경계, 상태 계약, TCP·DB 계약은 해당 단계에서 ADR로 구체화한다. 표에 없는 제안을 승인된 결정으로 간주하지 않는다.
