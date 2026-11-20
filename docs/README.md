@@ -10,6 +10,7 @@
 | 디자인 스킬, 화면과 UI 문구 | [UI UX 원칙](standards/ui-ux.md) |
 | 문서 수명, 삭제, 완료 점검 | [문서 관리](standards/maintenance.md) |
 | 중요한 아키텍처 결정 | [ADR 목록과 절차](adr/README.md) |
+| S04 기준 알고리즘의 계산식, 선택 근거, 점수 해석 | [전역 어두운 픽셀 비율](algorithms/global-dark-ratio.md) |
 
 현재 폴더에는 Git 저장소와 MFC 프로젝트가 있다. S01은 사용자 완료 확인을 받았으며 당시 OpenCV 이미지 뷰어의 상세 실행 증거를 재검증한 상태는 아니다. [S02 데이터 준비](steps/S02-data-preparation.md)는 공식 데이터 전체 점검과 접촉표 생성을 수행했고 사용자 검수 대기다. [S03 검사 콘솔 시제품](steps/S03-screen-design.md)은 승인된 계획에 따라 구현했으며, 왜·어떻게·무엇을 중심의 설명과 실제 MFC 화면, 실행·검증 절차를 제공한다. 단계 상태는 [로드맵](ROADMAP.md), 기존 개발 환경 기록은 [S01 기록](steps/S01-development-environment.md)을 따른다. 전체 PRD의 세부 요구사항은 사용자 검수 대상이다.
 
