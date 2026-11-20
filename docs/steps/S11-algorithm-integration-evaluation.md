@@ -1,6 +1,6 @@
 ﻿# S11 알고리즘 통합과 평가
 
-**상태**　사용자 결과 검수 대기
+**상태**　main 병합
 
 S04 기준 검사와 S07 국소 대비를 S08 선택 정책에 연결했다. CLI, MFC 파일 처리, TCP가 같은 C++ 분석 호출을 사용한다. 실행 시작점은 S10을 병합한 `e4824b0`이다. [로드맵](../ROADMAP.md) · [ADR 0011](../adr/0011-algorithm-integration-evaluation.md)
 

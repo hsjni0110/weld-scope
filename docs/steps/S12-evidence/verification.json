@@ -1,0 +1,92 @@
+{
+  "review_fixture": false,
+  "config_sha256": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93",
+  "source_sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+  "file_inspection_id": "7bbe6bd1-a3b9-472f-aafe-407118385b44",
+  "tcp_inspection_id": "a02b00cd-50b6-4939-af06-03b301fe3cd3",
+  "baseline_inspection_id": "9fed2e93-23c6-4a47-89cd-0d3506d2be93",
+  "pinned_registration": true,
+  "decision": "REVIEW",
+  "tcp_decision": "REVIEW",
+  "stages": [
+    [
+      "FAST",
+      "0.11570048309178745",
+      "PASS",
+      "fast_threshold"
+    ]
+  ],
+  "replay_after_restart": true,
+  "two_stage": {
+    "inspection_id": "0b0b60e1-e81e-4182-baf6-665545747da6",
+    "source_name": "image_10513.png",
+    "source_sha256": "52a6a7759bd37831f47efaa2726233645330e63278cc4fafc4b94bf8d1b80f53",
+    "reached_precise": true,
+    "observations": [
+      {
+        "inspection_id": "08335fc3-d148-4b56-8ed9-2d08e2db8163",
+        "decision": "REVIEW",
+        "stages": [
+          [
+            "FAST",
+            "0.292036445391078",
+            "REVIEW",
+            "fast_uncertain",
+            "0.209167"
+          ]
+        ]
+      },
+      {
+        "inspection_id": "0b0b60e1-e81e-4182-baf6-665545747da6",
+        "decision": "REVIEW",
+        "stages": [
+          [
+            "FAST",
+            "0.292036445391078",
+            "REVIEW",
+            "fast_uncertain",
+            "0.079167"
+          ],
+          [
+            "PRECISE",
+            "0.4441486214649154",
+            "REVIEW",
+            "precise_uncertain",
+            "3.801834"
+          ]
+        ]
+      }
+    ]
+  },
+  "timing": {
+    "tcp_client_polling_inclusive_ms": 108.95650000020396,
+    "db_save_including_connection_and_commit_ms": 6.393042,
+    "db_timed_inspection_id": "70060861-6fd2-4692-a4be-0d2c18bbdd7a"
+  },
+  "paired_observations": [
+    {
+      "file_inspection_id": "7bbe6bd1-a3b9-472f-aafe-407118385b44",
+      "file_decision": "REVIEW",
+      "file_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "10.507833"
+        ]
+      ],
+      "tcp_inspection_id": "a02b00cd-50b6-4939-af06-03b301fe3cd3",
+      "tcp_decision": "REVIEW",
+      "tcp_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "2.421291"
+        ]
+      ]
+    }
+  ]
+}

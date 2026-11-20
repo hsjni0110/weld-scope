@@ -28,6 +28,8 @@
 
 [S11 알고리즘 통합과 평가](steps/S11-algorithm-integration-evaluation.md)에 선택적 정밀 분석 통합과 OPENZDM의 검증·시험 사용 범위를 기록한다.
 
+[S12 전달과 재현](steps/S12-delivery-reproducibility.md)에 x64 검수 ZIP 제작, 패키지 실행과 동결 시험 재현을 기록한다. 검토자용 소개는 [저장소 README](../README.md)에 있다.
+
 이 폴더의 진행 단계는 ROADMAP.md가 기준이다. PRD에는 단계 구분만 요약하고 상태를 중복 기록하지 않는다. 소프트웨어 버전, 실행 명령, 빌드 옵션은 실제 구성 파일과 각 단계의 검증 결과를 기준으로 관리한다.
 
 Agent.md와 AGENTS.md를 중복 유지하지 않는다. 에이전트 진입 문서는 프로젝트 루트의 AGENTS.md 하나다.
