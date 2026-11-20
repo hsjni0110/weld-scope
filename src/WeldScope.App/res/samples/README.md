@@ -11,4 +11,4 @@ OPENZDM, *2D image dataset for the presence or absence of aesthetical defects on
 - `corrupt.png`는 오류 복구 확인용 합성 비이미지이며 원본 데이터가 아니다.
 - 파일별 SHA-256과 크기는 `provenance.json`에서 확인한다.
 
-재생성: 프로젝트 루트에서 `.tools/python/python.exe tools/prepare_s03_assets.py`. 로컬 S02 ZIP이 필요하다. 앱 실행에는 ZIP과 Python이 필요 없다.
+이 폴더는 S03의 출처 기록과 S04·S09 회귀 검사에 쓰이는 파일을 보관한다. S09 앱은 선택한 파일을 읽는다. 재생성은 프로젝트 루트에서 `.tools/python/python.exe tools/prepare_s03_assets.py`로 실행하며 로컬 S02 ZIP이 필요하다.

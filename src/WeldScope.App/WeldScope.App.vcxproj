@@ -275,9 +275,10 @@
       <AdditionalManifestFiles>$(ProjectDir)app.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
+  <Import Project="FileInspection.props" />
   <ItemGroup>
-    <ClInclude Include="SampleSession.h" />
-    <ClInclude Include="SampleImageView.h" />
+    <ClInclude Include="FileInspectionJob.h" />
+    <ClInclude Include="InspectionImageView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -296,7 +297,10 @@
     </ClCompile>
     <ClCompile Include="WeldScope.App.cpp" />
     <ClCompile Include="WeldScope.AppDlg.cpp" />
-    <ClCompile Include="SampleImageView.cpp" />
+    <ClCompile Include="InspectionImageView.cpp" />
+    <ClCompile Include="FileInspectionJob.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\WeldScope.FileInspection\InspectionInput.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WeldScopeApp.rc" />
