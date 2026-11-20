@@ -50,6 +50,14 @@ def choose_file(picker, path):
     u.PostMessageW(picker, 0x111, 1, u.GetDlgItem(picker, 1))
 
 
+def select_first_history_row(list_view):
+    # List view drag detection can wait for a mouse-up from within mouse-down.
+    position = (32 << 16) | 32
+    u.PostMessageW(list_view, 0x201, 1, position)
+    u.PostMessageW(list_view, 0x202, 0, position)
+    wait_for(lambda: send(list_view, 0x100C, -1, 2) == 0, "First history row missing")
+
+
 def verify(exe, output):
     out = Path(output).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -100,8 +108,7 @@ def verify(exe, output):
         capture(hwnd, out / "02-device-stored.png")
 
         list_view = control(1104)
-        send(list_view, 0x201, 1, (32 << 16) | 32)
-        send(list_view, 0x202, 0, (32 << 16) | 32)
+        select_first_history_row(list_view)
         click(1110)
         wait_for(lambda: "global-dark-ratio-v1" in text(1010), "History record did not reopen")
         capture(hwnd, out / "03-history-opened.png")
@@ -128,8 +135,7 @@ def verify(exe, output):
         click(1101)
         wait_for(lambda: text(1007) == "처리 오류" and text(1106) == "저장 완료", "Corrupt verdict missing")
         wait_for(lambda: text(1012) == "최근 저장 이력", "Corrupt history missing")
-        send(list_view, 0x201, 1, (32 << 16) | 32)
-        send(list_view, 0x202, 0, (32 << 16) | 32)
+        select_first_history_row(list_view)
         for _ in range(2):
             send(list_view, 0x100, 0x28)
             send(list_view, 0x101, 0x28)

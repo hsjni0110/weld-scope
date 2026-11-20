@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "established_utc": "2026-11-20T11:52:39.689520+00:00",
+  "executable_sha256": "f8ba199b647d2a544a9090a5225b45295ae0f8bd4a1fb7d37e32c49aef3d204f",
+  "calibrator_sha256": "2e9b43e07701dd0720b31d216c9d05d9a142cc3ed03c0afbcd6f2c590b509272",
+  "test_manifest_sha256": "1da18f57e30683676e8e3525a7d4b42935fe86868fcb80323cb9db879cb67bfb",
+  "test_primary_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+  "validation_manifest_sha256": "5f577cc652fce8a27b389c633e3799cce31a8aa8268f55a4c8209cf8163e63cc",
+  "excluded_sha256": "461eb40645e132f92f98e76cb7147752cabf3c8a6f60ed8080eb00c5cbbe8e39",
+  "source_archive_sha256": "4d05b87dfb66c515f261186f17f409978b2660add911424c5ec5c7f52274e52a",
+  "provenance_sha256": "26c431a02a1b853ab87430c04294d0f2bc1171020fc1bf47fc53b99c1df78e3e",
+  "config_sha256": {
+    "baseline": "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2",
+    "fast": "f08b43d364ce616ed6d11fd2eda4371682922b27941f4fac9b121a92661f4c61",
+    "precise": "7e1cf8c76a5c2458f953e6f26583abf5867a25e8af5a601f49ada587e2572df4",
+    "selective": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93"
+  },
+  "validation_selection_sha256": "05fc552ac2708e639d9f69fe2ab04b494a57611018d6b9138eb0c63e7f77c02a",
+  "environment": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "processor": "ARMv8 (64-bit) Family 8 Model 0 Revision   0, QEMU",
+    "host_arch": "ARM64",
+    "executable_machine": "0x8664",
+    "cpu_count": 4,
+    "opencv_threads": 1
+  },
+  "algorithm_version": {
+    "baseline": "global-dark-ratio-v1",
+    "fast": "local-contrast-fast-v1",
+    "precise": "local-contrast-precise-v1",
+    "selective": "local-contrast-selective-v1"
+  },
+  "metric_denominators": {
+    "ko_leak": "KO",
+    "ok_reject": "OK",
+    "automatic_error": "PASS+FAIL",
+    "review": "all",
+    "error": "all",
+    "automatic": "all",
+    "precise": "all"
+  }
+}

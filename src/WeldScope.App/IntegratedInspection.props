@@ -13,6 +13,11 @@
       <AdditionalDependencies>libmysql.lib;ws2_32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(WeldScopeS11Freeze)' != ''">
+    <ClCompile>
+      <PreprocessorDefinitions>WELDSCOPE_S11_DEPLOYED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
@@ -21,6 +26,13 @@
     <S10Runtime Include="$(WeldScopeMySqlRoot)\lib\libmysql.dll;$(WeldScopeMySqlRoot)\bin\libssl-3-x64.dll;$(WeldScopeMySqlRoot)\bin\libcrypto-3-x64.dll;$(MSBuildThisFileDirectory)res\samples\defect.png" />
   </ItemGroup>
   <Target Name="CopyS10Runtime" AfterTargets="Build">
+    <PropertyGroup>
+      <S11RuntimeFiles>$(OutDir)freeze.json;$(OutDir)selective.json</S11RuntimeFiles>
+    </PropertyGroup>
     <Copy SourceFiles="@(S10Runtime)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy Condition="'$(WeldScopeS11Freeze)' != ''"
+          SourceFiles="$(WeldScopeS11Freeze);$(WeldScopeS11Selective)"
+          DestinationFiles="$(S11RuntimeFiles)" SkipUnchangedFiles="true" />
+    <Delete Condition="'$(WeldScopeS11Freeze)' == ''" Files="$(S11RuntimeFiles)" />
   </Target>
 </Project>

@@ -13,11 +13,13 @@ import zlib
 CLI = None
 
 
-def png(width=2, height=2):
+def png(width=2, height=2, pixels=None):
     def chunk(kind, data):
         return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
-    if (width, height) == (2, 2):
-        raw = b''.join(b'\0' + b''.join(bytes([value]) * 3 for value in row) for row in [[0, 128], [129, 255]])
+    if pixels is not None or (width, height) == (2, 2):
+        if pixels is None:
+            pixels = [[0, 128], [129, 255]]
+        raw = b''.join(b'\0' + b''.join(bytes([value]) * 3 for value in row) for row in pixels)
         encoded = zlib.compress(raw)
     else:
         compressor = zlib.compressobj()
@@ -185,6 +187,83 @@ class CliTests(unittest.TestCase):
     def test_large_debug_flag_is_rejected_before_narrowing(self):
         self.run_cli('--manifest', self.manifest([dict(self.row(), debug=4294967297)]),
                      '--output', self.root / 'large-debug', code=1)
+
+    def test_validation_manifest_selection_and_observation_output(self):
+        self.config.write_text(json.dumps(dict(schema_version=1, contrast_threshold=12, fail_ratio=0.75)),
+                               encoding='utf-8')
+        image = self.root / 'images/val/OK/fixture.png'
+        image.parent.mkdir(parents=True)
+        image.write_bytes(png())
+        row = dict(self.row('val/OK/fixture.png'), split='validation', debug=0)
+        manifest = self.manifest([row])
+        self.run_cli('--algorithm', 'fast', '--manifest', manifest, '--output', self.root / 'no-split', code=1)
+        self.run_cli('--algorithm', 'fast', '--image', image, '--evaluation-split', 'validation',
+                     '--output', self.root / 'single-val', code=1)
+        output = self.root / 'validation'
+        self.run_cli('--algorithm', 'fast', '--manifest', manifest, '--evaluation-split', 'validation',
+                     '--output', output)
+        observation, = self.results(output)
+        self.assertEqual(observation['fast_score'], '1')
+        self.assertGreaterEqual(int(observation['fast_elapsed_us']), 0)
+        self.assertEqual(int(observation['fast_elapsed_ns']) // 1000, int(observation['fast_elapsed_us']))
+        self.assertEqual(observation['precise_elapsed_ns'], '')
+        self.assertEqual(observation['precise_score'], '')
+        self.assertEqual(observation['reason'], 'fast_threshold')
+        summary = json.loads((output / 'summary.json').read_text())
+        self.assertEqual(summary['evaluation_split'], 'validation')
+        self.assertEqual(summary['manifest_sha256'], hashlib.sha256(manifest.read_bytes()).hexdigest())
+        self.assertEqual(summary['input_manifest_valid'], 1)
+        incomplete = self.root / 'validation-incomplete'
+        self.run_cli('--algorithm', 'fast', '--manifest', self.manifest([row, self.row('val/OK/missing.png')
+                     | {'split': 'validation'}]), '--evaluation-split', 'validation',
+                     '--output', incomplete, code=2)
+        self.assertEqual(json.loads((incomplete / 'summary.json').read_text())['input_manifest_valid'], 0)
+        self.run_cli('--manifest', self.manifest([dict(self.row('test/OK/fixture.png'), split='test'), row]),
+                     '--evaluation-split', 'validation', '--output', self.root / 'mixed-split', code=1)
+
+    def test_selective_cli_records_ordered_attempts_and_final_review(self):
+        self.image.write_bytes(png(20, 4, [[0] * 10 + [255] + [0] * 9] * 4))
+        self.config.write_text(json.dumps(dict(schema_version=1, contrast_threshold=12,
+            fast_pass_max=0, fast_fail_min=1, precise_pass_max=0, precise_fail_min=1, budget_us=1_000_000)),
+            encoding='utf-8')
+        output = self.root / 'selective'
+        self.run_cli('--algorithm', 'selective', '--image', self.image, '--output', output)
+        row, = self.results(output)
+        self.assertEqual(row['decision'], 'REVIEW')
+        self.assertEqual(row['reason'], 'precise_uncertain')
+        self.assertEqual(row['fast_outcome'], 'REVIEW')
+        self.assertEqual(row['precise_outcome'], 'REVIEW')
+        self.assertTrue(row['fast_elapsed_us'] and row['precise_elapsed_us'])
+        fast_ns, precise_ns = (int(row[f'{stage}_elapsed_ns']) for stage in ('fast', 'precise'))
+        self.assertAlmostEqual(float(row['analysis_ms']), (fast_ns + precise_ns) / 1_000_000, places=8)
+        self.assertTrue((output / 'images/000001/overlay.png').is_file())
+        summary = json.loads((output / 'summary.json').read_text())
+        self.assertEqual(summary['REVIEW'], 1)
+        self.assertEqual(summary['algorithm_version'], 'local-contrast-selective-v1')
+
+    def test_test_manifest_requires_matching_freeze_before_creating_output(self):
+        image = self.root / 'images/test/OK/fixture.png'
+        image.parent.mkdir(parents=True)
+        image.write_bytes(png())
+        manifest = self.manifest([dict(self.row('test/OK/fixture.png'), split='test', debug=0)])
+        output = self.root / 'result'
+        args = ('--manifest', manifest, '--evaluation-split', 'test', '--output', output)
+        self.run_cli(*args, code=1)
+        config_hash = hashlib.sha256(self.config.read_bytes()).hexdigest()
+        freeze = dict(schema_version=1, test_manifest_sha256=hashlib.sha256(manifest.read_bytes()).hexdigest(),
+                      executable_sha256=hashlib.sha256(CLI.read_bytes()).hexdigest(),
+                      config_sha256=dict(baseline=config_hash, fast='1' * 64, precise='2' * 64, selective='3' * 64))
+        freeze_path = self.root / 'freeze.json'
+        for key in ('test_manifest_sha256', 'executable_sha256', 'config_sha256'):
+            with self.subTest(key=key):
+                wrong_hash = '0' * 64 if key != 'config_sha256' else freeze[key] | {'baseline': '0' * 64}
+                freeze_path.write_text(json.dumps(freeze | {key: wrong_hash}), encoding='utf-8')
+                self.run_cli(*args, '--freeze', freeze_path, code=1)
+                self.assertFalse(output.exists())
+        freeze_path.write_text(json.dumps(freeze), encoding='utf-8')
+        self.run_cli(*args, '--freeze', freeze_path)
+        self.assertEqual(self.results(output)[0]['decision'], 'FAIL')
+        self.assertEqual(json.loads((output / 'summary.json').read_text())['evaluation_split'], 'test')
 
 
 def run_integration(executable):

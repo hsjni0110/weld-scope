@@ -1,6 +1,6 @@
 ﻿# S10 기록과 장비 통합
 
-**상태**　사용자 결과 검수 대기
+**상태**　사용자가 main에 병합
 
 MFC에서 고른 PNG와 가상 장비 TCP 요청을 같은 기준 검사로 처리한다. 판정과 분석 시도는 MySQL에 저장하고 앱에서 다시 열 수 있다. [로드맵](../ROADMAP.md) · [ADR 0010](../adr/0010-record-device-integration.md) · [PRD F07·F08·F10](https://chatgpt.com/space/page_b35b9c74caac81918226ccdc9e38769e)
 

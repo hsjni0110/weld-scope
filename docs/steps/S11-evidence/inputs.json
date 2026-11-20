@@ -1,0 +1,35 @@
+{
+  "source_archive_sha256": "4d05b87dfb66c515f261186f17f409978b2660add911424c5ec5c7f52274e52a",
+  "s02_manifest_sha256": "0f5f002834e629496e024a7d376065ac75e9bad58b92784afad0dae7f5264fa3",
+  "s02_similar_pairs_sha256": "6fe44cfcaabb46c5dc4517fd43a0c27f7cba1963456d35646a0c78021cd0b325",
+  "cohorts": {
+    "validation": {
+      "KO": 1584,
+      "OK": 6626
+    },
+    "test-primary": {
+      "KO": 1569,
+      "OK": 6535
+    },
+    "test": {
+      "KO": 1769,
+      "OK": 7482
+    }
+  },
+  "excluded": {
+    "validation": {
+      "KO": 184,
+      "OK": 856
+    },
+    "test": {
+      "KO": 200,
+      "OK": 947
+    }
+  },
+  "sha256": {
+    "excluded.json": "461eb40645e132f92f98e76cb7147752cabf3c8a6f60ed8080eb00c5cbbe8e39",
+    "test-primary.json": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "test.json": "1da18f57e30683676e8e3525a7d4b42935fe86868fcb80323cb9db879cb67bfb",
+    "validation.json": "5f577cc652fce8a27b389c633e3799cce31a8aa8268f55a4c8209cf8163e63cc"
+  }
+}

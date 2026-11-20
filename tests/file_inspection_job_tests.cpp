@@ -72,11 +72,13 @@ void check_input(const std::filesystem::path& fixture, const std::filesystem::pa
     const std::atomic_bool cancelled{false};
     const auto result = inspect_file({fixture, config}, cancelled);
     const auto* image = std::get_if<InspectedFile>(&result);
-    check(image && image->decision == BaselineDecision::Fail && image->original.cols == 414
+    check(image && image->outcome == InspectionOutcome::Fail && image->original.cols == 414
           && image->original.rows == 40, "Real PNG inspection mismatch");
     check(image->inputHash == "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3"
           && image->original.type() == CV_8UC4 && !image->overlay.empty(), "Result provenance or buffer mismatch");
     check(image->score == 16047.0 / 16560.0, "Score differs from S04");
+    check(image->attempts.size() == 1 && image->attempts.front().stage == "BASELINE",
+          "Baseline stage was not retained");
     const cv::Mat bgr(1, 2, CV_8UC3, cv::Scalar(100, 100, 100));
     const cv::Mat mask = (cv::Mat_<unsigned char>(1, 2) << 0, 255);
     const auto overlay = make_candidate_overlay(bgr, mask);
@@ -98,6 +100,28 @@ void check_input(const std::filesystem::path& fixture, const std::filesystem::pa
         return;
     }
     throw std::runtime_error("Invalid configuration schema accepted");
+}
+
+void check_selective_cancellation(const std::filesystem::path& fixture, const std::filesystem::path& config)
+{
+    const std::string settings =
+        R"({"schema_version":1,"contrast_threshold":12,"fast_pass_max":0,"fast_fail_min":1,)"
+        R"("precise_pass_max":0,"precise_fail_min":1,"budget_us":1000000})";
+    const std::vector<unsigned char> bytes(settings.begin(), settings.end());
+    std::atomic_bool cancelled{false};
+    InspectionEvidence evidence;
+    bool notified = false;
+    const auto result = inspect_file_with_evidence({fixture, config, InspectionMode::Selective}, cancelled,
+        evidence, &bytes, {}, [&] { notified = true; cancelled = true; });
+    check(notified && std::holds_alternative<InspectionCancelled>(result),
+          "Cancel at the selective stage boundary did not discard the verdict");
+    cancelled = false;
+    const auto completed = inspect_file_with_evidence({fixture, config, InspectionMode::Selective}, cancelled,
+        evidence, &bytes);
+    const auto* image = std::get_if<InspectedFile>(&completed);
+    check(image && image->outcome == InspectionOutcome::Review && image->attempts.size() == 2 &&
+          image->attempts[0].stage == "FAST" && image->attempts[1].stage == "PRECISE",
+          "Selective inspection did not retain both attempted stages");
 }
 
 void check_input_errors(const std::filesystem::path& fixture)
@@ -125,6 +149,7 @@ int wmain(int argc, wchar_t** argv)
         check(argc == 3, "Expected fixture and config paths");
         check_lifecycle();
         check_input(argv[1], argv[2]);
+        check_selective_cancellation(argv[1], argv[2]);
         check_input_errors(argv[1]);
         std::cout << "File inspection job checks passed\n";
     } catch (const std::exception& error) {
