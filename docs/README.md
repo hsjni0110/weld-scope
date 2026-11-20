@@ -22,6 +22,8 @@
 
 [S08 선택적 정밀 분석](steps/S08-selective-inspection-policy.md)에 정밀 호출 횟수, 시간 예산과 최종 판정의 샘플 시연이 있다.
 
+[S09 파일 검사 통합](steps/S09-file-inspection-integration.md)에 실제 PNG의 MFC 검사, 후보 표시, 취소와 오류 복구의 시연 절차가 있다.
+
 이 폴더의 진행 단계는 ROADMAP.md가 기준이다. PRD에는 단계 구분만 요약하고 상태를 중복 기록하지 않는다. 소프트웨어 버전, 실행 명령, 빌드 옵션은 실제 구성 파일과 각 단계의 검증 결과를 기준으로 관리한다.
 
 Agent.md와 AGENTS.md를 중복 유지하지 않는다. 에이전트 진입 문서는 프로젝트 루트의 AGENTS.md 하나다.

@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "BaselineInspection.h"
 #include "InspectionFiles.h"
+#include "InspectionInput.h"
 #include "LocalContrastInspection.h"
 #include <algorithm>
 #include <chrono>
@@ -11,7 +12,6 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <limits>
 #include <map>
 #include <optional>
 #include <set>
@@ -45,14 +45,6 @@ std::string format_score(double value)
     number << std::setprecision(17) << value;
     return number.str();
 }
-int integer(const cv::FileNode& node, const char* name)
-{
-    if (!node.isInt()) throw std::invalid_argument(std::string("Missing or noninteger field: ") + name);
-    const auto value = static_cast<std::int64_t>(node);
-    if (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max())
-        throw std::invalid_argument(std::string("Integer field out of range: ") + name);
-    return static_cast<int>(value);
-}
 std::string string_value(const cv::FileNode& node, const char* name)
 {
     if (!node.isString()) throw std::invalid_argument(std::string("Missing or nonstring field: ") + name);
@@ -71,7 +63,7 @@ std::wstring case_key(const std::string& path)
 std::vector<InputRecord> load_manifest(const fs::path& file)
 {
     auto json = read_json(read_bytes(file, 32 * 1024 * 1024));
-    if (integer(json["schema_version"], "schema_version") != 1) throw std::invalid_argument("Unsupported manifest schema");
+    if (read_integer(json["schema_version"], "schema_version") != 1) throw std::invalid_argument("Unsupported manifest schema");
     const auto rootName = string_value(json["root"], "root");
     const auto root = contained_path(fs::absolute(file).parent_path(), rootName);
     const auto rows = json["rows"];
@@ -85,7 +77,7 @@ std::vector<InputRecord> load_manifest(const fs::path& file)
         record.split = string_value(row["split"], "split");
         record.label = string_value(row["label"], "label");
         record.expectedHash = string_value(row["sha256"], "sha256");
-        const int debug = integer(row["debug"], "debug");
+        const int debug = read_integer(row["debug"], "debug");
         record.debug = debug == 1;
         const auto relative = fs::u8path(record.path);
         const auto prefix = "train/" + record.label + "/";
@@ -111,10 +103,7 @@ void export_images(const fs::path& directory, const cv::Mat& image, const cv::Ma
     write_png(directory / "original.png", image);
     write_png(directory / "gray.png", gray);
     write_png(directory / "mask.png", mask);
-    cv::Mat colored = image.clone(), overlay;
-    colored.setTo(cv::Scalar(0, 191, 255), mask);
-    cv::addWeighted(image, 0.55, colored, 0.45, 0, overlay);
-    write_png(directory / "overlay.png", overlay);
+    write_png(directory / "overlay.png", make_candidate_overlay(image, mask));
 }
 }
 
@@ -150,16 +139,22 @@ int wmain(int argc, wchar_t** argv)
                 throw std::invalid_argument("Unknown algorithm; use --help");
             }
         }
-        const auto configBytes = read_bytes(options.at(L"--config"), 1024 * 1024);
+        const auto configBytes = read_bytes(options.at(L"--config"), config_file_limit);
         auto json = read_json(configBytes);
-        if (integer(json["schema_version"], "schema_version") != 1) throw std::invalid_argument("Unsupported config schema");
-        if (!json["fail_ratio"].isInt() && !json["fail_ratio"].isReal()) throw std::invalid_argument("Numeric fail_ratio required");
         const char* thresholdKey = localMode ? "contrast_threshold" : "intensity_threshold";
-        const int threshold = integer(json[thresholdKey], thresholdKey);
-        const double failRatio = static_cast<double>(json["fail_ratio"]);
         std::optional<BaselineConfig> baselineConfig;
-        if (localMode) validate_local_contrast_config(threshold, failRatio);
-        else baselineConfig.emplace(threshold, failRatio);
+        int threshold;
+        double failRatio;
+        if (localMode) {
+            const auto settings = read_inspection_settings(json, thresholdKey);
+            threshold = settings.threshold;
+            failRatio = settings.failRatio;
+            validate_local_contrast_config(threshold, failRatio);
+        } else {
+            baselineConfig = parse_baseline_config(json);
+            threshold = baselineConfig->intensityThreshold();
+            failRatio = baselineConfig->failRatio();
+        }
         const auto analyze = [&](const cv::Mat& image, double& analysisMs) -> AnalysisResult {
             const auto start = Clock::now();
             if (localMode) {
@@ -200,7 +195,7 @@ int wmain(int argc, wchar_t** argv)
             AnalysisResult result{};
             const auto loadStart = Clock::now();
             try {
-                const auto bytes = read_bytes(record.file, 16 * 1024 * 1024);
+                const auto bytes = read_bytes(record.file, image_file_limit);
                 imageHash = sha256(bytes);
                 if (!record.expectedHash.empty() && record.expectedHash != imageHash) throw std::runtime_error("Image SHA-256 mismatch");
                 image = decode_png(bytes);

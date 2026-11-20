@@ -87,6 +87,22 @@ class CliTests(unittest.TestCase):
         self.assertTrue(all(record['error'] for record in records[:2]))
         self.assertEqual(json.loads((output / 'summary.json').read_text())['ERROR'], 2)
 
+    def test_damaged_png_ending_does_not_produce_a_verdict(self):
+        data = png()
+        endings = {'bad-crc': data[:-1] + bytes([data[-1] ^ 1]),
+                   'missing-iend': data[:-12], 'extra-bytes': data + b'extra',
+                   'second-image': data + data}
+        for name, damaged in endings.items():
+            with self.subTest(name=name):
+                self.image.write_bytes(damaged)
+                output = self.root / name
+                self.run_cli('--image', self.image, '--output', output, code=2)
+                row, = self.results(output)
+                self.assertEqual(row['decision'], 'ERROR')
+                self.assertEqual(row['score'], '')
+                self.assertEqual(row['image_sha256'], hashlib.sha256(damaged).hexdigest())
+                self.assertFalse((output / 'images').exists())
+
     def test_rejects_manifest_escape_duplicate_nontrain_unsorted_and_hash_mismatch(self):
         for index, rows in enumerate([
             [self.row('../escape.png')], [self.row('test/OK/a.png')], [self.row(), self.row()],

@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SampleSession.h">
+    <ClInclude Include="FileInspectionJob.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SampleImageView.h">
+    <ClInclude Include="InspectionImageView.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="WeldScope.App.h">
@@ -41,7 +41,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SampleImageView.cpp">
+    <ClCompile Include="InspectionImageView.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInspectionJob.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WeldScope.FileInspection\InspectionInput.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="WeldScope.App.cpp">
