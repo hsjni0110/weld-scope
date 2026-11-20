@@ -1,0 +1,23 @@
+[샘플] 선택적 정밀 분석
+fast_pass_max=0.25 fast_fail_min=0.75 precise_pass_max=0.125 precise_fail_min=0.875 budget_us=10000
+[빠른 정상 경계] fast_score=0.25 fast_us=2000
+  precise_calls=0 outcome=PASS reason=FAST_THRESHOLD
+[빠른 불량 경계] fast_score=0.75 fast_us=2000
+  precise_calls=0 outcome=FAIL reason=FAST_THRESHOLD
+[정밀 정상 경계 및 예산 도달] fast_score=0.5 fast_us=2000
+  state=REANALYZE selection=FAST_UNCERTAIN
+  precise_calls=1 precise_score=0.125 precise_us=8000 outcome=PASS reason=PRECISE_THRESHOLD
+[정밀 불량 경계] fast_score=0.5 fast_us=2000
+  state=REANALYZE selection=FAST_UNCERTAIN
+  precise_calls=1 precise_score=0.875 precise_us=3000 outcome=FAIL reason=PRECISE_THRESHOLD
+[정밀 점수 불확실] fast_score=0.5 fast_us=2000
+  state=REANALYZE selection=FAST_UNCERTAIN
+  precise_calls=1 precise_score=0.5 precise_us=3000 outcome=REVIEW reason=PRECISE_UNCERTAIN
+[정밀 분석 시작 전 예산 소진] fast_score=0.5 fast_us=10000
+  precise_calls=0 outcome=REVIEW reason=BUDGET_EXHAUSTED
+[정밀 분석 1µs 초과] fast_score=0.5 fast_us=2000
+  state=REANALYZE selection=FAST_UNCERTAIN
+  precise_calls=1 precise_score=0.875 precise_us=8001 outcome=REVIEW reason=BUDGET_EXHAUSTED
+[정밀 분석 실패] fast_score=0.5 fast_us=2000
+  state=REANALYZE selection=FAST_UNCERTAIN
+  precise_calls=1 precise_score=- precise_us=3000 outcome=ERROR reason=PRECISE_ANALYSIS_ERROR
