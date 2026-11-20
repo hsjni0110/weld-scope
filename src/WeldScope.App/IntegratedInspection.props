@@ -13,6 +13,11 @@
       <AdditionalDependencies>libmysql.lib;ws2_32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(WeldScopeS11Freeze)' != ''">
+    <ClCompile>
+      <PreprocessorDefinitions>WELDSCOPE_S11_DEPLOYED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
@@ -22,5 +27,8 @@
   </ItemGroup>
   <Target Name="CopyS10Runtime" AfterTargets="Build">
     <Copy SourceFiles="@(S10Runtime)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy Condition="'$(WeldScopeS11Freeze)' != ''"
+          SourceFiles="$(WeldScopeS11Freeze);$(WeldScopeS11Selective)"
+          DestinationFiles="$(OutDir)freeze.json;$(OutDir)selective.json" SkipUnchangedFiles="true" />
   </Target>
 </Project>

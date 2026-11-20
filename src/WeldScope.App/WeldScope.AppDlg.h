@@ -77,7 +77,7 @@ private:
     CButton filePicker_, start_, stop_, candidate_;
     CListCtrl history_;
     InspectionImageView image_;
-    std::optional<weldscope::BaselineDecision> verdictValue_;
+    std::optional<weldscope::InspectionOutcome> verdictValue_;
     UINT dpi_ = 96;
     UINT_PTR pollTimer_ = 0;
     int scrollOffset_ = 0;

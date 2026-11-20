@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnalysisPipeline.h"
 #include "InspectionInput.h"
 #include <atomic>
 #include <filesystem>
@@ -15,14 +16,18 @@ namespace weldscope {
 struct FileInspectionRequest {
     std::filesystem::path path;
     std::filesystem::path config;
+    InspectionMode mode = InspectionMode::Baseline;
 };
 
 struct InspectedFile {
     std::filesystem::path path;
     std::string inputHash;
     cv::Mat original, overlay;
-    BaselineDecision decision{};
-    double score{}, loadMs{}, analysisMs{};
+    InspectionOutcome outcome = InspectionOutcome::Error;
+    std::optional<double> score;
+    std::string reason;
+    std::vector<InspectionAttempt> attempts;
+    double loadMs{}, analysisMs{};
 };
 
 struct InspectionCancelled {};
@@ -36,7 +41,7 @@ struct InspectionEvidence {
 };
 FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
     InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig = nullptr,
-    std::string_view expectedSourceHash = {});
+    std::string_view expectedSourceHash = {}, const std::function<void()>& beforePrecise = {});
 
 enum class InspectionJobState { Empty, Ready, Running, Complete, Cancelled, Error, Closing };
 

@@ -301,6 +301,9 @@
     <ClCompile Include="InspectionImageView.cpp" />
     <ClCompile Include="FileInspectionJob.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\WeldScope.Core\LocalContrastInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\WeldScope.Core\SelectiveInspectionPolicy.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\WeldScope.FileInspection\AnalysisPipeline.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\WeldScope.FileInspection\InspectionInput.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
   </ItemGroup>
   <ItemGroup>

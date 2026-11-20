@@ -45,6 +45,9 @@ public:
     // The callback represents the same input. It returns a missing score for an expected analysis failure.
     PolicyResult evaluate(AnalysisMeasurement fast, const std::function<AnalysisMeasurement()>& analyzePrecise) const;
 
+    // The observation and band have already passed policy validation.
+    static InspectionOutcome classify_score(double score, ScoreBand band);
+
 private:
     ScoreBand fast_;
     ScoreBand precise_;

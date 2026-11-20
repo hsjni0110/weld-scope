@@ -19,13 +19,13 @@ bool valid_measurement(const AnalysisMeasurement& measurement)
         && (!measurement.score || (0 <= *measurement.score && *measurement.score <= 1));
 }
 
-Outcome classify(double score, ScoreBand band)
+}
+
+InspectionOutcome SelectiveInspectionPolicy::classify_score(double score, ScoreBand band)
 {
     if (score <= band.passMax) return Outcome::Pass;
     if (score >= band.failMin) return Outcome::Fail;
     return Outcome::Review;
-}
-
 }
 
 SelectiveInspectionPolicy::SelectiveInspectionPolicy(ScoreBand fast, ScoreBand precise,
@@ -43,7 +43,7 @@ PolicyResult SelectiveInspectionPolicy::evaluate(AnalysisMeasurement fast,
     if (!fast.score) return {Outcome::Error, Reason::FastAnalysisError, std::nullopt};
     if (fast.elapsed > budget_) return {Outcome::Review, Reason::BudgetExhausted, std::nullopt};
 
-    const auto fastOutcome = classify(*fast.score, fast_);
+    const auto fastOutcome = classify_score(*fast.score, fast_);
     if (fastOutcome != Outcome::Review) return {fastOutcome, Reason::FastThreshold, std::nullopt};
 
     const auto remaining = budget_ - fast.elapsed;
@@ -55,7 +55,7 @@ PolicyResult SelectiveInspectionPolicy::evaluate(AnalysisMeasurement fast,
     if (!precise.score) return {Outcome::Error, Reason::PreciseAnalysisError, precise};
     if (precise.elapsed > remaining) return {Outcome::Review, Reason::BudgetExhausted, precise};
 
-    const auto preciseOutcome = classify(*precise.score, precise_);
+    const auto preciseOutcome = classify_score(*precise.score, precise_);
     const auto reason = preciseOutcome == Outcome::Review ? Reason::PreciseUncertain : Reason::PreciseThreshold;
     return {preciseOutcome, reason, precise};
 }

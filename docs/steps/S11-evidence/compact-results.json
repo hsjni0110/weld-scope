@@ -1,0 +1,1711 @@
+{
+  "freeze_sha256": "f4e5808cff3e9e6021e7a26e92ea8c8fb870e1457d7bb570343c386c2c7e0383",
+  "input_sha256": "26c431a02a1b853ab87430c04294d0f2bc1171020fc1bf47fc53b99c1df78e3e",
+  "report_sha256": "aafdfd53abf815304a84699266d9216d51786e212c29ecd3d8cf12827cd59ded",
+  "validation": {
+    "constraints": {
+      "ko_leak_max_count": 762,
+      "automatic_min_percent": 90,
+      "precise_max_percent": 25
+    },
+    "budget_us": 132,
+    "live_candidates": [
+      {
+        "rank": 1,
+        "calibration": {
+          "fast_pass_max": 0.2657745480326125,
+          "fast_fail_min": 0.3083329049503933,
+          "precise_pass_max": 0.3742306663098742,
+          "precise_fail_min": 0.7974307640974307,
+          "eligible": true,
+          "precise_count": 817,
+          "automatic": 7392,
+          "deficits": {
+            "ko_excess": 0,
+            "automatic_shortfall": 0,
+            "precise_excess": 0
+          },
+          "counts": [
+            [
+              4990,
+              1030,
+              606,
+              0
+            ],
+            [
+              762,
+              610,
+              212,
+              0
+            ]
+          ]
+        },
+        "constraints": {
+          "ko_leak": true,
+          "automatic": false,
+          "precise": true
+        },
+        "metrics": {
+          "ko_leak": {
+            "count": 740,
+            "denominator": 1584,
+            "rate": 0.4671717171717172
+          },
+          "automatic": {
+            "count": 7294,
+            "denominator": 8210,
+            "rate": 0.8884287454323995
+          },
+          "precise": {
+            "count": 815,
+            "denominator": 8210,
+            "rate": 0.09926918392204628
+          },
+          "ok_reject": {
+            "count": 1011,
+            "denominator": 6626,
+            "rate": 0.15258074252942952
+          },
+          "review": {
+            "count": 916,
+            "denominator": 8210,
+            "rate": 0.11157125456760049
+          },
+          "error": {
+            "count": 0,
+            "denominator": 8210,
+            "rate": 0.0
+          }
+        }
+      },
+      {
+        "rank": 2,
+        "calibration": {
+          "fast_pass_max": 0.2657745480326125,
+          "fast_fail_min": 0.3083329049503933,
+          "precise_pass_max": 0.3742306663098742,
+          "precise_fail_min": 1,
+          "eligible": true,
+          "precise_count": 817,
+          "automatic": 7392,
+          "deficits": {
+            "ko_excess": 0,
+            "automatic_shortfall": 0,
+            "precise_excess": 0
+          },
+          "counts": [
+            [
+              4990,
+              1030,
+              606,
+              0
+            ],
+            [
+              762,
+              610,
+              212,
+              0
+            ]
+          ]
+        },
+        "constraints": {
+          "ko_leak": false,
+          "automatic": true,
+          "precise": true
+        },
+        "metrics": {
+          "ko_leak": {
+            "count": 763,
+            "denominator": 1584,
+            "rate": 0.48169191919191917
+          },
+          "automatic": {
+            "count": 7390,
+            "denominator": 8210,
+            "rate": 0.9001218026796589
+          },
+          "precise": {
+            "count": 819,
+            "denominator": 8210,
+            "rate": 0.09975639464068209
+          },
+          "ok_reject": {
+            "count": 1028,
+            "denominator": 6626,
+            "rate": 0.15514639299728342
+          },
+          "review": {
+            "count": 820,
+            "denominator": 8210,
+            "rate": 0.09987819732034105
+          },
+          "error": {
+            "count": 0,
+            "denominator": 8210,
+            "rate": 0.0
+          }
+        }
+      },
+      {
+        "rank": 3,
+        "calibration": {
+          "fast_pass_max": 0.2657745480326125,
+          "fast_fail_min": 0.3083329049503933,
+          "precise_pass_max": 0,
+          "precise_fail_min": 0.5498386386973741,
+          "eligible": true,
+          "precise_count": 817,
+          "automatic": 7389,
+          "deficits": {
+            "ko_excess": 0,
+            "automatic_shortfall": 0,
+            "precise_excess": 0
+          },
+          "counts": [
+            [
+              4980,
+              1036,
+              610,
+              0
+            ],
+            [
+              754,
+              619,
+              211,
+              0
+            ]
+          ]
+        },
+        "constraints": {
+          "ko_leak": true,
+          "automatic": true,
+          "precise": true
+        },
+        "metrics": {
+          "ko_leak": {
+            "count": 754,
+            "denominator": 1584,
+            "rate": 0.476010101010101
+          },
+          "automatic": {
+            "count": 7390,
+            "denominator": 8210,
+            "rate": 0.9001218026796589
+          },
+          "precise": {
+            "count": 819,
+            "denominator": 8210,
+            "rate": 0.09975639464068209
+          },
+          "ok_reject": {
+            "count": 1036,
+            "denominator": 6626,
+            "rate": 0.15635375792333234
+          },
+          "review": {
+            "count": 820,
+            "denominator": 8210,
+            "rate": 0.09987819732034105
+          },
+          "error": {
+            "count": 0,
+            "denominator": 8210,
+            "rate": 0.0
+          }
+        }
+      }
+    ]
+  },
+  "cohorts": {
+    "primary": {
+      "repeat": [
+        {
+          "baseline": {
+            "confusion": {
+              "OK": {
+                "PASS": 1658,
+                "FAIL": 4877,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 750,
+                "FAIL": 819,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 750,
+              "denominator": 1569,
+              "rate": 0.4780114722753346
+            },
+            "ok_reject": {
+              "count": 4877,
+              "denominator": 6535,
+              "rate": 0.7462892119357307
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 5627,
+              "denominator": 8104,
+              "rate": 0.6943484698914116
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.013083,
+                  "p95": 0.02475
+                },
+                "load_ms": {
+                  "p50": 3.973917,
+                  "p95": 6.993708
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.013083,
+                  "p95": 0.015459
+                },
+                "load_ms": {
+                  "p50": 3.986125,
+                  "p95": 4.775083
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.013375,
+                  "p95": 0.028375
+                },
+                "load_ms": {
+                  "p50": 3.976625,
+                  "p95": 7.985041
+                }
+              }
+            }
+          },
+          "fast": {
+            "confusion": {
+              "OK": {
+                "PASS": 4886,
+                "FAIL": 1649,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 768,
+                "FAIL": 801,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 768,
+              "denominator": 1569,
+              "rate": 0.4894837476099426
+            },
+            "ok_reject": {
+              "count": 1649,
+              "denominator": 6535,
+              "rate": 0.2523335883703137
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2417,
+              "denominator": 8104,
+              "rate": 0.29824777887462983
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.027708,
+                  "p95": 0.047167
+                },
+                "load_ms": {
+                  "p50": 0.362292,
+                  "p95": 0.54575
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.028125,
+                  "p95": 0.034166
+                },
+                "load_ms": {
+                  "p50": 0.3765,
+                  "p95": 0.517708
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.029458,
+                  "p95": 0.044708
+                },
+                "load_ms": {
+                  "p50": 0.373625,
+                  "p95": 0.797458
+                }
+              }
+            }
+          },
+          "precise": {
+            "confusion": {
+              "OK": {
+                "PASS": 5152,
+                "FAIL": 1383,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 760,
+                "FAIL": 809,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 760,
+              "denominator": 1569,
+              "rate": 0.4843849585723391
+            },
+            "ok_reject": {
+              "count": 1383,
+              "denominator": 6535,
+              "rate": 0.21162968630451415
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2143,
+              "denominator": 8104,
+              "rate": 0.26443731490621913
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.058541,
+                  "p95": 0.125833
+                },
+                "load_ms": {
+                  "p50": 0.364167,
+                  "p95": 0.501041
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.058459,
+                  "p95": 0.089
+                },
+                "load_ms": {
+                  "p50": 0.377042,
+                  "p95": 0.546542
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.059375,
+                  "p95": 0.078084
+                },
+                "load_ms": {
+                  "p50": 0.388041,
+                  "p95": 0.509542
+                }
+              }
+            }
+          },
+          "selective": {
+            "confusion": {
+              "OK": {
+                "PASS": 4866,
+                "FAIL": 1058,
+                "REVIEW": 611,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 754,
+                "FAIL": 609,
+                "REVIEW": 206,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 754,
+              "denominator": 1569,
+              "rate": 0.4805608667941364
+            },
+            "ok_reject": {
+              "count": 1058,
+              "denominator": 6535,
+              "rate": 0.1618974751338944
+            },
+            "automatic": {
+              "count": 7287,
+              "denominator": 8104,
+              "rate": 0.8991855873642646
+            },
+            "automatic_error": {
+              "count": 1812,
+              "denominator": 7287,
+              "rate": 0.2486620008233841
+            },
+            "review": {
+              "count": 817,
+              "denominator": 8104,
+              "rate": 0.10081441263573544
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 812,
+              "denominator": 8104,
+              "rate": 0.10019743336623889
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.029459,
+                  "p95": 0.0905
+                },
+                "load_ms": {
+                  "p50": 0.368875,
+                  "p95": 0.515792
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.028583,
+                  "p95": 0.112459
+                },
+                "load_ms": {
+                  "p50": 0.374708,
+                  "p95": 0.979375
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.029458,
+                  "p95": 0.10325
+                },
+                "load_ms": {
+                  "p50": 0.356459,
+                  "p95": 0.470542
+                }
+              }
+            }
+          }
+        },
+        {
+          "baseline": {
+            "confusion": {
+              "OK": {
+                "PASS": 1658,
+                "FAIL": 4877,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 750,
+                "FAIL": 819,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 750,
+              "denominator": 1569,
+              "rate": 0.4780114722753346
+            },
+            "ok_reject": {
+              "count": 4877,
+              "denominator": 6535,
+              "rate": 0.7462892119357307
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 5627,
+              "denominator": 8104,
+              "rate": 0.6943484698914116
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.01125,
+                  "p95": 0.018125
+                },
+                "load_ms": {
+                  "p50": 0.391417,
+                  "p95": 0.836333
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.01125,
+                  "p95": 0.024
+                },
+                "load_ms": {
+                  "p50": 0.403542,
+                  "p95": 0.906584
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.011875,
+                  "p95": 0.021875
+                },
+                "load_ms": {
+                  "p50": 0.39875,
+                  "p95": 0.703084
+                }
+              }
+            }
+          },
+          "fast": {
+            "confusion": {
+              "OK": {
+                "PASS": 4886,
+                "FAIL": 1649,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 768,
+                "FAIL": 801,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 768,
+              "denominator": 1569,
+              "rate": 0.4894837476099426
+            },
+            "ok_reject": {
+              "count": 1649,
+              "denominator": 6535,
+              "rate": 0.2523335883703137
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2417,
+              "denominator": 8104,
+              "rate": 0.29824777887462983
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.027916,
+                  "p95": 0.033375
+                },
+                "load_ms": {
+                  "p50": 0.358584,
+                  "p95": 0.531875
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.027667,
+                  "p95": 0.032167
+                },
+                "load_ms": {
+                  "p50": 0.35325,
+                  "p95": 0.498792
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.029125,
+                  "p95": 0.037208
+                },
+                "load_ms": {
+                  "p50": 0.367292,
+                  "p95": 0.493459
+                }
+              }
+            }
+          },
+          "precise": {
+            "confusion": {
+              "OK": {
+                "PASS": 5152,
+                "FAIL": 1383,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 760,
+                "FAIL": 809,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 760,
+              "denominator": 1569,
+              "rate": 0.4843849585723391
+            },
+            "ok_reject": {
+              "count": 1383,
+              "denominator": 6535,
+              "rate": 0.21162968630451415
+            },
+            "automatic": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2143,
+              "denominator": 8104,
+              "rate": 0.26443731490621913
+            },
+            "review": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 8104,
+              "denominator": 8104,
+              "rate": 1.0
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.057333,
+                  "p95": 0.069667
+                },
+                "load_ms": {
+                  "p50": 0.357333,
+                  "p95": 0.417291
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.058292,
+                  "p95": 0.076625
+                },
+                "load_ms": {
+                  "p50": 0.358208,
+                  "p95": 0.534333
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.060333,
+                  "p95": 0.148959
+                },
+                "load_ms": {
+                  "p50": 0.364917,
+                  "p95": 0.635208
+                }
+              }
+            }
+          },
+          "selective": {
+            "confusion": {
+              "OK": {
+                "PASS": 4836,
+                "FAIL": 1052,
+                "REVIEW": 647,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 752,
+                "FAIL": 613,
+                "REVIEW": 204,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 752,
+              "denominator": 1569,
+              "rate": 0.4792861695347355
+            },
+            "ok_reject": {
+              "count": 1052,
+              "denominator": 6535,
+              "rate": 0.16097934200459066
+            },
+            "automatic": {
+              "count": 7253,
+              "denominator": 8104,
+              "rate": 0.894990128331688
+            },
+            "automatic_error": {
+              "count": 1804,
+              "denominator": 7253,
+              "rate": 0.2487246656555908
+            },
+            "review": {
+              "count": 851,
+              "denominator": 8104,
+              "rate": 0.10500987166831194
+            },
+            "error": {
+              "count": 0,
+              "denominator": 8104,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 808,
+              "denominator": 8104,
+              "rate": 0.09970384995064166
+            },
+            "representative_timing": {
+              "404x35": {
+                "n": 38,
+                "analysis_ms": {
+                  "p50": 0.029667,
+                  "p95": 0.14125
+                },
+                "load_ms": {
+                  "p50": 0.378458,
+                  "p95": 1.113167
+                }
+              },
+              "405x35": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.02925,
+                  "p95": 0.089542
+                },
+                "load_ms": {
+                  "p50": 0.3775,
+                  "p95": 0.629083
+                }
+              },
+              "406x36": {
+                "n": 36,
+                "analysis_ms": {
+                  "p50": 0.030083,
+                  "p95": 0.161375
+                },
+                "load_ms": {
+                  "p50": 0.381625,
+                  "p95": 2.546916
+                }
+              }
+            }
+          }
+        }
+      ],
+      "repeated_decision_changes": {
+        "baseline": [],
+        "fast": [],
+        "precise": [],
+        "selective": [
+          {
+            "from": "FAIL",
+            "to": "REVIEW",
+            "first_reason": "fast_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 7
+          },
+          {
+            "from": "FAIL",
+            "to": "REVIEW",
+            "first_reason": "precise_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 2
+          },
+          {
+            "from": "PASS",
+            "to": "REVIEW",
+            "first_reason": "fast_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 44
+          },
+          {
+            "from": "REVIEW",
+            "to": "FAIL",
+            "first_reason": "budget_exhausted",
+            "second_reason": "fast_threshold",
+            "n": 6
+          },
+          {
+            "from": "REVIEW",
+            "to": "FAIL",
+            "first_reason": "budget_exhausted",
+            "second_reason": "precise_threshold",
+            "n": 1
+          },
+          {
+            "from": "REVIEW",
+            "to": "PASS",
+            "first_reason": "budget_exhausted",
+            "second_reason": "fast_threshold",
+            "n": 12
+          }
+        ]
+      }
+    },
+    "official": {
+      "repeat": [
+        {
+          "baseline": {
+            "confusion": {
+              "OK": {
+                "PASS": 1944,
+                "FAIL": 5538,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 929,
+                "FAIL": 840,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 929,
+              "denominator": 1769,
+              "rate": 0.5251554550593556
+            },
+            "ok_reject": {
+              "count": 5538,
+              "denominator": 7482,
+              "rate": 0.7401764234161988
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 6467,
+              "denominator": 9251,
+              "rate": 0.6990595611285266
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.012458,
+                  "p95": 0.016208
+                },
+                "load_ms": {
+                  "p50": 3.991541,
+                  "p95": 5.234458
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.013083,
+                  "p95": 0.023625
+                },
+                "load_ms": {
+                  "p50": 3.973917,
+                  "p95": 5.246416
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.013125,
+                  "p95": 0.015459
+                },
+                "load_ms": {
+                  "p50": 3.986125,
+                  "p95": 4.775083
+                }
+              }
+            }
+          },
+          "fast": {
+            "confusion": {
+              "OK": {
+                "PASS": 5771,
+                "FAIL": 1711,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 943,
+                "FAIL": 826,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 943,
+              "denominator": 1769,
+              "rate": 0.5330695308083663
+            },
+            "ok_reject": {
+              "count": 1711,
+              "denominator": 7482,
+              "rate": 0.22868217054263565
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2654,
+              "denominator": 9251,
+              "rate": 0.2868879040103773
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.026792,
+                  "p95": 0.034375
+                },
+                "load_ms": {
+                  "p50": 0.332333,
+                  "p95": 0.831042
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.027708,
+                  "p95": 0.036375
+                },
+                "load_ms": {
+                  "p50": 0.36175,
+                  "p95": 0.444458
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.028167,
+                  "p95": 0.034166
+                },
+                "load_ms": {
+                  "p50": 0.3765,
+                  "p95": 0.517708
+                }
+              }
+            }
+          },
+          "precise": {
+            "confusion": {
+              "OK": {
+                "PASS": 6054,
+                "FAIL": 1428,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 938,
+                "FAIL": 831,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 938,
+              "denominator": 1769,
+              "rate": 0.5302430751837196
+            },
+            "ok_reject": {
+              "count": 1428,
+              "denominator": 7482,
+              "rate": 0.1908580593424218
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2366,
+              "denominator": 9251,
+              "rate": 0.255756134471949
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.055291,
+                  "p95": 0.062209
+                },
+                "load_ms": {
+                  "p50": 0.340042,
+                  "p95": 0.415291
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.058541,
+                  "p95": 0.108084
+                },
+                "load_ms": {
+                  "p50": 0.359041,
+                  "p95": 0.491666
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.05825,
+                  "p95": 0.086791
+                },
+                "load_ms": {
+                  "p50": 0.370208,
+                  "p95": 0.532125
+                }
+              }
+            }
+          },
+          "selective": {
+            "confusion": {
+              "OK": {
+                "PASS": 5745,
+                "FAIL": 1082,
+                "REVIEW": 655,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 927,
+                "FAIL": 624,
+                "REVIEW": 218,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 927,
+              "denominator": 1769,
+              "rate": 0.5240248728094969
+            },
+            "ok_reject": {
+              "count": 1082,
+              "denominator": 7482,
+              "rate": 0.14461373964180702
+            },
+            "automatic": {
+              "count": 8378,
+              "denominator": 9251,
+              "rate": 0.9056318235866393
+            },
+            "automatic_error": {
+              "count": 2009,
+              "denominator": 8378,
+              "rate": 0.2397947004058248
+            },
+            "review": {
+              "count": 873,
+              "denominator": 9251,
+              "rate": 0.09436817641336072
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 863,
+              "denominator": 9251,
+              "rate": 0.0932872121932764
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.027791,
+                  "p95": 0.082876
+                },
+                "load_ms": {
+                  "p50": 0.333167,
+                  "p95": 0.484583
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.029458,
+                  "p95": 0.087501
+                },
+                "load_ms": {
+                  "p50": 0.362834,
+                  "p95": 0.495833
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.028583,
+                  "p95": 0.090166
+                },
+                "load_ms": {
+                  "p50": 0.366584,
+                  "p95": 0.526833
+                }
+              }
+            }
+          }
+        },
+        {
+          "baseline": {
+            "confusion": {
+              "OK": {
+                "PASS": 1944,
+                "FAIL": 5538,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 929,
+                "FAIL": 840,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 929,
+              "denominator": 1769,
+              "rate": 0.5251554550593556
+            },
+            "ok_reject": {
+              "count": 5538,
+              "denominator": 7482,
+              "rate": 0.7401764234161988
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 6467,
+              "denominator": 9251,
+              "rate": 0.6990595611285266
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.010792,
+                  "p95": 0.013667
+                },
+                "load_ms": {
+                  "p50": 0.37075,
+                  "p95": 0.753084
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.01125,
+                  "p95": 0.015458
+                },
+                "load_ms": {
+                  "p50": 0.388792,
+                  "p95": 0.738291
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.011292,
+                  "p95": 0.018334
+                },
+                "load_ms": {
+                  "p50": 0.398958,
+                  "p95": 0.669958
+                }
+              }
+            }
+          },
+          "fast": {
+            "confusion": {
+              "OK": {
+                "PASS": 5771,
+                "FAIL": 1711,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 943,
+                "FAIL": 826,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 943,
+              "denominator": 1769,
+              "rate": 0.5330695308083663
+            },
+            "ok_reject": {
+              "count": 1711,
+              "denominator": 7482,
+              "rate": 0.22868217054263565
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2654,
+              "denominator": 9251,
+              "rate": 0.2868879040103773
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.026333,
+                  "p95": 0.034834
+                },
+                "load_ms": {
+                  "p50": 0.307416,
+                  "p95": 0.40125
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.027959,
+                  "p95": 0.032459
+                },
+                "load_ms": {
+                  "p50": 0.358584,
+                  "p95": 0.52375
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.02775,
+                  "p95": 0.032167
+                },
+                "load_ms": {
+                  "p50": 0.35325,
+                  "p95": 0.498792
+                }
+              }
+            }
+          },
+          "precise": {
+            "confusion": {
+              "OK": {
+                "PASS": 6054,
+                "FAIL": 1428,
+                "REVIEW": 0,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 938,
+                "FAIL": 831,
+                "REVIEW": 0,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 938,
+              "denominator": 1769,
+              "rate": 0.5302430751837196
+            },
+            "ok_reject": {
+              "count": 1428,
+              "denominator": 7482,
+              "rate": 0.1908580593424218
+            },
+            "automatic": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "automatic_error": {
+              "count": 2366,
+              "denominator": 9251,
+              "rate": 0.255756134471949
+            },
+            "review": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 9251,
+              "denominator": 9251,
+              "rate": 1.0
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.055708,
+                  "p95": 0.068959
+                },
+                "load_ms": {
+                  "p50": 0.325041,
+                  "p95": 0.563666
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.057333,
+                  "p95": 0.067833
+                },
+                "load_ms": {
+                  "p50": 0.355042,
+                  "p95": 0.398417
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.05825,
+                  "p95": 0.0695
+                },
+                "load_ms": {
+                  "p50": 0.353,
+                  "p95": 0.42775
+                }
+              }
+            }
+          },
+          "selective": {
+            "confusion": {
+              "OK": {
+                "PASS": 5715,
+                "FAIL": 1075,
+                "REVIEW": 692,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 927,
+                "FAIL": 628,
+                "REVIEW": 214,
+                "ERROR": 0
+              }
+            },
+            "ko_leak": {
+              "count": 927,
+              "denominator": 1769,
+              "rate": 0.5240248728094969
+            },
+            "ok_reject": {
+              "count": 1075,
+              "denominator": 7482,
+              "rate": 0.14367816091954022
+            },
+            "automatic": {
+              "count": 8345,
+              "denominator": 9251,
+              "rate": 0.902064641660361
+            },
+            "automatic_error": {
+              "count": 2002,
+              "denominator": 8345,
+              "rate": 0.23990413421210305
+            },
+            "review": {
+              "count": 906,
+              "denominator": 9251,
+              "rate": 0.09793535833963896
+            },
+            "error": {
+              "count": 0,
+              "denominator": 9251,
+              "rate": 0.0
+            },
+            "precise": {
+              "count": 858,
+              "denominator": 9251,
+              "rate": 0.09274673008323424
+            },
+            "representative_timing": {
+              "404x33": {
+                "n": 42,
+                "analysis_ms": {
+                  "p50": 0.027834,
+                  "p95": 0.092916
+                },
+                "load_ms": {
+                  "p50": 0.341333,
+                  "p95": 0.697667
+                }
+              },
+              "404x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.029667,
+                  "p95": 0.10974999999999999
+                },
+                "load_ms": {
+                  "p50": 0.37725,
+                  "p95": 0.836667
+                }
+              },
+              "405x35": {
+                "n": 40,
+                "analysis_ms": {
+                  "p50": 0.02925,
+                  "p95": 0.08579200000000001
+                },
+                "load_ms": {
+                  "p50": 0.375,
+                  "p95": 0.516125
+                }
+              }
+            }
+          }
+        }
+      ],
+      "repeated_decision_changes": {
+        "baseline": [],
+        "fast": [],
+        "precise": [],
+        "selective": [
+          {
+            "from": "FAIL",
+            "to": "REVIEW",
+            "first_reason": "fast_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 8
+          },
+          {
+            "from": "FAIL",
+            "to": "REVIEW",
+            "first_reason": "precise_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 2
+          },
+          {
+            "from": "PASS",
+            "to": "REVIEW",
+            "first_reason": "fast_threshold",
+            "second_reason": "budget_exhausted",
+            "n": 47
+          },
+          {
+            "from": "REVIEW",
+            "to": "FAIL",
+            "first_reason": "budget_exhausted",
+            "second_reason": "fast_threshold",
+            "n": 6
+          },
+          {
+            "from": "REVIEW",
+            "to": "FAIL",
+            "first_reason": "budget_exhausted",
+            "second_reason": "precise_threshold",
+            "n": 1
+          },
+          {
+            "from": "REVIEW",
+            "to": "PASS",
+            "first_reason": "budget_exhausted",
+            "second_reason": "fast_threshold",
+            "n": 17
+          }
+        ]
+      }
+    }
+  }
+}

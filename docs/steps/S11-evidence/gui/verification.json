@@ -1,0 +1,116 @@
+{
+  "review_fixture": false,
+  "config_sha256": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93",
+  "source_sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+  "file_inspection_id": "cc119725-3b14-4162-b373-cc20bd68cba7",
+  "tcp_inspection_id": "4c37b171-f5fb-4254-8a9d-1f8babd44dd5",
+  "baseline_inspection_id": "649fba67-67d7-4693-b0d8-6d649cd5738d",
+  "pinned_registration": true,
+  "decision": "PASS",
+  "tcp_decision": "PASS",
+  "stages": [
+    [
+      "FAST",
+      "0.11570048309178745",
+      "PASS",
+      "fast_threshold"
+    ]
+  ],
+  "replay_after_restart": true,
+  "two_stage": {
+    "inspection_id": "7eb24bd8-bf63-40f5-9fb2-7f7a130a295a",
+    "source_name": "image_10513.png",
+    "source_sha256": "52a6a7759bd37831f47efaa2726233645330e63278cc4fafc4b94bf8d1b80f53",
+    "reached_precise": true,
+    "observations": [
+      {
+        "inspection_id": "2c95f2c1-1e2e-410c-ad15-667ae241419a",
+        "decision": "REVIEW",
+        "stages": [
+          [
+            "FAST",
+            "0.292036445391078",
+            "REVIEW",
+            "fast_uncertain",
+            "0.15"
+          ]
+        ]
+      },
+      {
+        "inspection_id": "7eb24bd8-bf63-40f5-9fb2-7f7a130a295a",
+        "decision": "REVIEW",
+        "stages": [
+          [
+            "FAST",
+            "0.292036445391078",
+            "REVIEW",
+            "fast_uncertain",
+            "0.051"
+          ],
+          [
+            "PRECISE",
+            "0.4441486214649154",
+            "REVIEW",
+            "precise_uncertain",
+            "0.154"
+          ]
+        ]
+      }
+    ]
+  },
+  "timing": {
+    "tcp_client_polling_inclusive_ms": 91.00604099967313,
+    "db_save_including_connection_and_commit_ms": 6.169417,
+    "db_timed_inspection_id": "d553bff1-e93e-4371-bac3-46cfd11b539f"
+  },
+  "paired_observations": [
+    {
+      "file_inspection_id": "0182db49-9e66-4edb-948f-8700e345bcb6",
+      "file_decision": "REVIEW",
+      "file_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "0.187"
+        ]
+      ],
+      "tcp_inspection_id": "e0bae4c7-73dd-44c2-84d2-44c8514e7048",
+      "tcp_decision": "PASS",
+      "tcp_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "0.073"
+        ]
+      ]
+    },
+    {
+      "file_inspection_id": "cc119725-3b14-4162-b373-cc20bd68cba7",
+      "file_decision": "PASS",
+      "file_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "0.11"
+        ]
+      ],
+      "tcp_inspection_id": "4c37b171-f5fb-4254-8a9d-1f8babd44dd5",
+      "tcp_decision": "PASS",
+      "tcp_attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "0.066"
+        ]
+      ]
+    }
+  ]
+}

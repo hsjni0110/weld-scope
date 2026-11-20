@@ -1,6 +1,7 @@
 #include "IntegratedInspection.h"
 
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 
 using namespace weldscope;
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
     std::condition_variable verdictChanged;
     bool holdVerdict = false;
     bool reachedVerdict = false;
+    cv::setNumThreads(1);
     IntegratedInspection inspection(argv[1], argv[2], 0, [&] {
         std::unique_lock lock(verdictMutex);
         reachedVerdict = true;
@@ -66,6 +68,10 @@ int main(int argc, char** argv) {
         }
         if (command == "retry") inspection.Retry();
         if (command == "cancel") inspection.CancelInspection();
+        if (command == "save_ms") {
+            const auto value = inspection.Snapshot().saveMs;
+            std::cout << std::setprecision(17) << value.value_or(-1.0) << std::endl;
+        }
         if (command == "state") {
             snapshot = inspection.Snapshot();
             std::cout << StateName(snapshot.state) << ' ' << snapshot.record.inspectionId << ' '

@@ -15,6 +15,9 @@ struct IntegrationSnapshot {
     IntegrationState state = IntegrationState::Connecting;
     unsigned short port = 0;
     bool listenerFailed = false;
+    std::optional<InspectionMode> fileMode = InspectionMode::Baseline;
+    bool preciseRunning = false;
+    std::optional<double> saveMs;
     std::uint64_t revision = 0;
     InspectionRecord record;
     std::optional<FileInspectionResult> result;
@@ -41,7 +44,13 @@ private:
     struct Job {
         FileInspectionRequest input;
         std::string sourceId, configId;
+        std::string configSha256;
+        std::vector<unsigned char> fixedConfig;
         bool commitUnconfirmed = false;
+    };
+    struct RegisteredConfig {
+        std::string sha256;
+        std::vector<unsigned char> bytes;
     };
     struct RequestLookup {
         std::string requestId;
@@ -66,7 +75,7 @@ private:
     Action action_ = Action::Connect;
     std::optional<Job> job_;
     IntegrationSnapshot snapshot_;
-    std::vector<unsigned char> deviceConfig_;
+    RegisteredConfig baselineConfig_, selectiveConfig_;
     std::thread worker_, listener_;
 };
 }

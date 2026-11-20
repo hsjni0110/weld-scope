@@ -2,5 +2,6 @@
 /docs/steps/S02-evidence/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 /docs/steps/S03-evidence/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 /docs/steps/S04-evidence/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/docs/steps/S11-evidence/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 /config/baseline.json -text
 *.png binary

@@ -9,9 +9,11 @@
 namespace weldscope {
 namespace {
 constexpr auto sourceId = "weld-01";
-constexpr auto configId = "baseline-v1";
+constexpr auto baselineId = "baseline-v1";
+constexpr auto selectiveId = "selective-v1";
 constexpr auto sourceHash = "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3";
-constexpr auto configHash = "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2";
+constexpr auto baselineHash = "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2";
+constexpr auto selectiveHash = "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93";
 constexpr auto lookupBudget = std::chrono::milliseconds(150);
 
 std::string NewId() {
@@ -101,11 +103,13 @@ void IntegratedInspection::Begin(Job job, std::string requestId) {
     record.requestId = std::move(requestId);
     record.inputId = job.sourceId.empty() ? record.requestId : job.sourceId;
     record.sourcePath = job.input.path.u8string();
-    record.configSha256 = job.configId.empty() ? "" : configHash;
-    record.algorithmVersion = "global-dark-ratio-v1";
+    record.configSha256 = job.configSha256;
+    record.algorithmVersion = inspection_version(job.input.mode);
     record.datasetVersion = job.sourceId.empty() ? "local-file" : "openzdm-14025630";
     snapshot_.record = std::move(record);
     snapshot_.result.reset();
+    snapshot_.preciseRunning = false;
+    snapshot_.saveMs.reset();
     job_ = std::move(job);
     cancelled_ = false;
     Queue(Action::Inspect, IntegrationState::Inspecting);
@@ -118,8 +122,13 @@ bool IntegratedInspection::CanStart() const {
 
 bool IntegratedInspection::StartFile(const std::filesystem::path& path) {
     const std::lock_guard lock(mutex_);
-    if (!CanStart() || path.empty()) return false;
-    Begin({{path, config_}, {}, {}}, "file-" + NewId());
+    if (!CanStart() || path.empty() || !snapshot_.fileMode) return false;
+    const auto mode = *snapshot_.fileMode;
+    if (mode == InspectionMode::Selective) {
+        Begin({{path, {}, mode}, {}, {}, selectiveConfig_.sha256, selectiveConfig_.bytes}, "file-" + NewId());
+    } else {
+        Begin({{path, config_, mode}, {}, {}, {}, {}}, "file-" + NewId());
+    }
     return true;
 }
 
@@ -175,19 +184,43 @@ void IntegratedInspection::Run() {
 
 void IntegratedInspection::Connect() {
     auto state = IntegrationState::Disconnected;
-    std::vector<unsigned char> config;
+    RegisteredConfig baseline{baselineHash, {}}, selective;
+    std::optional<InspectionMode> fileMode = InspectionMode::Baseline;
     try {
         InspectionHistory(HistoryConnectionFromEnvironment()).CheckReady();
         state = IntegrationState::Ready;
     } catch (const std::exception&) {}
     if (state == IntegrationState::Ready) {
         try {
-            config = read_bytes(config_, config_file_limit);
-            if (sha256(config) != configHash) config.clear();
-        } catch (const std::exception&) { config.clear(); }
+            auto bytes = read_bytes(config_, config_file_limit);
+            if (sha256(bytes) == baseline.sha256) baseline.bytes = std::move(bytes);
+        } catch (const std::exception&) {}
+        try {
+            const auto folder = config_.parent_path();
+            const auto settingsPath = folder / L"selective.json";
+            const auto freezePath = folder / L"freeze.json";
+#ifdef WELDSCOPE_S11_DEPLOYED
+            const bool selectiveRequested = true;
+#else
+            const bool selectiveRequested = std::filesystem::exists(settingsPath) || std::filesystem::exists(freezePath);
+#endif
+            if (selectiveRequested) {
+                const auto frozen = read_json(read_bytes(freezePath, config_file_limit));
+                if (read_integer(frozen["schema_version"], "schema_version") != 1)
+                    throw std::invalid_argument("Unsupported selective freeze schema");
+                selective.sha256 = frozen["config_sha256"]["selective"].string();
+                auto bytes = read_bytes(settingsPath, config_file_limit);
+                if (sha256(bytes) != selective.sha256) throw std::invalid_argument("Selective settings hash mismatch");
+                parse_inspection_parameters(read_json(bytes), InspectionMode::Selective);
+                selective.bytes = std::move(bytes);
+                fileMode = InspectionMode::Selective;
+            }
+        } catch (const std::exception&) { fileMode.reset(); }
     }
     const std::lock_guard lock(mutex_);
-    deviceConfig_ = std::move(config);
+    baselineConfig_ = std::move(baseline);
+    selectiveConfig_ = std::move(selective);
+    snapshot_.fileMode = fileMode;
     Queue(Action::Idle, state);
 }
 
@@ -195,9 +228,13 @@ void IntegratedInspection::Inspect() {
     InspectionEvidence evidence;
     FileInspectionResult result = FileInspectionFailure::Analysis;
     try {
-        const auto* fixtureConfig = job_->configId.empty() ? nullptr : &deviceConfig_;
-        result = inspect_file_with_evidence(job_->input, cancelled_, evidence, fixtureConfig,
-            fixtureConfig ? sourceHash : "");
+        const auto* fixedConfig = job_->fixedConfig.empty() ? nullptr : &job_->fixedConfig;
+        result = inspect_file_with_evidence(job_->input, cancelled_, evidence, fixedConfig,
+            job_->sourceId.empty() ? "" : sourceHash, [this] {
+                const std::lock_guard lock(mutex_);
+                snapshot_.preciseRunning = true;
+                ++snapshot_.revision;
+            });
         if (beforeVerdict_) beforeVerdict_();
     } catch (const std::exception&) { result = FileInspectionFailure::Analysis; }
 
@@ -208,9 +245,13 @@ void IntegratedInspection::Inspect() {
     if (job_->sourceId.empty() && !record.sourceSha256.empty()) record.inputId = "file:" + record.sourceSha256;
     if (!evidence.configSha256.empty()) record.configSha256 = std::move(evidence.configSha256);
     if (const auto* inspected = std::get_if<InspectedFile>(&result)) {
-        record.decision = inspected->decision == BaselineDecision::Pass ? "PASS" : "FAIL";
-        record.reason = "dark_pixel_ratio";
-        record.attempts.push_back({"BASELINE", inspected->score, record.decision, record.reason, inspected->analysisMs});
+        record.decision = outcome_name(inspected->outcome);
+        record.reason = inspected->reason;
+        for (const auto& attempt : inspected->attempts) {
+            const auto duration = std::chrono::duration<double, std::milli>(attempt.elapsed).count();
+            record.attempts.push_back({attempt.stage, attempt.score, outcome_name(attempt.outcome),
+                attempt.reason, duration});
+        }
     } else if (const auto* error = std::get_if<FileInspectionFailure>(&result)) {
         record.decision = "ERROR";
         record.reason = FailureReason(*error);
@@ -224,13 +265,16 @@ void IntegratedInspection::Inspect() {
 
 void IntegratedInspection::Save() {
     auto state = job_->commitUnconfirmed ? IntegrationState::CommitUnknown : IntegrationState::Unsaved;
+    const auto start = std::chrono::steady_clock::now();
     try {
         const auto saved = InspectionHistory(HistoryConnectionFromEnvironment()).Save(snapshot_.record);
         state = saved == SaveStatus::Conflict ? IntegrationState::Conflict : IntegrationState::Stored;
     } catch (const CommitOutcomeUnknown&) {
         state = IntegrationState::CommitUnknown;
     } catch (const std::exception&) {}
+    const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
     const std::lock_guard lock(mutex_);
+    snapshot_.saveMs = elapsed.count();
     if (state == IntegrationState::Stored) job_.reset();
     else if (state == IntegrationState::CommitUnknown) job_->commitUnconfirmed = true;
     Queue(Action::Idle, state);
@@ -275,8 +319,9 @@ std::string IntegratedInspection::Respond(const device::Request& request, Reques
             return ErrorFrame(request.requestId, "BUSY");
         const auto existing = lookup.result.get();
         if (existing) {
-            if (existing->record.inputId != request.sourceId || request.configId != configId ||
-                existing->record.configSha256 != configHash)
+            const std::string_view hash = request.configId == baselineId ? baselineHash :
+                request.configId == selectiveId ? selectiveHash : "";
+            if (hash.empty() || existing->record.inputId != request.sourceId || existing->record.configSha256 != hash)
                 return ErrorFrame(request.requestId, "REQUEST_CONFLICT");
             return StoredResponse(existing->record);
         }
@@ -285,9 +330,15 @@ std::string IntegratedInspection::Respond(const device::Request& request, Reques
             return ErrorFrame(request.requestId, "BUSY");
         if (!CanStart()) return ErrorFrame(request.requestId, "DB_UNAVAILABLE");
         if (request.sourceId != sourceId) return ErrorFrame(request.requestId, "UNKNOWN_SOURCE");
-        if (request.configId != configId) return ErrorFrame(request.requestId, "UNKNOWN_CONFIG");
-        if (deviceConfig_.empty()) return ErrorFrame(request.requestId, "CONFIG_UNAVAILABLE");
-        Begin({{deviceImage_, config_}, std::string(request.sourceId), std::string(request.configId)}, std::string(request.requestId));
+        const bool isBaseline = request.configId == baselineId;
+        if (!isBaseline && request.configId != selectiveId) return ErrorFrame(request.requestId, "UNKNOWN_CONFIG");
+        const auto& settings = isBaseline ? baselineConfig_ : selectiveConfig_;
+        const auto expectedHash = isBaseline ? baselineHash : selectiveHash;
+        if (settings.bytes.empty() || settings.sha256 != expectedHash)
+            return ErrorFrame(request.requestId, "CONFIG_UNAVAILABLE");
+        const auto mode = isBaseline ? InspectionMode::Baseline : InspectionMode::Selective;
+        Begin({{deviceImage_, {}, mode}, std::string(request.sourceId), std::string(request.configId),
+            settings.sha256, settings.bytes}, std::string(request.requestId));
         return StatusFrame(request.requestId, snapshot_.record.inspectionId, "IN_PROGRESS");
     } catch (const std::exception&) {
         const std::lock_guard lock(mutex_);

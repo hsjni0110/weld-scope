@@ -21,14 +21,16 @@ FileInspectionResult inspect_file(const FileInspectionRequest& request, const st
 }
 
 FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
-    InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig, std::string_view expectedSourceHash)
+    InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig, std::string_view expectedSourceHash,
+    const std::function<void()>& beforePrecise)
 {
     if (cancelled) return InspectionCancelled{};
     auto failure = FileInspectionFailure::Configuration;
     try {
-        const auto configBytes = fixedConfig ? *fixedConfig : read_bytes(request.config, config_file_limit);
+        const auto loaded = fixedConfig ? std::vector<unsigned char>{} : read_bytes(request.config, config_file_limit);
+        const auto& configBytes = fixedConfig ? *fixedConfig : loaded;
         evidence.configSha256 = sha256(configBytes);
-        const auto config = parse_baseline_config(read_json(configBytes));
+        const auto config = parse_inspection_parameters(read_json(configBytes), request.mode);
         if (cancelled) return InspectionCancelled{};
 
         failure = FileInspectionFailure::Analysis;
@@ -42,23 +44,29 @@ FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& req
         const auto loadMs = elapsed_ms(loadStart);
         if (cancelled) return InspectionCancelled{};
         if (bgr.type() != CV_8UC3) return FileInspectionFailure::UnsupportedFormat;
-        const auto analysisStart = Clock::now();
-        const auto result = inspect_baseline(bgr, config);
-        const auto analysisMs = elapsed_ms(analysisStart);
+        auto result = analyze_image(bgr, config, [&] {
+            if (cancelled) throw InspectionCancelled{};
+            if (beforePrecise) beforePrecise();
+            if (cancelled) throw InspectionCancelled{};
+        });
         if (cancelled) return InspectionCancelled{};
 
         InspectedFile completed;
         completed.path = request.path;
         completed.inputHash = evidence.sourceSha256;
-        completed.decision = result.decision;
+        completed.outcome = result.outcome;
         completed.score = result.score;
+        completed.reason = std::move(result.reason);
+        completed.attempts = std::move(result.attempts);
         completed.loadMs = loadMs;
-        completed.analysisMs = analysisMs;
+        completed.analysisMs = result.analysisMs;
         cv::cvtColor(bgr, completed.original, cv::COLOR_BGR2BGRA);
         if (!cancelled && result.candidatePixels != 0)
             cv::cvtColor(make_candidate_overlay(bgr, result.mask), completed.overlay, cv::COLOR_BGR2BGRA);
         if (cancelled) return InspectionCancelled{};
         return completed;
+    } catch (const InspectionCancelled&) {
+        return InspectionCancelled{};
     } catch (const InspectionInputError& error) {
         if (cancelled) return InspectionCancelled{};
         if (failure != FileInspectionFailure::Configuration) return error.reason();

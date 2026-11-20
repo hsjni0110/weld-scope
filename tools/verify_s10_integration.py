@@ -25,8 +25,8 @@ def wait_until(operation, predicate, seconds=12):
 
 
 @contextmanager
-def host(program, env, file):
-    args = [program, "config/baseline.json", "src/WeldScope.App/res/samples/defect.png", file]
+def host(program, env, file, *, config="config/baseline.json", device_image="src/WeldScope.App/res/samples/defect.png"):
+    args = [program, config, device_image, file]
     with subprocess.Popen(args, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True) as process:
         try:
             port = int(process.stdout.readline())
