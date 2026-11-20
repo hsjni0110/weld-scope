@@ -1,12 +1,12 @@
 # WeldScope
 
-WeldScope는 공개 용접 외관 PNG를 분석하는 C++ 검사 프로그램입니다. Windows MFC에서 원본과 후보 오버레이를 확인하고, 파일 검사와 루프백 TCP 장비 요청을 MySQL 이력으로 저장합니다.
+WeldScope는 공개 용접 외관 PNG를 분석하는 C++ 검사 프로그램입니다. Windows MFC에서 파일이나 폴더를 선택해 검사하고, 원본과 후보 오버레이 및 MySQL 이력을 확인할 수 있습니다. 루프백 TCP 장비 요청도 같은 검사 경로를 사용합니다.
 
-![WeldScope의 실제 MFC 두 단계 분석 화면](docs/steps/S11-evidence/gui/04-frozen-two-stage.png)
+![WeldScope의 실제 MFC 폴더 검사 화면. 검수용 입력 네 장의 판정과 후보 영상.](docs/steps/S13-evidence/04-row-detail.png)
 
 ## 실행과 재현
 
-- **검수용 ZIP** — Windows 11에서 x64 패키지를 풀고 VC++ 런타임과 전용 MySQL을 연결합니다. 파일 선택, 정밀 분석, TCP 재전송과 이력 조회를 시연할 수 있습니다. [실행 안내](docs/steps/S12-run-package.md) · [패키지 생성과 검증](docs/steps/S12-delivery-reproducibility.md)
+- **폴더 검사 ZIP** — Windows 11에서 x64 패키지를 풀고 런처를 더블클릭합니다. 폴더를 한 번 선택해 검사하고 진행률과 판정별 이력을 확인할 수 있습니다. [실행 안내](docs/steps/S13-run-package.md) · [전체 GUI E2E](docs/steps/S13-folder-inspection-monitoring.md)
 - **소스 빌드** — Visual Studio에서 동일한 MFC 앱과 CMake 검사 CLI를 빌드합니다. [S11 빌드와 검사 명령](docs/steps/S11-algorithm-integration-evaluation.md#실행과-검수)
 - **평가 자료** — OPENZDM은 공식 분할을 사용합니다. 원본 취득 절차, 공용 검증 규칙, 설정 및 동결 기록에서 평가를 재현할 수 있습니다. [데이터 취득](docs/steps/S02-data-preparation.md) · [평가 기준](docs/adr/0011-algorithm-integration-evaluation.md) · [의존성과 영상 출처](docs/steps/S12-third-party-notices.md)
 

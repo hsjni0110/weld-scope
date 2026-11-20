@@ -11,6 +11,15 @@
 namespace weldscope {
 enum class IntegrationState { Connecting, Disconnected, Ready, Inspecting, Saving, Stored, Unsaved, CommitUnknown, Conflict };
 
+std::vector<std::filesystem::path> FindInspectionFiles(const std::filesystem::path& root);
+
+struct BatchProgress {
+    std::string batchId;
+    unsigned int totalFiles = 0, savedFiles = 0;
+    bool active = false;
+    bool stopping = false;
+};
+
 struct IntegrationSnapshot {
     IntegrationState state = IntegrationState::Connecting;
     unsigned short port = 0;
@@ -21,6 +30,8 @@ struct IntegrationSnapshot {
     std::uint64_t revision = 0;
     InspectionRecord record;
     std::optional<FileInspectionResult> result;
+    std::optional<BatchProgress> batch;
+    bool batchReady = false;
 };
 
 class IntegratedInspection {
@@ -32,6 +43,7 @@ public:
     IntegratedInspection& operator=(const IntegratedInspection&) = delete;
 
     bool StartFile(const std::filesystem::path& path);
+    bool StartFolder(const std::filesystem::path& root, std::vector<std::filesystem::path> files);
     void CancelInspection();
     void Retry();
     void Pause(bool paused);
@@ -40,7 +52,7 @@ public:
     IntegrationSnapshot Snapshot() const;
 
 private:
-    enum class Action { Idle, Connect, Inspect, Save };
+    enum class Action { Idle, Connect, CreateBatch, Inspect, Save, FinishBatch };
     struct Job {
         FileInspectionRequest input;
         std::string sourceId, configId;
@@ -52,18 +64,29 @@ private:
         std::string sha256;
         std::vector<unsigned char> bytes;
     };
+    struct FolderWork {
+        std::filesystem::path root;
+        std::vector<std::filesystem::path> files;
+        InspectionMode mode;
+        RegisteredConfig config;
+    };
     struct RequestLookup {
         std::string requestId;
         std::future<std::optional<StoredInspection>> result;
     };
 
-    void Run();
-    void Inspect();
-    void Save();
+    void RunWorker();
+    void CreateBatchRecord();
+    void QueueNextBatchStep();
+    void FinishBatchRecord();
+    void MarkBatchActionForRetry(Action action);
+    void AnalyzeCurrentFile();
+    void SaveCurrentInspection();
     void Connect();
-    void Queue(Action action, IntegrationState state);
-    void Begin(Job job, std::string requestId);
-    bool CanStart() const;
+    void SetWorkerAction(Action action, IntegrationState state);
+    void QueueInspection(Job job, std::string requestId);
+    bool HasActiveInspection() const;
+    bool CanStartInspection() const;
     std::string Respond(const device::Request& request, RequestLookup& lookup);
 
     const std::filesystem::path config_, deviceImage_;
@@ -74,6 +97,8 @@ private:
     std::atomic_bool stopListener_{false}, cancelled_{false};
     Action action_ = Action::Connect;
     std::optional<Job> job_;
+    std::optional<FolderWork> folder_;
+    std::optional<Action> folderRetry_;
     IntegrationSnapshot snapshot_;
     RegisteredConfig baselineConfig_, selectiveConfig_;
     std::thread worker_, listener_;

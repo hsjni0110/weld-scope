@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory)][string]$AppDir,
     [Parameter(Mandatory)][string]$Inspect,
     [Parameter(Mandatory)][string]$TwoStageSample,
-    [Parameter(Mandatory)][string]$Output
+    [Parameter(Mandatory)][string]$Output,
+    [switch]$FolderInspection
 )
 
 $ErrorActionPreference = 'Stop'
@@ -67,6 +68,12 @@ $files = [ordered]@{
     'licenses/OpenCV.txt'     = Join-Path $opencv 'LICENSE'
     'licenses/libpng.txt'     = Join-Path $opencv 'etc/licenses/libpng-LICENSE'
     'licenses/zlib.txt'       = Join-Path $opencv 'etc/licenses/zlib-LICENSE'
+}
+if ($FolderInspection) {
+    $files['README.md'] = Join-Path $docs 'S13-run-package.md'
+    $files['db/s13.sql'] = Join-Path $repo 'db/s13/schema.sql'
+    $files['WeldScope-Start.cmd'] = Join-Path $PSScriptRoot 'WeldScope-Start.cmd'
+    $files['Start-WeldScope-Practice.ps1'] = Join-Path $PSScriptRoot 'Start-WeldScope-Practice.ps1'
 }
 
 $freezePath = Join-Path $docs 'S11-evidence/freeze.json'

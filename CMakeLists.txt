@@ -46,15 +46,23 @@ add_test(NAME file_inspection_job COMMAND file_inspection_job_tests
 option(WELDSCOPE_S10_TESTS "Build the x64 S10 integration test host" OFF)
 if(WELDSCOPE_S10_TESTS)
     add_subdirectory(src/WeldScope.Storage)
-    add_executable(s10_integration_host tests/s10_integration_host.cpp
+    add_library(weldscope_integrated_inspection STATIC
         src/WeldScope.App/FileInspectionJob.cpp src/WeldScope.App/IntegratedInspection.cpp
         src/WeldScope.Device/LoopbackServer.cpp src/WeldScope.Device/Protocol.cpp)
-    target_include_directories(s10_integration_host PRIVATE src/WeldScope.App src/WeldScope.Device)
-    target_link_libraries(s10_integration_host PRIVATE weldscope_inspection_input weldscope_storage ws2_32 rpcrt4)
+    target_include_directories(weldscope_integrated_inspection PUBLIC src/WeldScope.App src/WeldScope.Device)
+    target_link_libraries(weldscope_integrated_inspection PUBLIC weldscope_inspection_input weldscope_storage ws2_32 rpcrt4)
+    target_compile_options(weldscope_integrated_inspection PRIVATE /W4 /WX /utf-8 /permissive-)
+    add_executable(s10_integration_host tests/s10_integration_host.cpp)
+    target_link_libraries(s10_integration_host PRIVATE weldscope_integrated_inspection)
     target_compile_options(s10_integration_host PRIVATE /W4 /WX /utf-8 /permissive-)
     add_dependencies(s10_integration_host weldscope_history)
     foreach(runtime libmysql.dll libssl-3-x64.dll libcrypto-3-x64.dll)
         add_custom_command(TARGET s10_integration_host POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE_DIR:weldscope_history>/${runtime}" "$<TARGET_FILE_DIR:s10_integration_host>" VERBATIM)
     endforeach()
+    add_executable(folder_discovery_tests tests/folder_discovery_tests.cpp)
+    target_link_libraries(folder_discovery_tests PRIVATE weldscope_integrated_inspection)
+    target_compile_options(folder_discovery_tests PRIVATE /W4 /WX /utf-8 /permissive-)
+    add_dependencies(folder_discovery_tests s10_integration_host)
+    add_test(NAME folder_discovery COMMAND folder_discovery_tests)
 endif()

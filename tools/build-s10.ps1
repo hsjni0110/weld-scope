@@ -1,7 +1,8 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
     [string]$StagedMfc,
-    [string]$SelectiveFreeze
+    [string]$SelectiveFreeze,
+    [string]$OutputRoot
 )
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
@@ -14,8 +15,11 @@ $msbuild = Join-Path $installation "MSBuild/Current/Bin/$hostTools/MSBuild.exe"
 $toolset = (Get-Content (Join-Path $installation 'VC/Auxiliary/Build/Microsoft.VCToolsVersion.v145.default.txt') -Raw).Trim()
 $tools = Join-Path $installation "VC/Tools/MSVC/$toolset/bin/Host$hostTools/x64"
 $stage = if ($SelectiveFreeze) { 'S11' } else { 'S10' }
-$output = Join-Path $repoRoot "artifacts/$stage/x64/$Configuration/"
-$intermediate = Join-Path $repoRoot "artifacts/$stage/obj/x64/$Configuration/"
+$buildRoot = if ($OutputRoot) {
+    $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputRoot)
+} else { Join-Path $repoRoot "artifacts/$stage" }
+$output = Join-Path $buildRoot "x64/$Configuration/"
+$intermediate = Join-Path $buildRoot "obj/x64/$Configuration/"
 $selectiveOptions = @()
 if ($SelectiveFreeze) {
     $freeze = (Resolve-Path -LiteralPath $SelectiveFreeze).Path
