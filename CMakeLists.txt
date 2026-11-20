@@ -6,7 +6,9 @@ find_package(OpenCV 4 REQUIRED COMPONENTS core imgproc imgcodecs)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 enable_testing()
 
-add_library(weldscope_baseline STATIC src/WeldScope.Core/BaselineInspection.cpp)
+add_library(weldscope_baseline STATIC
+    src/WeldScope.Core/BaselineInspection.cpp
+    src/WeldScope.Core/LocalContrastInspection.cpp)
 target_include_directories(weldscope_baseline PUBLIC src/WeldScope.Core)
 target_include_directories(weldscope_baseline SYSTEM PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(weldscope_baseline PUBLIC opencv_core opencv_imgproc)
@@ -14,8 +16,11 @@ add_executable(weldscope_inspect src/WeldScope.Cli/main.cpp src/WeldScope.Cli/In
 target_link_libraries(weldscope_inspect PRIVATE weldscope_baseline opencv_imgcodecs bcrypt)
 add_executable(baseline_inspection_tests tests/baseline_inspection_tests.cpp)
 target_link_libraries(baseline_inspection_tests PRIVATE weldscope_baseline)
-foreach(target weldscope_baseline weldscope_inspect baseline_inspection_tests)
+add_executable(local_contrast_inspection_tests tests/local_contrast_inspection_tests.cpp)
+target_link_libraries(local_contrast_inspection_tests PRIVATE weldscope_baseline)
+foreach(target weldscope_baseline weldscope_inspect baseline_inspection_tests local_contrast_inspection_tests)
     target_compile_options(${target} PRIVATE /W4 /WX /utf-8 /permissive-)
 endforeach()
 add_test(NAME baseline_engine COMMAND baseline_inspection_tests)
+add_test(NAME local_contrast_engine COMMAND local_contrast_inspection_tests)
 add_test(NAME baseline_cli COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_s04_cli.py $<TARGET_FILE:weldscope_inspect>)
