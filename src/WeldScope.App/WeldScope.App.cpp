@@ -15,14 +15,6 @@ BOOL CWeldScopeAppApp::InitInstance()
     AfxEnableControlContainer();
     CWeldScopeAppDlg dialog;
     m_pMainWnd = &dialog;
-    modalResult_ = dialog.DoModal();
-    m_pMainWnd = nullptr;
+    dialog.DoModal();
     return FALSE;
-}
-
-int CWeldScopeAppApp::ExitInstance()
-{
-    CWinApp::ExitInstance();
-    // The modal loop's last message can be a timer, whose WPARAM is a timer ID.
-    return modalResult_ == -1 ? 1 : 0;
 }

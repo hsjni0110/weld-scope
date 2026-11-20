@@ -3,41 +3,44 @@
 #include "WeldScope.AppDlg.h"
 #include "afxdialogex.h"
 #include <algorithm>
-#include <stdexcept>
-#include <string>
+#include <iterator>
 
 namespace {
-using namespace weldscope;
-using State = InspectionJobState;
-constexpr UINT_PTR inspectionTimerId = 1;
-
-const wchar_t* VerdictText(const std::optional<BaselineDecision>& verdict)
+using weldscope::SampleState;
+using weldscope::SampleVerdict;
+struct SampleFixture {
+    const wchar_t* label;
+    const wchar_t* file;
+    const wchar_t* displayName;
+    UINT resource;
+    SampleVerdict verdict;
+};
+const SampleFixture samples[] = {
+    {L"정상 샘플", L"train/OK/image_1.png", nullptr, IDR_SAMPLE_NORMAL, SampleVerdict::Normal},
+    {L"불량 샘플", L"train/KO/image_1.png", nullptr, IDR_SAMPLE_DEFECT, SampleVerdict::Defect},
+    {L"검토 필요 샘플", L"train/KO/image_1.png", nullptr, IDR_SAMPLE_DEFECT, SampleVerdict::Review},
+    {L"읽기 오류 샘플", L"corrupt.png", nullptr, IDR_SAMPLE_CORRUPT, SampleVerdict::None},
+    {L"긴 파일명 샘플", L"train/OK/image_1.png", L"배터리_용접_외관_검사_긴_파일명_표시_확인_샘플_image_1.png", IDR_SAMPLE_NORMAL, SampleVerdict::Normal}
+};
+const wchar_t* VerdictText(SampleVerdict verdict)
 {
-    if (!verdict) return L"판정 대기";
-    return *verdict == BaselineDecision::Pass ? L"정상" : L"불량";
-}
-
-const wchar_t* StateText(State state)
-{
-    switch (state) {
-    case State::Ready: return L"준비";
-    case State::Running: return L"검사 중";
-    case State::Complete: return L"완료";
-    case State::Cancelled: return L"중지";
-    case State::Error: return L"처리 오류";
-    case State::Closing: return L"종료 대기";
-    default: return L"대기";
+    switch (verdict) {
+    case SampleVerdict::Normal: return L"정상";
+    case SampleVerdict::Defect: return L"불량";
+    case SampleVerdict::Review: return L"검토 필요";
+    default: return L"판정 대기";
     }
 }
-
-std::filesystem::path BaselineConfigPath()
+const wchar_t* StateText(SampleState state)
 {
-    std::wstring executable(32768, L'\0');
-    const DWORD capacity = static_cast<DWORD>(executable.size());
-    const DWORD length = ::GetModuleFileNameW(nullptr, executable.data(), capacity);
-    if (!length || length >= capacity) throw std::runtime_error("Executable path unavailable");
-    executable.resize(length);
-    return std::filesystem::path(executable).parent_path() / L"baseline.json";
+    switch (state) {
+    case SampleState::Ready: return L"준비";
+    case SampleState::Running: return L"검사 중";
+    case SampleState::Complete: return L"완료";
+    case SampleState::Cancelled: return L"중지";
+    case SampleState::Error: return L"처리 오류";
+    default: return L"대기";
+    }
 }
 }
 
@@ -50,10 +53,9 @@ BEGIN_MESSAGE_MAP(CWeldScopeAppDlg, CDialogEx)
     ON_WM_VSCROLL()
     ON_WM_MOUSEWHEEL()
     ON_WM_TIMER()
-    ON_WM_CLOSE()
     ON_WM_DESTROY()
     ON_MESSAGE(WM_DPICHANGED, OnDpiChanged)
-    ON_BN_CLICKED(IDC_FILE_PICKER, OnSelectFile)
+    ON_CBN_SELCHANGE(IDC_SAMPLE_PICKER, OnSelectSample)
     ON_BN_CLICKED(IDC_START, OnStart)
     ON_BN_CLICKED(IDC_STOP, OnStop)
     ON_BN_CLICKED(IDC_CANDIDATE, OnToggleCandidate)
@@ -71,26 +73,29 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
         control.Create(text, WS_CHILD | WS_VISIBLE | SS_NOPREFIX | style, CRect(), this, id);
     };
     label(title_, L"WeldScope", IDC_TITLE);
+    label(badge_, L"샘플", IDC_BADGE, SS_CENTER);
     label(section_, L"검사 콘솔", IDC_SECTION);
     label(imageTitle_, L"원본 이미지", IDC_IMAGE_TITLE);
     label(imageMeta_, L"입력 대기", IDC_IMAGE_META, SS_RIGHT);
-    label(fileName_, L"이미지 선택", IDC_FILENAME, SS_PATHELLIPSIS);
-    label(resultTitle_, L"검사 판정", IDC_RESULT_TITLE);
+    label(fileName_, L"샘플 선택", IDC_FILENAME);
+    label(resultTitle_, L"샘플 판정", IDC_RESULT_TITLE);
     label(verdict_, L"판정 대기", IDC_VERDICT);
     label(statusTitle_, L"작업 상태", IDC_STATUS_TITLE);
     label(status_, L"대기", IDC_STATUS);
-    label(detail_, L"이미지 선택", IDC_DETAIL);
-    label(historyTitle_, L"검사 이력", IDC_HISTORY_TITLE);
+    label(detail_, L"샘플 선택", IDC_DETAIL);
+    label(historyTitle_, L"샘플 이력", IDC_HISTORY_TITLE);
     label(historyNote_, L"현재 실행", IDC_HISTORY_NOTE, SS_RIGHT);
-    filePicker_.Create(L"이미지 선택(&I)", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        CRect(), this, IDC_FILE_PICKER);
+    label(footer_, L"OPENZDM  |  CC BY 4.0", IDC_FOOTER);
+    samplePicker_.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VSCROLL,
+        CRect(), this, IDC_SAMPLE_PICKER);
+    for (const auto& sample : samples) samplePicker_.AddString(sample.label);
     start_.Create(L"검사 시작(&S)", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON, CRect(), this, IDC_START);
     stop_.Create(L"검사 중지(&T)", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, CRect(), this, IDC_STOP);
-    candidate_.Create(L"이상 후보(&O)", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX, CRect(), this, IDC_CANDIDATE);
+    candidate_.Create(L"샘플 후보(&O)", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX, CRect(), this, IDC_CANDIDATE);
     candidate_.SetCheck(BST_CHECKED);
     const auto imageClass = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW, LoadCursor(nullptr, IDC_ARROW));
-    image_.CreateEx(0, imageClass, L"원본 이미지", WS_CHILD | WS_VISIBLE,
-        CRect(), this, IDC_INSPECTION_IMAGE);
+    image_.CreateEx(0, imageClass, L"원본 샘플 이미지", WS_CHILD | WS_VISIBLE,
+        CRect(), this, IDC_SAMPLE_IMAGE);
     history_.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS,
         CRect(), this, IDC_HISTORY);
     history_.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP);
@@ -99,7 +104,7 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
     history_.SetTextColor(RGB(28, 39, 55));
     history_.InsertColumn(0, L"순서", LVCFMT_LEFT, Dip(64));
     history_.InsertColumn(1, L"시각", LVCFMT_LEFT, Dip(96));
-    history_.InsertColumn(2, L"파일", LVCFMT_LEFT, Dip(148));
+    history_.InsertColumn(2, L"샘플", LVCFMT_LEFT, Dip(160));
     history_.InsertColumn(3, L"판정", LVCFMT_LEFT, Dip(130));
     history_.InsertColumn(4, L"원본 경로", LVCFMT_LEFT, Dip(300));
     SetFonts();
@@ -111,7 +116,7 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
     SetWindowPos(nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
     CenterWindow();
     Refresh();
-    filePicker_.SetFocus();
+    samplePicker_.SetFocus();
     return FALSE;
 }
 
@@ -158,24 +163,26 @@ void CWeldScopeAppDlg::Layout()
         control.MoveWindow(x, y - scrollOffset_, (std::max)(1, width), (std::max)(1, height));
     };
     move(title_, margin, Dip(22), Dip(172), Dip(38));
+    move(badge_, margin + Dip(184), Dip(30), Dip(58), Dip(25));
     move(section_, margin, Dip(88), Dip(96), Dip(28));
-    move(filePicker_, margin + Dip(110), Dip(83), Dip(160), Dip(36));
+    move(samplePicker_, margin + Dip(110), Dip(84), Dip(320), Dip(260));
     move(start_, bounds.Width() - margin - Dip(240), Dip(83), Dip(116), Dip(36));
     move(stop_, bounds.Width() - margin - Dip(116), Dip(83), Dip(116), Dip(36));
     move(imageTitle_, imagePanel_.left + gap, top + Dip(18), Dip(150), Dip(25));
     move(imageMeta_, imagePanel_.left + Dip(174), top + Dip(20), imagePanel_.Width() - Dip(194), Dip(24));
     move(image_, imagePanel_.left + gap, top + Dip(58), imagePanel_.Width() - 2 * gap, imagePanel_.Height() - Dip(158));
-    move(fileName_, imagePanel_.left + gap, panelBottom - Dip(72), imagePanel_.Width() - 2 * gap, Dip(24));
+    move(fileName_, imagePanel_.left + gap, panelBottom - Dip(88), imagePanel_.Width() - 2 * gap, Dip(72));
     const int rx = verdictPanel_.left + gap, rw = verdictPanel_.Width() - 2 * gap;
     move(resultTitle_, rx, top + Dip(20), rw, Dip(26));
     move(verdict_, rx, top + Dip(60), rw, Dip(50));
     move(statusTitle_, rx, top + Dip(137), Dip(90), Dip(24));
     move(status_, rx + Dip(96), top + Dip(137), rw - Dip(96), Dip(24));
-    move(detail_, rx, top + Dip(176), rw, Dip(62));
+    move(detail_, rx, top + Dip(176), rw, Dip(54));
     move(candidate_, rx, panelBottom - Dip(52), rw, Dip(32));
     move(historyTitle_, margin + gap, historyPanel_.top + Dip(15), Dip(150), Dip(26));
     move(historyNote_, historyPanel_.right - Dip(160), historyPanel_.top + Dip(16), Dip(140), Dip(24));
     move(history_, margin + gap, historyPanel_.top + Dip(50), historyPanel_.Width() - 2 * gap, historyPanel_.Height() - Dip(66));
+    move(footer_, margin, contentHeight - Dip(30), bounds.Width() - 2 * margin, Dip(24));
     const int widths[] = {56, 92, 148, 116};
     int fixedWidth = 0;
     for (int index = 0; index < 4; ++index) { history_.SetColumnWidth(index, Dip(widths[index])); fixedWidth += Dip(widths[index]); }
@@ -186,88 +193,73 @@ void CWeldScopeAppDlg::Layout()
 
 void CWeldScopeAppDlg::Refresh()
 {
-    const auto state = job_.state();
-    const bool running = state == State::Running;
-    const bool closing = state == State::Closing;
-    start_.EnableWindow(!closing && !job_.busy() && !job_.selected_path().empty());
+    const auto state = session_.state();
+    const bool running = state == SampleState::Running;
+    start_.EnableWindow(state == SampleState::Ready || state == SampleState::Complete || state == SampleState::Cancelled);
     stop_.EnableWindow(running);
-    filePicker_.EnableWindow(!running && !closing);
-    verdict_.SetWindowText(VerdictText(verdictValue_));
+    samplePicker_.EnableWindow(!running);
+    verdict_.SetWindowText(VerdictText(session_.verdict()));
     status_.SetWindowText(StateText(state));
-    const bool hasCandidate = image_.HasCandidate() && !closing;
-    candidate_.EnableWindow(hasCandidate);
-    image_.SetCandidateVisible(hasCandidate && candidate_.GetCheck() == BST_CHECKED);
+    const wchar_t* detail = L"샘플 선택";
+    switch (state) {
+    case SampleState::Ready: detail = L"검사 시작"; break;
+    case SampleState::Running: detail = L"샘플 실행 중"; break;
+    case SampleState::Complete: detail = L"사전 지정 결과"; break;
+    case SampleState::Cancelled: detail = L"판정 없음\n검사 재시작"; break;
+    case SampleState::Error: detail = L"이미지 읽기 실패\n다른 샘플 선택"; break;
+    default: break;
+    }
+    detail_.SetWindowText(detail);
+    const bool showCandidate = session_.verdict() == SampleVerdict::Defect || session_.verdict() == SampleVerdict::Review;
+    candidate_.EnableWindow(showCandidate);
+    image_.SetCandidateVisible(showCandidate && candidate_.GetCheck() == BST_CHECKED);
+    // A disabled focused button must not trap the keyboard after completion/stop.
     const HWND focus = ::GetFocus();
-    if (!closing && focus && !::IsWindowEnabled(focus)) {
-        (running ? static_cast<CWnd*>(&stop_) : static_cast<CWnd*>(&filePicker_))->SetFocus();
+    if (focus && !::IsWindowEnabled(focus)) {
+        (running ? static_cast<CWnd*>(&stop_) : static_cast<CWnd*>(&samplePicker_))->SetFocus();
     }
     Invalidate(FALSE);
 }
 
-void CWeldScopeAppDlg::ClearResult()
+void CWeldScopeAppDlg::OnSelectSample()
 {
-    verdictValue_.reset();
-    image_.SetImages({}, {});
-    imageMeta_.SetWindowText(L"");
-    detail_.SetWindowText(L"");
-    candidate_.SetCheck(BST_CHECKED);
-}
-
-void CWeldScopeAppDlg::OnSelectFile()
-{
-    if (job_.state() == State::Running || job_.state() == State::Closing) return;
-    CFileDialog picker(TRUE, L"png", nullptr, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR,
-        L"PNG 이미지 (*.png)|*.png||", this, 0, FALSE);
-    if (picker.DoModal() != IDOK || !job_.select(picker.GetPathName().GetString())) return;
-    ClearResult();
-    fileName_.SetWindowText(job_.selected_path().c_str());
+    if (session_.state() == SampleState::Running) return;
+    selectedSample_ = samplePicker_.GetCurSel();
+    if (selectedSample_ < 0 || selectedSample_ >= static_cast<int>(std::size(samples))) return;
+    const auto& sample = samples[selectedSample_];
+    const bool loaded = image_.LoadResourceImage(sample.resource);
+    session_.select(sample.verdict, loaded);
+    CString fileText;
+    if (sample.displayName) fileText.Format(L"%s\n%s", sample.displayName, sample.file);
+    else fileText = sample.file;
+    fileName_.SetWindowText(fileText);
+    CString metadata;
+    const auto size = image_.ImageSize();
+    if (loaded) metadata.Format(L"%d × %d px", size.cx, size.cy);
+    else metadata = L"읽기 오류";
+    imageMeta_.SetWindowText(metadata);
     Refresh();
 }
 
 void CWeldScopeAppDlg::OnStart()
 {
-    if (job_.busy() || job_.selected_path().empty() || job_.state() == State::Closing) return;
-    ClearResult();
-    if (!pollTimer_) pollTimer_ = SetTimer(inspectionTimerId, 25, nullptr);
-    bool started = false;
-    if (pollTimer_) {
-        try {
-            started = job_.start(BaselineConfigPath());
-        } catch (const std::exception&) {
-            // A failed executable-path lookup leaves no worker to drain.
-        }
-    }
-    if (!started) {
-        if (pollTimer_) KillTimer(pollTimer_);
-        pollTimer_ = 0;
-        detail_.SetWindowText(L"검사 시작 실패");
-    }
+    if (!session_.start()) return;
+    // Each run has its own timer ID so an old queued WM_TIMER cannot complete a new run.
+    completionTimer_ = SetTimer(nextTimerId_++, 1200, nullptr);
+    if (!completionTimer_) { session_.cancel(); Refresh(); return; }
     Refresh();
-    if (!started) status_.SetWindowText(L"처리 오류");
 }
 
 void CWeldScopeAppDlg::OnStop()
 {
-    if (job_.state() != State::Running) return;
-    job_.cancel();
-    ClearResult();
+    if (completionTimer_) KillTimer(completionTimer_);
+    completionTimer_ = 0;
+    session_.cancel();
     Refresh();
 }
 
-void CWeldScopeAppDlg::OnCancel()
-{
-    job_.request_close();
-    if (job_.busy()) {
-        Refresh();
-        return;
-    }
-    CDialogEx::OnCancel();
-}
-
-void CWeldScopeAppDlg::OnClose() { OnCancel(); }
 void CWeldScopeAppDlg::OnToggleCandidate() { Refresh(); }
 void CWeldScopeAppDlg::OnOK() { OnStart(); }
-
 BOOL CWeldScopeAppDlg::PreTranslateMessage(MSG* message)
 {
     const BOOL handled = CDialogEx::PreTranslateMessage(message);
@@ -291,65 +283,22 @@ BOOL CWeldScopeAppDlg::PreTranslateMessage(MSG* message)
 
 void CWeldScopeAppDlg::OnTimer(UINT_PTR id)
 {
-    if (id != pollTimer_ || !pollTimer_) {
-        CDialogEx::OnTimer(id);
-        return;
-    }
-    const auto result = job_.poll();
-    if (job_.busy()) return;
-    KillTimer(pollTimer_);
-    pollTimer_ = 0;
-    if (job_.state() == State::Closing) {
-        CDialogEx::OnCancel();
-        return;
-    }
-    if (result) {
-        if (const auto* inspected = std::get_if<InspectedFile>(&*result)) {
-            verdictValue_ = inspected->decision;
-            image_.SetImages(inspected->original, inspected->overlay);
-            CString metadata, details;
-            metadata.Format(L"%d × %d px", inspected->original.cols, inspected->original.rows);
-            details.Format(L"후보 점수 %.4f\n읽기 %.2f ms\n분석 %.2f ms",
-                inspected->score, inspected->loadMs, inspected->analysisMs);
-            imageMeta_.SetWindowText(metadata);
-            detail_.SetWindowText(details);
-            AddHistory(*inspected);
-        } else if (const auto* error = std::get_if<FileInspectionFailure>(&*result)) {
-            switch (*error) {
-            case FileInspectionFailure::Configuration:
-                detail_.SetWindowText(L"기준 설정 오류\nbaseline.json 확인");
-                break;
-            case FileInspectionFailure::FileAccess:
-                detail_.SetWindowText(L"파일 접근 실패\n경로와 권한 확인");
-                break;
-            case FileInspectionFailure::SizeLimit:
-                detail_.SetWindowText(L"크기 한도 초과\n16 MiB, 1,600만 픽셀");
-                break;
-            case FileInspectionFailure::DamagedPng:
-                detail_.SetWindowText(L"PNG 손상\n다른 이미지 선택");
-                break;
-            case FileInspectionFailure::UnsupportedFormat:
-                detail_.SetWindowText(L"지원하지 않는 형식\n8비트 컬러 PNG 선택");
-                break;
-            case FileInspectionFailure::Analysis:
-                detail_.SetWindowText(L"분석 실패\n검사 재시작");
-                break;
-            }
-        }
-    }
+    if (id != completionTimer_ || completionTimer_ == 0) { CDialogEx::OnTimer(id); return; }
+    KillTimer(completionTimer_);
+    completionTimer_ = 0;
+    if (session_.complete()) AddHistory();
     Refresh();
 }
 
-void CWeldScopeAppDlg::AddHistory(const InspectedFile& inspected)
+void CWeldScopeAppDlg::AddHistory()
 {
     CString sequence;
     sequence.Format(L"%d", history_.GetItemCount() + 1);
     const int row = history_.InsertItem(0, sequence);
-    if (row < 0) return;
     history_.SetItemText(row, 1, CTime::GetCurrentTime().Format(L"%H:%M:%S"));
-    history_.SetItemText(row, 2, inspected.path.filename().c_str());
-    history_.SetItemText(row, 3, VerdictText(inspected.decision));
-    history_.SetItemText(row, 4, inspected.path.c_str());
+    history_.SetItemText(row, 2, samples[selectedSample_].label);
+    history_.SetItemText(row, 3, VerdictText(session_.verdict()));
+    history_.SetItemText(row, 4, samples[selectedSample_].file);
 }
 
 BOOL CWeldScopeAppDlg::OnEraseBkgnd(CDC*) { return TRUE; }
@@ -376,11 +325,15 @@ HBRUSH CWeldScopeAppDlg::OnCtlColor(CDC* dc, CWnd* wnd, UINT controlType)
         dc->SetBkMode(TRANSPARENT);
         const int id = wnd->GetDlgCtrlID();
         if (id == IDC_VERDICT) {
-            if (!verdictValue_) dc->SetTextColor(RGB(83, 99, 120));
-            else if (*verdictValue_ == BaselineDecision::Pass) dc->SetTextColor(RGB(0, 111, 85));
-            else dc->SetTextColor(RGB(181, 42, 50));
+            switch (session_.verdict()) {
+            case SampleVerdict::Normal: dc->SetTextColor(RGB(0, 111, 85)); break;
+            case SampleVerdict::Defect: dc->SetTextColor(RGB(181, 42, 50)); break;
+            case SampleVerdict::Review: dc->SetTextColor(RGB(139, 87, 0)); break;
+            default: dc->SetTextColor(RGB(83, 99, 120)); break;
+            }
         }
-        const bool background = id == IDC_SECTION;
+        if (id == IDC_BADGE) { dc->SetBkColor(RGB(231, 240, 252)); return static_cast<HBRUSH>(backgroundBrush_.GetSafeHandle()); }
+        const bool background = id == IDC_SECTION || id == IDC_FOOTER;
         dc->SetBkColor(background ? RGB(243, 246, 250) : RGB(255, 255, 255));
         return static_cast<HBRUSH>((background ? backgroundBrush_ : whiteBrush_).GetSafeHandle());
     }
@@ -435,6 +388,6 @@ LRESULT CWeldScopeAppDlg::OnDpiChanged(WPARAM dpi, LPARAM suggestedRect)
 }
 void CWeldScopeAppDlg::OnDestroy()
 {
-    if (pollTimer_) KillTimer(pollTimer_);
+    if (completionTimer_) KillTimer(completionTimer_);
     CDialogEx::OnDestroy();
 }
