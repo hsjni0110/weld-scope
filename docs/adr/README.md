@@ -23,6 +23,6 @@
 | [0002](0002-development-environment.md) | UTM의 Windows ARM 개발 환경 | 승인 | 미검증 |
 | [0003](0003-dataset-preparation.md) | OPENZDM 데이터 준비와 공식 분할 보존 | 승인 | 19개 자동 검사, 61,670장 전체 점검 및 재현 확인. 실제 결과의 사용자 검수 대기 |
 | [0004](0004-baseline-inspection.md) | C++ 기준 검사와 train 개발 실행 | 승인 | ARM64 빌드, 실제 CLI·오류 검사, 전체 train 2회와 재현 확인. 사용자 검수 후 main 병합 |
-| [0005](0005-inspection-history.md) | MySQL 검사 이력과 재전송 규칙 | 제안 | x64 독립 콘솔과 MySQL 8.4.13에서 검증. 사용자 검수 대기 |
+| [0005](0005-inspection-history.md) | MySQL 검사 이력과 재전송 규칙 | 제안 | x64 독립 콘솔과 MySQL 8.4.13에서 검증 후 main 병합 |
 
 엔진 경계, 상태 계약, TCP·DB 계약은 해당 단계에서 ADR로 구체화한다. 표에 없는 제안을 승인된 결정으로 간주하지 않는다.
