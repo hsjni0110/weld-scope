@@ -23,10 +23,14 @@ public:
 // 재정의입니다.
 public:
 	virtual BOOL InitInstance();
+	int ExitInstance() override;
 
 // 구현입니다.
 
 	DECLARE_MESSAGE_MAP()
+
+private:
+	INT_PTR modalResult_ = -1;
 };
 
 extern CWeldScopeAppApp theApp;
