@@ -28,5 +28,6 @@
 | [0007](0007-local-contrast-inspection.md) | 국소 대비와 다중 스케일 검사 | 승인 | [S07 단계 기록](../steps/S07-improved-inspection.md) |
 | [0008](0008-selective-inspection-policy.md) | 선택적 정밀 분석 정책과 시간 예산 | 승인 | [S08 단계 기록](../steps/S08-selective-inspection-policy.md) |
 | [0009](0009-mfc-file-inspection.md) | MFC 파일 검사와 작업 수명 | 승인 | [S09 단계 기록](../steps/S09-file-inspection-integration.md) |
+| [0010](0010-record-device-integration.md) | 기록과 장비 통합 계약 | 승인 | [S10 단계 기록](../steps/S10-record-device-integration.md) |
 
 엔진 경계, 상태 계약, TCP·DB 계약은 해당 단계에서 ADR로 구체화한다. 표에 없는 제안을 승인된 결정으로 간주하지 않는다.

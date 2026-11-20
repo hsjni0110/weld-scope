@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <WeldScopeMySqlRoot Condition="'$(WeldScopeMySqlRoot)' == ''">$(MSBuildThisFileDirectory)..\..\.tools\mysql-8.4.13-winx64</WeldScopeMySqlRoot>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>WELDSCOPE_S10;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\WeldScope.Device;$(MSBuildThisFileDirectory)..\WeldScope.Storage;$(WeldScopeMySqlRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(WeldScopeMySqlRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmysql.lib;ws2_32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <S10Runtime Include="$(WeldScopeMySqlRoot)\lib\libmysql.dll;$(WeldScopeMySqlRoot)\bin\libssl-3-x64.dll;$(WeldScopeMySqlRoot)\bin\libcrypto-3-x64.dll;$(MSBuildThisFileDirectory)res\samples\defect.png" />
+  </ItemGroup>
+  <Target Name="CopyS10Runtime" AfterTargets="Build">
+    <Copy SourceFiles="@(S10Runtime)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

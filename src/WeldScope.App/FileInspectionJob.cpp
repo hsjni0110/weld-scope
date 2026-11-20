@@ -16,17 +16,28 @@ double elapsed_ms(Clock::time_point start)
 
 FileInspectionResult inspect_file(const FileInspectionRequest& request, const std::atomic_bool& cancelled)
 {
+    InspectionEvidence evidence;
+    return inspect_file_with_evidence(request, cancelled, evidence);
+}
+
+FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
+    InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig, std::string_view expectedSourceHash)
+{
     if (cancelled) return InspectionCancelled{};
     auto failure = FileInspectionFailure::Configuration;
     try {
-        const auto config = parse_baseline_config(read_json(read_bytes(request.config, config_file_limit)));
+        const auto configBytes = fixedConfig ? *fixedConfig : read_bytes(request.config, config_file_limit);
+        evidence.configSha256 = sha256(configBytes);
+        const auto config = parse_baseline_config(read_json(configBytes));
         if (cancelled) return InspectionCancelled{};
 
         failure = FileInspectionFailure::Analysis;
         const auto loadStart = Clock::now();
         const auto bytes = read_bytes(request.path, image_file_limit);
         if (cancelled) return InspectionCancelled{};
-        const auto hash = sha256(bytes);
+        evidence.sourceSha256 = sha256(bytes);
+        if (!expectedSourceHash.empty() && evidence.sourceSha256 != expectedSourceHash)
+            return FileInspectionFailure::FileAccess;
         const auto bgr = decode_png(bytes);
         const auto loadMs = elapsed_ms(loadStart);
         if (cancelled) return InspectionCancelled{};
@@ -38,7 +49,7 @@ FileInspectionResult inspect_file(const FileInspectionRequest& request, const st
 
         InspectedFile completed;
         completed.path = request.path;
-        completed.inputHash = hash;
+        completed.inputHash = evidence.sourceSha256;
         completed.decision = result.decision;
         completed.score = result.score;
         completed.loadMs = loadMs;

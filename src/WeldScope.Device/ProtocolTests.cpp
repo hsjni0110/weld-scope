@@ -63,6 +63,9 @@ void TestFields() {
     Require(ParseRequest("INSPECT\t" + maxId + "\ts\tc").has_value(), "Allow a 64-byte ID");
     Require(!ParseRequest("INSPECT\t" + maxId + "x\ts\tc"), "Reject a 65-byte ID");
     Require(ResultFrame("r", "i-1") == "RESULT\tr\ti-1\tFAIL\n", "Encode the sample response");
+    Require(ResultFrame("r", "i-1", "PASS") == "RESULT\tr\ti-1\tPASS\n", "Encode the stored decision");
+    Require(StatusFrame("r", "i-1", "IN_PROGRESS") == "STATUS\tr\ti-1\tIN_PROGRESS\n",
+            "Encode the status and keep the inspection ID");
     Require(ErrorFrame("-", "BAD_FRAME") == "ERROR\t-\tBAD_FRAME\n", "Encode the error response");
 }
 

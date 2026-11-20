@@ -35,6 +35,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/demo-s05.ps1
 
 마지막 줄 `S05 checks passed`와 그 앞의 저장·조회·재전송·충돌·롤백 결과를 확인한다. 시연은 매번 새 ID를 사용한다. 샘플은 OPENZDM의 S04 실행 결과 일부를 고정한 값으로, 영상 처리 없이 저장 계약을 검증한다.
 
+S10 이전 스키마로 이미 준비한 개발 DB에서 현재 저장 모듈을 실행하려면 [S05 → S10 마이그레이션](../../db/s10/migrate-from-s05.sql)을 한 번 적용한다. 새 DB는 현재 `db/s05/schema.sql`로 초기화한다.
+
 ## 별도 인스턴스에서 동시 저장과 연결 단절 재현
 
 전용 Windows MySQL 인스턴스의 TCP 포트는 `33359`로 사용했다. 다음 명령은 PowerShell 창 하나에서 실행한다. `mysql-data`를 처음 만들 때만 초기화한다. 테스트 프록시는 평문 MySQL 패킷을 전달하므로 테스트 인스턴스를 루프백에 바인딩하고 TLS를 끈다. [MySQL 서버의 tls_version 설정](https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_tls_version)

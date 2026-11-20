@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 
 namespace weldscope {
@@ -28,6 +29,14 @@ struct InspectionCancelled {};
 using FileInspectionResult = std::variant<InspectedFile, FileInspectionFailure, InspectionCancelled>;
 
 FileInspectionResult inspect_file(const FileInspectionRequest& request, const std::atomic_bool& cancelled);
+
+struct InspectionEvidence {
+    std::string sourceSha256;
+    std::string configSha256;
+};
+FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
+    InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig = nullptr,
+    std::string_view expectedSourceHash = {});
 
 enum class InspectionJobState { Empty, Ready, Running, Complete, Cancelled, Error, Closing };
 

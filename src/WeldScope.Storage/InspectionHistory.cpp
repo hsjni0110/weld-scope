@@ -5,6 +5,8 @@
 #include <mysqld_error.h>
 
 #include <array>
+#include <charconv>
+#include <cstdlib>
 #include <limits>
 #include <memory>
 #include <string_view>
@@ -13,6 +15,19 @@
 
 namespace weldscope {
 namespace {
+
+constexpr std::string_view insertInspection =
+    "INSERT INTO inspections (inspection_id, request_id, input_id, source_path, source_sha256, config_sha256, "
+    "algorithm_version, dataset_version, decision, reason, work_state) "
+    "VALUES (?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?, NULLIF(?, ''), ?, ?)";
+constexpr std::string_view insertAttempt =
+    "INSERT INTO analysis_attempts (inspection_id, sequence_no, stage, score, decision, reason, duration_ms) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+std::string Environment(const char* name, const char* fallback = "") {
+    const char* value = std::getenv(name);
+    return value ? value : fallback;
+}
 
 class DatabaseError : public std::runtime_error {
 public:
@@ -250,7 +265,7 @@ private:
 auto RecordFields(const InspectionRecord& record) {
     return std::tie(record.inspectionId, record.requestId, record.inputId, record.sourcePath, record.sourceSha256,
                     record.configSha256, record.algorithmVersion, record.datasetVersion, record.decision, record.reason,
-                    record.attempts);
+                    record.attempts, record.workState);
 }
 
 std::optional<StoredInspection> ReadInspection(MYSQL* mysql, const std::string& inspectionId) {
@@ -258,13 +273,16 @@ std::optional<StoredInspection> ReadInspection(MYSQL* mysql, const std::string& 
     auto& record = stored.record;
     record.inspectionId = inspectionId;
     {
+        std::string workState;
         Statement inspection(mysql, "Read inspection",
-            "SELECT request_id, input_id, source_path, source_sha256, config_sha256, algorithm_version, "
-            "dataset_version, decision, reason, created_at FROM inspections WHERE inspection_id = ?");
+            "SELECT request_id, input_id, source_path, COALESCE(source_sha256, ''), COALESCE(config_sha256, ''), "
+            "algorithm_version, dataset_version, COALESCE(decision, ''), reason, created_at, work_state "
+            "FROM inspections WHERE inspection_id = ?");
         inspection.Execute(inspectionId);
         if (!inspection.Fetch(record.requestId, record.inputId, record.sourcePath, record.sourceSha256,
                               record.configSha256, record.algorithmVersion, record.datasetVersion, record.decision,
-                              record.reason, stored.createdAtUtc)) return std::nullopt;
+                              record.reason, stored.createdAtUtc, workState)) return std::nullopt;
+        if (workState == "CANCELLED") record.workState = InspectionWorkState::Cancelled;
     }
     Statement attempts(mysql, "Read analysis attempts",
         "SELECT stage, score, decision, reason, duration_ms FROM analysis_attempts "
@@ -289,6 +307,21 @@ void ValidateSha256(const std::string& hash) {
 
 } // namespace
 
+HistoryConnection HistoryConnectionFromEnvironment() {
+    const auto portText = Environment("WELDSCOPE_MYSQL_PORT", "3309");
+    unsigned int port = 0;
+    const auto end = portText.data() + portText.size();
+    const auto parsed = std::from_chars(portText.data(), end, port);
+    if (parsed.ec != std::errc{} || parsed.ptr != end || port == 0 || port > 65535)
+        throw std::invalid_argument("Invalid WELDSCOPE_MYSQL_PORT");
+    auto password = Environment("WELDSCOPE_MYSQL_PASSWORD");
+    if (password.empty()) throw std::invalid_argument("WELDSCOPE_MYSQL_PASSWORD is required");
+    return {Environment("WELDSCOPE_MYSQL_HOST", "10.0.2.2"), port,
+            Environment("WELDSCOPE_MYSQL_DATABASE", "weldscope_s05"),
+            Environment("WELDSCOPE_MYSQL_USER", "weldscope_app"), std::move(password),
+            Environment("WELDSCOPE_MYSQL_CA_FILE")};
+}
+
 bool AnalysisAttempt::operator==(const AnalysisAttempt& other) const {
     return std::tie(stage, score, decision, reason, durationMs) ==
            std::tie(other.stage, other.score, other.decision, other.reason, other.durationMs);
@@ -308,8 +341,13 @@ std::string InspectionHistory::Version() const {
 SaveStatus InspectionHistory::Save(const InspectionRecord& record) const {
     ValidateId(record.inspectionId);
     ValidateId(record.requestId);
-    ValidateSha256(record.sourceSha256);
-    ValidateSha256(record.configSha256);
+    const bool cancelled = record.workState == InspectionWorkState::Cancelled;
+    if (cancelled && (!record.decision.empty() || !record.attempts.empty()))
+        throw std::invalid_argument("Cancellation cannot have a verdict or attempts");
+    if (!record.sourceSha256.empty() || (!cancelled && record.decision != "ERROR"))
+        ValidateSha256(record.sourceSha256);
+    if (!record.configSha256.empty() || (!cancelled && record.decision != "ERROR"))
+        ValidateSha256(record.configSha256);
     if (record.attempts.size() > (std::numeric_limits<unsigned int>::max)()) {
         throw std::invalid_argument("Too many analysis attempts");
     }
@@ -317,12 +355,11 @@ SaveStatus InspectionHistory::Save(const InspectionRecord& record) const {
     auto* mysql = connection.get();
     Transaction transaction(mysql);
     try {
-        Statement insert(mysql, "Insert inspection",
-            "INSERT INTO inspections (inspection_id, request_id, input_id, source_path, source_sha256, config_sha256, "
-            "algorithm_version, dataset_version, decision, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        Statement insert(mysql, "Insert inspection", insertInspection);
         insert.ExecuteWrite(mysql, record.inspectionId, record.requestId, record.inputId, record.sourcePath,
                             record.sourceSha256, record.configSha256, record.algorithmVersion,
-                            record.datasetVersion, record.decision, record.reason);
+                            record.datasetVersion, record.decision, record.reason,
+                            std::string(cancelled ? "CANCELLED" : "COMPLETED"));
     } catch (const DatabaseError& error) {
         if (error.code != ER_DUP_ENTRY) throw;
         transaction.Rollback();
@@ -331,9 +368,7 @@ SaveStatus InspectionHistory::Save(const InspectionRecord& record) const {
         return existing && RecordFields(existing->record) == RecordFields(record) ? SaveStatus::Replay : SaveStatus::Conflict;
     }
     if (!record.attempts.empty()) {
-        Statement insert(mysql, "Insert analysis attempt",
-            "INSERT INTO analysis_attempts (inspection_id, sequence_no, stage, score, decision, reason, duration_ms) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)");
+        Statement insert(mysql, "Insert analysis attempt", insertAttempt);
         unsigned int sequence = 0;
         for (const auto& attempt : record.attempts) {
             insert.ExecuteWrite(mysql, record.inspectionId, ++sequence, attempt.stage, attempt.score,
@@ -348,6 +383,42 @@ std::optional<StoredInspection> InspectionHistory::Get(const std::string& inspec
     ValidateId(inspectionId);
     const auto connection = Connect(settings_);
     return ReadInspection(connection.get(), inspectionId);
+}
+
+void InspectionHistory::CheckReady() const {
+    const auto connection = Connect(settings_);
+    Statement(connection.get(), "Check inspection schema", "SELECT work_state FROM inspections WHERE FALSE").Execute();
+    Statement(connection.get(), "Check attempt schema", "SELECT sequence_no FROM analysis_attempts WHERE FALSE").Execute();
+    Statement(connection.get(), "Check inspection writer", insertInspection);
+    Statement(connection.get(), "Check attempt writer", insertAttempt);
+}
+
+std::optional<StoredInspection> InspectionHistory::GetByRequestId(const std::string& requestId) const {
+    ValidateId(requestId);
+    const auto connection = Connect(settings_);
+    std::string inspectionId;
+    {
+        Statement lookup(connection.get(), "Find request", "SELECT inspection_id FROM inspections WHERE request_id = ?");
+        lookup.Execute(requestId);
+        if (!lookup.Fetch(inspectionId)) return std::nullopt;
+    }
+    return ReadInspection(connection.get(), inspectionId);
+}
+
+std::vector<InspectionSummary> InspectionHistory::Recent() const {
+    const auto connection = Connect(settings_);
+    Statement list(connection.get(), "List inspections",
+        "SELECT inspection_id, source_path, COALESCE(decision, ''), created_at, work_state "
+        "FROM inspections ORDER BY created_at DESC, inspection_id DESC LIMIT 50");
+    list.Execute();
+    std::vector<InspectionSummary> records;
+    InspectionSummary row;
+    std::string state;
+    while (list.Fetch(row.inspectionId, row.sourcePath, row.decision, row.createdAtUtc, state)) {
+        row.workState = state == "CANCELLED" ? InspectionWorkState::Cancelled : InspectionWorkState::Completed;
+        records.push_back(std::move(row));
+    }
+    return records;
 }
 
 } // namespace weldscope

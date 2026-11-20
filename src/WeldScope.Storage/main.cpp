@@ -12,27 +12,6 @@ namespace {
 
 using namespace weldscope;
 
-std::string Environment(const char* name, const char* fallback = "") {
-    const char* value = std::getenv(name);
-    return value ? value : fallback;
-}
-
-HistoryConnection ConnectionSettings() {
-    const auto portText = Environment("WELDSCOPE_MYSQL_PORT", "3309");
-    unsigned int port = 0;
-    const auto end = portText.data() + portText.size();
-    const auto parsed = std::from_chars(portText.data(), end, port);
-    if (parsed.ec != std::errc{} || parsed.ptr != end || port == 0 || port > 65535) {
-        throw std::invalid_argument("Invalid WELDSCOPE_MYSQL_PORT");
-    }
-    auto password = Environment("WELDSCOPE_MYSQL_PASSWORD");
-    if (password.empty()) throw std::invalid_argument("WELDSCOPE_MYSQL_PASSWORD is required");
-    return {Environment("WELDSCOPE_MYSQL_HOST", "10.0.2.2"), port,
-            Environment("WELDSCOPE_MYSQL_DATABASE", "weldscope_s05"),
-            Environment("WELDSCOPE_MYSQL_USER", "weldscope_app"), std::move(password),
-            Environment("WELDSCOPE_MYSQL_CA_FILE")};
-}
-
 InspectionRecord Sample(const char* inspectionId, const char* requestId, std::string_view variant) {
     // Fixed history sample based on the first public OPENZDM S04 sample row.
     InspectionRecord record{
@@ -78,7 +57,7 @@ void PrintSaveStatus(std::string_view status, const InspectionRecord& record) {
 
 int Save(const InspectionRecord& record) {
     try {
-        switch (InspectionHistory(ConnectionSettings()).Save(record)) {
+        switch (InspectionHistory(HistoryConnectionFromEnvironment()).Save(record)) {
         case SaveStatus::Stored: PrintSaveStatus("stored", record); return 0;
         case SaveStatus::Replay: PrintSaveStatus("replay", record); return 0;
         case SaveStatus::Conflict: PrintSaveStatus("conflict", record); return 3;
@@ -101,12 +80,12 @@ int main(int argc, char** argv) {
     try {
         const std::string_view command = argc > 1 ? argv[1] : "";
         if (command == "version" && argc == 2) {
-            const auto version = InspectionHistory(ConnectionSettings()).Version();
+            const auto version = InspectionHistory(HistoryConnectionFromEnvironment()).Version();
             std::cout << "server_version=" << version << '\n';
             return 0;
         }
         if (command == "get" && argc == 3) {
-            const auto stored = InspectionHistory(ConnectionSettings()).Get(argv[2]);
+            const auto stored = InspectionHistory(HistoryConnectionFromEnvironment()).Get(argv[2]);
             if (stored) {
                 PrintInspection(*stored);
                 return 0;
