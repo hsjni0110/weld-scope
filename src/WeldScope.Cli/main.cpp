@@ -3,8 +3,7 @@
 #include <windows.h>
 #include "BaselineInspection.h"
 #include "InspectionFiles.h"
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
+#include "LocalContrastInspection.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -14,9 +13,11 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace fs = std::filesystem;
 using namespace weldscope;
@@ -27,9 +28,22 @@ struct InputRecord {
     std::string path, split, label, expectedHash;
     bool debug = false;
 };
+struct AnalysisResult {
+    cv::Mat gray, mask;
+    std::uint64_t candidatePixels, totalPixels;
+    double score;
+    bool isFail;
+    std::optional<double> continuousCandidateRatio;
+};
 double elapsed(Clock::time_point start)
 {
     return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+}
+std::string format_score(double value)
+{
+    std::ostringstream number;
+    number << std::setprecision(17) << value;
+    return number.str();
 }
 int integer(const cv::FileNode& node, const char* name)
 {
@@ -91,14 +105,14 @@ std::vector<InputRecord> load_manifest(const fs::path& file)
     }
     return records;
 }
-void export_images(const fs::path& directory, const cv::Mat& image, const BaselineResult& result)
+void export_images(const fs::path& directory, const cv::Mat& image, const cv::Mat& gray, const cv::Mat& mask)
 {
     fs::create_directories(directory);
     write_png(directory / "original.png", image);
-    write_png(directory / "gray.png", result.gray);
-    write_png(directory / "mask.png", result.mask);
+    write_png(directory / "gray.png", gray);
+    write_png(directory / "mask.png", mask);
     cv::Mat colored = image.clone(), overlay;
-    colored.setTo(cv::Scalar(0, 191, 255), result.mask);
+    colored.setTo(cv::Scalar(0, 191, 255), mask);
     cv::addWeighted(image, 0.55, colored, 0.45, 0, overlay);
     write_png(directory / "overlay.png", overlay);
 }
@@ -110,9 +124,10 @@ int wmain(int argc, wchar_t** argv)
         SetConsoleOutputCP(CP_UTF8);
         cv::setNumThreads(1);
         std::map<std::wstring, fs::path> options;
-        const std::set<std::wstring> allowed{L"--config", L"--output", L"--image", L"--manifest"};
+        const std::set<std::wstring> allowed{L"--config", L"--output", L"--image", L"--manifest", L"--algorithm"};
         if (argc == 2 && std::wstring(argv[1]) == L"--help") {
-            std::cout << "weldscope_inspect --config config.json (--image file.png | --manifest manifest.json) --output NEW_DIRECTORY\n";
+            std::cout << "weldscope_inspect [--algorithm baseline|fast|precise] --config config.json "
+                         "(--image file.png | --manifest manifest.json) --output NEW_DIRECTORY\n";
             return 0;
         }
         for (int index = 1; index < argc; index += 2) {
@@ -122,11 +137,42 @@ int wmain(int argc, wchar_t** argv)
         if (!options.count(L"--config") || !options.count(L"--output")
             || options.count(L"--image") + options.count(L"--manifest") != 1)
             throw std::invalid_argument("Require config, output and exactly one input mode");
+        std::optional<LocalContrastMode> localMode;
+        const char* algorithmVersion = "global-dark-ratio-v1";
+        if (const auto algorithm = options.find(L"--algorithm"); algorithm != options.end()) {
+            if (algorithm->second == L"fast") {
+                localMode = LocalContrastMode::Fast;
+                algorithmVersion = "local-contrast-fast-v1";
+            } else if (algorithm->second == L"precise") {
+                localMode = LocalContrastMode::Precise;
+                algorithmVersion = "local-contrast-precise-v1";
+            } else if (algorithm->second != L"baseline") {
+                throw std::invalid_argument("Unknown algorithm; use --help");
+            }
+        }
         const auto configBytes = read_bytes(options.at(L"--config"), 1024 * 1024);
         auto json = read_json(configBytes);
         if (integer(json["schema_version"], "schema_version") != 1) throw std::invalid_argument("Unsupported config schema");
         if (!json["fail_ratio"].isInt() && !json["fail_ratio"].isReal()) throw std::invalid_argument("Numeric fail_ratio required");
-        const BaselineConfig config(integer(json["intensity_threshold"], "intensity_threshold"), static_cast<double>(json["fail_ratio"]));
+        const char* thresholdKey = localMode ? "contrast_threshold" : "intensity_threshold";
+        const int threshold = integer(json[thresholdKey], thresholdKey);
+        const double failRatio = static_cast<double>(json["fail_ratio"]);
+        std::optional<BaselineConfig> baselineConfig;
+        if (localMode) validate_local_contrast_config(threshold, failRatio);
+        else baselineConfig.emplace(threshold, failRatio);
+        const auto analyze = [&](const cv::Mat& image, double& analysisMs) -> AnalysisResult {
+            const auto start = Clock::now();
+            if (localMode) {
+                auto result = inspect_local_contrast(image, *localMode, threshold, failRatio);
+                analysisMs = elapsed(start);
+                return {std::move(result.gray), std::move(result.mask), result.candidatePixels, result.totalPixels,
+                        result.score, result.isFail, result.continuousCandidateRatio};
+            }
+            auto result = inspect_baseline(image, *baselineConfig);
+            analysisMs = elapsed(start);
+            return {std::move(result.gray), std::move(result.mask), result.candidatePixels, result.totalPixels,
+                    result.score, result.decision == BaselineDecision::Fail, std::nullopt};
+        };
         const auto configHash = sha256(configBytes);
         std::vector<InputRecord> records;
         if (options.count(L"--manifest")) records = load_manifest(options.at(L"--manifest"));
@@ -139,45 +185,46 @@ int wmain(int argc, wchar_t** argv)
         write_text(output / "config.json", std::string(configBytes.begin(), configBytes.end()));
         std::ofstream csv(output / "results.csv", std::ios::binary);
         csv.exceptions(std::ios::failbit | std::ios::badbit);
-        csv << "source_path,split,label,image_sha256,config_sha256,width,height,candidate_pixels,total_pixels,score,decision,error,load_ms,analysis_ms,artifact_ms,artifact_path\n";
+        csv << "source_path,split,label,image_sha256,config_sha256,width,height,candidate_pixels,total_pixels,"
+               "score,decision,error,load_ms,analysis_ms,artifact_ms,artifact_path";
+        if (localMode) csv << ",continuous_candidate_ratio";
+        csv << '\n';
         int passed = 0, failed = 0, errors = 0;
         std::size_t ordinal = 0;
         for (const auto& record : records) {
             ++ordinal;
             std::string imageHash, decision = "ERROR", reason, artifactPath;
-            std::string width, height, candidates, total, score;
+            std::string width, height, candidates, total, score, continuousCandidateRatio;
             double loadMs = 0, analysisMs = 0, artifactMs = 0;
             cv::Mat image;
-            BaselineResult result;
-            auto start = Clock::now();
+            AnalysisResult result{};
+            const auto loadStart = Clock::now();
             try {
                 const auto bytes = read_bytes(record.file, 16 * 1024 * 1024);
                 imageHash = sha256(bytes);
                 if (!record.expectedHash.empty() && record.expectedHash != imageHash) throw std::runtime_error("Image SHA-256 mismatch");
                 image = decode_png(bytes);
-                loadMs = elapsed(start);
-                start = Clock::now();
-                result = inspect_baseline(image, config);
-                analysisMs = elapsed(start);
+                loadMs = elapsed(loadStart);
+                result = analyze(image, analysisMs);
                 width = std::to_string(image.cols);
                 height = std::to_string(image.rows);
                 candidates = std::to_string(result.candidatePixels);
                 total = std::to_string(result.totalPixels);
-                std::ostringstream number;
-                number << std::setprecision(17) << result.score;
-                score = number.str();
-                decision = result.decision == BaselineDecision::Fail ? "FAIL" : "PASS";
+                score = format_score(result.score);
+                if (result.continuousCandidateRatio)
+                    continuousCandidateRatio = format_score(*result.continuousCandidateRatio);
+                decision = result.isFail ? "FAIL" : "PASS";
             } catch (const std::exception& error) {
                 reason = error.what();
-                if (loadMs == 0) loadMs = elapsed(start);
+                if (loadMs == 0) loadMs = elapsed(loadStart);
             }
             // Saving is outside the input-error catch: a disk failure aborts the run with exit 1.
             if (decision != "ERROR" && record.debug) {
-                start = Clock::now();
+                const auto start = Clock::now();
                 std::ostringstream name;
                 name << "images/" << std::setfill('0') << std::setw(6) << ordinal;
                 artifactPath = name.str();
-                export_images(output / fs::u8path(artifactPath), image, result);
+                export_images(output / fs::u8path(artifactPath), image, result.gray, result.mask);
                 artifactMs = elapsed(start);
             }
             if (decision == "PASS") ++passed;
@@ -186,15 +233,17 @@ int wmain(int argc, wchar_t** argv)
             const std::string fields[] = {record.path, record.split, record.label, imageHash, configHash, width, height,
                 candidates, total, score, decision, reason};
             for (const auto& field : fields) csv << csv_field(field) << ',';
-            csv << std::setprecision(17) << loadMs << ',' << analysisMs << ',' << artifactMs << ',' << csv_field(artifactPath) << '\n';
+            csv << std::setprecision(17) << loadMs << ',' << analysisMs << ',' << artifactMs << ',' << csv_field(artifactPath);
+            if (localMode) csv << ',' << continuousCandidateRatio;
+            csv << '\n';
         }
         csv.close();
         cv::FileStorage summary(".json", cv::FileStorage::WRITE | cv::FileStorage::MEMORY | cv::FileStorage::FORMAT_JSON);
-        summary << "algorithm_version" << "global-dark-ratio-v1" << "opencv_version" << CV_VERSION
+        summary << "algorithm_version" << algorithmVersion << "opencv_version" << CV_VERSION
                 << "scope" << (options.count(L"--manifest") ? "train-development-only" : "unlabelled-single-image") << "independent_evaluation" << 0
                 << "requested" << static_cast<int>(records.size()) << "PASS" << passed << "FAIL" << failed << "ERROR" << errors
                 << "threads" << cv::getNumThreads() << "config_sha256" << configHash
-                << "intensity_threshold" << config.intensityThreshold() << "fail_ratio" << config.failRatio();
+                << thresholdKey << threshold << "fail_ratio" << failRatio;
         write_text(output / "summary.json", summary.releaseAndGetString());
         std::cout << "Requested " << records.size() << ", PASS " << passed << ", FAIL " << failed << ", ERROR " << errors << '\n'
                   << "Results: " << output.u8string() << '\n';

@@ -100,6 +100,49 @@ class CliTests(unittest.TestCase):
         self.run_cli('--manifest', self.manifest([dict(self.row(), sha256='0' * 64)]), '--output', output, code=2)
         self.assertEqual(self.results(output)[0]['decision'], 'ERROR')
 
+    def test_local_contrast_modes_report_distinct_scores_for_same_image(self):
+        self.config.write_text(json.dumps(dict(schema_version=1, contrast_threshold=12, fail_ratio=0.75)),
+                               encoding='utf-8')
+        self.manifest([self.row()])
+        for mode, decision, score, continuous in [('fast', 'FAIL', '1', ''), ('precise', 'PASS', '0.5', '0')]:
+            with self.subTest(mode=mode):
+                output = self.root / mode
+                self.run_cli('--algorithm', mode, '--manifest', self.root / 'manifest.json', '--output', output)
+                row, = self.results(output)
+                self.assertEqual((row['width'], row['height'], row['candidate_pixels']), ('2', '2', '4'))
+                self.assertEqual((row['decision'], row['score'], row['continuous_candidate_ratio']),
+                                 (decision, score, continuous))
+                self.assertEqual(row['image_sha256'], hashlib.sha256(self.image.read_bytes()).hexdigest())
+                summary = json.loads((output / 'summary.json').read_text())
+                self.assertEqual(summary['algorithm_version'], f'local-contrast-{mode}-v1')
+                self.assertEqual(summary['config_sha256'], hashlib.sha256(self.config.read_bytes()).hexdigest())
+                self.assertEqual(summary['contrast_threshold'], 12)
+                self.assertEqual(summary['fail_ratio'], 0.75)
+                self.assertTrue((output / 'images/000001/mask.png').is_file())
+        self.assertEqual((self.root / 'fast/images/000001/mask.png').read_bytes(),
+                         (self.root / 'precise/images/000001/mask.png').read_bytes())
+
+    def test_local_contrast_errors_keep_existing_exit_codes(self):
+        self.config.write_text(json.dumps(dict(schema_version=1, contrast_threshold=12, fail_ratio=0.1)),
+                               encoding='utf-8')
+        corrupt = self.image.parent / 'bad.png'
+        corrupt.write_bytes(b'broken')
+        self.manifest([self.row('train/OK/bad.png', b'broken'), dict(self.row(), sha256='0' * 64)])
+        for mode in ('fast', 'precise'):
+            with self.subTest(mode=mode):
+                output = self.root / mode
+                self.run_cli('--algorithm', mode, '--manifest', self.root / 'manifest.json', '--output', output, code=2)
+                errors = self.results(output)
+                self.assertEqual([row['decision'] for row in errors], ['ERROR', 'ERROR'])
+                self.assertTrue(all(row['error'] and not row['score'] and not row['continuous_candidate_ratio']
+                                    for row in errors))
+        rejected = self.root / 'rejected'
+        self.run_cli('--algorithm', 'other', '--image', self.image, '--output', rejected, code=1)
+        self.config.write_text(json.dumps(dict(schema_version=1, contrast_threshold=256, fail_ratio=0.1)),
+                               encoding='utf-8')
+        self.run_cli('--algorithm', 'fast', '--image', self.image, '--output', rejected, code=1)
+        self.assertFalse(rejected.exists())
+
     def test_bad_config_existing_output_and_huge_image_are_errors(self):
         output = self.root / 'exists'
         output.mkdir()
