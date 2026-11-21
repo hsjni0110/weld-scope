@@ -1,4 +1,5 @@
 #include "AnalysisPipeline.h"
+#include "InspectionInput.h"
 #include "LocalContrastInspection.h"
 #include "PooledSmoothModel.h"
 

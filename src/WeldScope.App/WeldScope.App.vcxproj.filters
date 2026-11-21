@@ -1,76 +1,131 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <Filter Include="검사 화면" />
+    <Filter Include="작업 제어" />
+    <Filter Include="영상 분석" />
+    <Filter Include="검사 이력" />
+    <Filter Include="장비 통신" />
+    <Filter Include="리소스" />
+    <Filter Include="앱 시작과 빌드" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FileInspectionJob.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="InspectionImageView.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="WeldScope.App.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="WeldScope.AppDlg.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>검사 화면</Filter>
     </ClInclude>
+    <ClCompile Include="WeldScope.AppDlg.cpp">
+      <Filter>검사 화면</Filter>
+    </ClCompile>
+    <ClInclude Include="InspectionImageView.h">
+      <Filter>검사 화면</Filter>
+    </ClInclude>
+    <ClCompile Include="InspectionImageView.cpp">
+      <Filter>검사 화면</Filter>
+    </ClCompile>
+    <ClInclude Include="FileInspectionJob.h">
+      <Filter>작업 제어</Filter>
+    </ClInclude>
+    <ClCompile Include="FileInspectionJob.cpp">
+      <Filter>작업 제어</Filter>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IntegratedInspection.h">
+      <Filter>작업 제어</Filter>
+    </ClInclude>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp">
+      <Filter>작업 제어</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.Core\BaselineInspection.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp">
+      <Filter>영상 분석</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.Core\LocalContrastInspection.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClCompile Include="..\WeldScope.Core\LocalContrastInspection.cpp">
+      <Filter>영상 분석</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.Core\SelectiveInspectionPolicy.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClCompile Include="..\WeldScope.Core\SelectiveInspectionPolicy.cpp">
+      <Filter>영상 분석</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.FileInspection\AnalysisPipeline.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClCompile Include="..\WeldScope.FileInspection\AnalysisPipeline.cpp">
+      <Filter>영상 분석</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.FileInspection\InspectionInput.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClCompile Include="..\WeldScope.FileInspection\InspectionInput.cpp">
+      <Filter>영상 분석</Filter>
+    </ClCompile>
+    <ClInclude Include="..\WeldScope.FileInspection\PooledSmoothModel.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WeldScope.FileInspection\PooledTexture.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WeldScope.FileInspection\CompactBoostedTrees.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WeldScope.FileInspection\InterpolatedScoreBand.h">
+      <Filter>영상 분석</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)InspectionDetails.h">
+      <Filter>검사 이력</Filter>
+    </ClInclude>
+    <ClCompile Include="$(MSBuildThisFileDirectory)InspectionDetails.cpp">
+      <Filter>검사 이력</Filter>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.h">
+      <Filter>검사 이력</Filter>
+    </ClInclude>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.cpp">
+      <Filter>검사 이력</Filter>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.h">
+      <Filter>장비 통신</Filter>
+    </ClInclude>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.cpp">
+      <Filter>장비 통신</Filter>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.h">
+      <Filter>장비 통신</Filter>
+    </ClInclude>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.cpp">
+      <Filter>장비 통신</Filter>
+    </ClCompile>
+    <ClInclude Include="Resource.h">
+      <Filter>리소스</Filter>
+    </ClInclude>
+    <ResourceCompile Include="WeldScopeApp.rc">
+      <Filter>리소스</Filter>
+    </ResourceCompile>
+    <Image Include="res\WeldScope.App.ico">
+      <Filter>리소스</Filter>
+    </Image>
     <ClInclude Include="framework.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>앱 시작과 빌드</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>앱 시작과 빌드</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="WeldScope.App.h">
+      <Filter>앱 시작과 빌드</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="InspectionImageView.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="FileInspectionJob.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\WeldScope.FileInspection\InspectionInput.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="WeldScope.App.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>앱 시작과 빌드</Filter>
     </ClCompile>
-    <ClCompile Include="WeldScope.AppDlg.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
+    <ClInclude Include="pch.h">
+      <Filter>앱 시작과 빌드</Filter>
+    </ClInclude>
     <ClCompile Include="pch.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>앱 시작과 빌드</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="WeldScopeApp.rc">
-      <Filter>리소스 파일</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\WeldScope.App.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
   </ItemGroup>
 </Project>

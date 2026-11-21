@@ -1,5 +1,6 @@
 #include "InterpolatedScoreBand.h"
-#include "../openzdm_boost_guard/CompactBoostedTrees.h"
+#include "CompactBoostedTrees.h"
+#include "InspectionInput.h"
 #include "../openzdm_eda/StudyMeasurements.h"
 
 int wmain(int argc,wchar_t** argv)

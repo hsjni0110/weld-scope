@@ -32,18 +32,18 @@ void check_lifecycle()
     check(job.select(L"A.png"), "Selection A rejected");
     std::promise<void> finish;
     auto gate = finish.get_future().share();
-    check(job.start(L"baseline.json", [gate](const auto&, const auto&) -> FileInspectionResult {
+    check(job.try_start(L"baseline.json", [gate](const auto&, const auto&) -> FileInspectionResult {
         gate.wait();
         return InspectedFile{};
     }), "A did not start");
-    const bool duplicateAccepted = job.start(L"baseline.json");
+    const bool duplicateAccepted = job.try_start(L"baseline.json");
     job.cancel();
     const bool selected = job.select(L"B.png");
-    const bool startedWhileDraining = job.start(L"baseline.json");
+    const bool startedWhileDraining = job.try_start(L"baseline.json");
     finish.set_value();
     check(!duplicateAccepted && selected && !startedWhileDraining, "Single-slot admission failed");
     check(!drain(job) && job.state() == InspectionJobState::Ready, "Late A result was accepted");
-    check(job.start(L"baseline.json", [](const auto& request, const auto&) -> FileInspectionResult {
+    check(job.try_start(L"baseline.json", [](const auto& request, const auto&) -> FileInspectionResult {
         InspectedFile result;
         result.path = request.path;
         return result;
@@ -52,19 +52,19 @@ void check_lifecycle()
     check(result && std::get<InspectedFile>(*result).path == L"B.png"
           && job.state() == InspectionJobState::Complete, "B result was not retained");
 
-    check(job.start(L"baseline.json", [](const auto&, const auto&) -> FileInspectionResult {
+    check(job.try_start(L"baseline.json", [](const auto&, const auto&) -> FileInspectionResult {
         return FileInspectionFailure::FileAccess;
     }), "Error-producing request did not start");
     job.cancel();
     check(job.select(L"C.png") && !drain(job) && job.state() == InspectionJobState::Ready,
           "Late error affected the replacement selection");
 
-    check(job.start(L"baseline.json", [](const auto&, const auto&) -> FileInspectionResult {
+    check(job.try_start(L"baseline.json", [](const auto&, const auto&) -> FileInspectionResult {
         return FileInspectionFailure::FileAccess;
     }), "Retry did not start");
     job.request_close();
     check(!drain(job) && job.state() == InspectionJobState::Closing, "Close accepted a late error");
-    check(!job.select(L"C.png") && !job.start(L"baseline.json"), "Closing reopened admission");
+    check(!job.select(L"C.png") && !job.try_start(L"baseline.json"), "Closing reopened admission");
 }
 
 void check_input(const std::filesystem::path& fixture, const std::filesystem::path& config)

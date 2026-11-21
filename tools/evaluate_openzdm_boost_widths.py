@@ -26,8 +26,7 @@ def regional(config, is_inside):
 
 
 def fit(out):
-    if any(sha(Path(p)) != h for p,h in read_json(PRIOR/'freeze.json')['hashes'].items()):
-        raise ValueError('Previous experiment freeze mismatch')
+    pooled.verify_research_freeze(read_json(PRIOR/'freeze.json'))
     source = {r['path']:r for r in read_json(PRIOR/'calibration.json')['rows']}
     precise = {r['source_path']:r for r in read_rows(pooled.ROOT/'artifacts/S07/review-train-01/precise/results.csv')}
     def add_precise(rows):
@@ -117,8 +116,10 @@ def validate(out):
              PRIOR/'model-400.txt',PRIOR/'calibration.json',out/'calibration-report.json',EDGE,Path(__file__).resolve(),
              *(p for p in pooled.PRIOR.rglob('*') if p.is_file()),*(out/f'config-{s}.json' for s in SIZES),
              *(out/f'model-{s}.txt' for s in SIZES),*(pooled.ROOT/'tools/openzdm_boost_guard'/f for f in
-               ('CMakeLists.txt','runner.cpp','CompactBoostedTrees.h'))]
-    write_json(out/'freeze.json',{'selected':selected,'validation':reports,'hashes':{str(f.resolve()):sha(f) for f in files},
+               ('CMakeLists.txt','runner.cpp')),
+             *(pooled.ROOT/'src/WeldScope.FileInspection'/f for f in ('CompactBoostedTrees.h','PooledTexture.h'))]
+    write_json(out/'freeze.json',{'selected':selected,'validation':reports,'source_layout':'shared',
+                                  'hashes':{str(f.resolve()):sha(f) for f in files},
                                   'score_parity_rows_per_size':len(read_json(pooled.VALIDATION)['rows'])})
     print('Selected',selected,flush=True)
 
@@ -149,8 +150,7 @@ def test(out):
     primary = {r['path'] for r in read_json(pooled.INPUTS/'test-primary.json')['rows']}
     order = (*CONTROLS,size)
     for i,modes in enumerate((order,tuple(reversed(order))),1):
-        if any(sha(Path(p))!=h for p,h in frozen['hashes'].items()):
-            raise ValueError('Frozen inputs changed')
+        pooled.verify_research_freeze(frozen)
         data = {k:measure(out,f'test-{i}',pooled.INPUTS/'test.json',k) for k in modes}
         results.append({'official':summary(data),'primary':by_group({k:[r for r in rows if r['path'] in primary]
                                                                      for k,rows in data.items()})})

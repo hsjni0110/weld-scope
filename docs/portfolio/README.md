@@ -80,19 +80,19 @@ $$
 | 416픽셀 | 약 0.145 | 두 기준선 사이 |
 | 417픽셀 | 약 0.129 | 두 기준선 사이 |
 
-두 기준선 사이에서는 남은 시간이 있으면 정밀 분석으로 넘어갑니다. [배포 설정](../../config/pooled-smooth-220.json) · [폭별 기준 계산 코드](../../tools/openzdm_boost_smooth/InterpolatedScoreBand.h)
+두 기준선 사이에서는 남은 시간이 있으면 정밀 분석으로 넘어갑니다. [배포 설정](../../config/pooled-smooth-220.json) · [폭별 기준 계산 코드](../../src/WeldScope.FileInspection/InterpolatedScoreBand.h)
 
 ### LightGBM으로 학습하고 C++로 판정하기
 
 밝기와 주변 무늬를 숫자로 정리한 뒤, 사진마다 붙어 있는 **정상·불량 정답**을 함께 주어 LightGBM으로 모델을 학습했습니다. LightGBM은 **결정 나무**를 차례로 만들면서 앞의 나무들이 낸 예측의 오류를 다음 나무가 줄이도록 학습합니다. 예를 들어 어두운 배경에서 정상과 불량이 자주 섞이면, 이후 나무는 그 사진을 구분하는 데 도움이 되는 밝기 변화나 무늬를 찾을 수 있습니다. [LightGBM 학습 코드](../../tools/openzdm_boost/fit.cpp) · [후보 비교와 220개 나무 선택](../algorithms/openzdm-false-pass-eda.md#최종-220개-나무와-연속-폭-경계)
 
-배포할 때는 최종 모델의 **결정 나무 220개**에서 비교 기준과 각 경로의 점수를 꺼내 `model-220.txt`에 저장합니다. Windows 앱은 이 파일을 **C++ 판독기**로 읽어 새 사진의 점수를 계산합니다. 앱을 실행하는 PC에서는 LightGBM 설치 없이 검사할 수 있습니다. [모델 변환 코드](../../tools/evaluate_openzdm_boost.py) · [배포 모델](../../config/model-220.txt) · [C++ 판독 코드](../../tools/openzdm_boost_guard/CompactBoostedTrees.h)
+배포할 때는 최종 모델의 **결정 나무 220개**에서 비교 기준과 각 경로의 점수를 꺼내 `model-220.txt`에 저장합니다. Windows 앱은 이 파일을 **C++ 판독기**로 읽어 새 사진의 점수를 계산합니다. 앱을 실행하는 PC에서는 LightGBM 설치 없이 검사할 수 있습니다. [모델 변환 코드](../../tools/evaluate_openzdm_boost.py) · [배포 모델](../../config/model-220.txt) · [C++ 판독 코드](../../src/WeldScope.FileInspection/CompactBoostedTrees.h)
 
 사진 한 장이 들어오면 다음 순서로 처리합니다.
 
-1. **사진을 여러 곳에서 읽습니다.** 가로 64곳과 세로 16곳을 조합한 1,024개 지점에서 밝기와 주변 밝기 차이를 잽니다. 예를 들어 어두운 점 세 개가 가운데에 모인 사진과 양끝에 흩어진 사진은 후보 수가 같아도 위치별 입력값이 다릅니다. [밝기와 무늬 계산 코드](../../tools/openzdm_boost/PooledTexture.h)
+1. **사진을 여러 곳에서 읽습니다.** 가로 64곳과 세로 16곳을 조합한 1,024개 지점에서 밝기와 주변 밝기 차이를 잽니다. 예를 들어 어두운 점 세 개가 가운데에 모인 사진과 양끝에 흩어진 사진은 후보 수가 같아도 위치별 입력값이 다릅니다. [밝기와 무늬 계산 코드](../../src/WeldScope.FileInspection/PooledTexture.h)
 2. **학습한 질문으로 점수를 냅니다.** 결정 나무 한 개는 “이 구간의 밝기 변화가 기준보다 큰가?”처럼 숫자를 비교하는 질문을 따라갑니다. 220개 나무의 답을 합쳐 사진 한 장의 점수를 냅니다. 점수가 낮을수록 정상 쪽에 가깝습니다. [C++ 모델 코드](../../src/WeldScope.FileInspection/PooledSmoothModel.h)
-3. **사진 폭에 맞춰 점수를 해석합니다.** 220개 나무는 모든 폭에서 동일하게 사용합니다. 모델이 점수를 낸 뒤, **연속 보간**으로 계산한 통과선·탈락선과 비교합니다. [보간 코드](../../tools/openzdm_boost_smooth/InterpolatedScoreBand.h)
+3. **사진 폭에 맞춰 점수를 해석합니다.** 220개 나무는 모든 폭에서 동일하게 사용합니다. 모델이 점수를 낸 뒤, **연속 보간**으로 계산한 통과선·탈락선과 비교합니다. [보간 코드](../../src/WeldScope.FileInspection/InterpolatedScoreBand.h)
 
 아래는 사진 읽기와 계산이 성공했을 때의 판정 순서입니다. 현재 앱은 첫 점수를 LightGBM 모델로 계산하고, 필요할 때 앞서 설명한 정밀 분석을 한 번 사용합니다.
 

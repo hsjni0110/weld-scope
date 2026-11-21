@@ -286,6 +286,15 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WeldScope.App.h" />
     <ClInclude Include="WeldScope.AppDlg.h" />
+    <ClInclude Include="..\WeldScope.Core\BaselineInspection.h" />
+    <ClInclude Include="..\WeldScope.Core\LocalContrastInspection.h" />
+    <ClInclude Include="..\WeldScope.Core\SelectiveInspectionPolicy.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\AnalysisPipeline.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\InspectionInput.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\PooledSmoothModel.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\PooledTexture.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\CompactBoostedTrees.h" />
+    <ClInclude Include="..\WeldScope.FileInspection\InterpolatedScoreBand.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

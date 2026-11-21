@@ -3,18 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <filesystem>
-#include <fstream>
 #include <stdexcept>
 #include <vector>
 
 namespace pooled_texture {
+// 학습과 실행에서 동일하게 사용하는 영상 격자와 특징 수.
 constexpr int gridColumns = 8, gridRows = 4, channels = 14;
 constexpr int featureCount = (gridColumns * gridRows + gridRows + 1) * channels;
+// 모델에 전달하는 고정 순서의 영상 질감 특징.
 using Features = std::array<float, featureCount>;
 
-// Each cell samples 8 x 4 positions. Directional differences use native-pixel
-// distances so that both narrow grooves and wider ripples contribute.
+// 비어 있지 않은 8비트 회색 또는 BGR 영상에서 모델의 입력 특징을 만든다.
+// 원본 픽셀 간격을 사용해 좁은 홈과 넓은 요철의 밝기 차를 함께 반영한다.
 inline Features describe(const cv::Mat& image)
 {
     cv::Mat gray;
@@ -78,53 +78,4 @@ inline Features describe(const cv::Mat& image)
     }
     return result;
 }
-
-class BoostedTrees {
-    struct Node { int feature, left, right; double threshold; };
-    struct Tree { std::vector<Node> nodes; std::vector<double> leaves; };
-    std::vector<Tree> trees_;
-public:
-    explicit BoostedTrees(const std::filesystem::path& path)
-    {
-        std::ifstream input(path);
-        input.exceptions(std::ios::failbit | std::ios::badbit);
-        std::string version;
-        int features, count;
-        input >> version >> features >> count;
-        if (version != "pooled-texture-v1" || features != featureCount || count < 1 || count > 4096)
-            throw std::invalid_argument("Invalid pooled texture model header");
-        trees_.resize(count);
-        for (auto& tree : trees_) {
-            int leaves;
-            input >> leaves;
-            if (leaves < 2 || leaves > 1024) throw std::invalid_argument("Invalid leaf count");
-            tree.nodes.resize(leaves-1);
-            tree.leaves.resize(leaves);
-            for (int i = 0; i < leaves-1; ++i) {
-                auto& node = tree.nodes[i];
-                input >> node.feature >> node.threshold >> node.left >> node.right;
-                const auto valid = [=](int child) { return child >= -leaves && (child < 0 || (child > i && child < leaves-1)); };
-                if (node.feature < 0 || node.feature >= featureCount || !std::isfinite(node.threshold) ||
-                    !valid(node.left) || !valid(node.right)) throw std::invalid_argument("Invalid tree node");
-            }
-            for (auto& leaf : tree.leaves) {
-                input >> leaf;
-                if (!std::isfinite(leaf)) throw std::invalid_argument("Invalid tree leaf");
-            }
-        }
-    }
-    double predict(const Features& features) const
-    {
-        double raw = 0;
-        for (const auto& tree : trees_) {
-            int index = 0;
-            while (index >= 0) {
-                const auto& node = tree.nodes[index];
-                index = features[node.feature] <= node.threshold ? node.left : node.right;
-            }
-            raw += tree.leaves[static_cast<size_t>(-1-index)];
-        }
-        return 1/(1+std::exp(-raw));
-    }
-};
 }

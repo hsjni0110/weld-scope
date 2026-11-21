@@ -49,6 +49,7 @@ if(WELDSCOPE_S10_TESTS)
     add_subdirectory(src/WeldScope.Storage)
     add_library(weldscope_integrated_inspection STATIC
         src/WeldScope.App/FileInspectionJob.cpp src/WeldScope.App/IntegratedInspection.cpp
+        src/WeldScope.App/InspectionDetails.cpp
         src/WeldScope.Device/LoopbackServer.cpp src/WeldScope.Device/Protocol.cpp)
     target_include_directories(weldscope_integrated_inspection PUBLIC src/WeldScope.App src/WeldScope.Device)
     target_link_libraries(weldscope_integrated_inspection PUBLIC weldscope_inspection_input weldscope_storage ws2_32 rpcrt4)

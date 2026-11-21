@@ -1,22 +1,32 @@
 #pragma once
 
-#include "AnalysisPipeline.h"
-#include "../../tools/openzdm_boost_guard/CompactBoostedTrees.h"
-#include "../../tools/openzdm_boost_smooth/InterpolatedScoreBand.h"
+#include "CompactBoostedTrees.h"
+#include "InspectionInput.h"
+#include "InterpolatedScoreBand.h"
+#include "SelectiveInspectionPolicy.h"
+
+#include <filesystem>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 namespace weldscope {
 
+// 배포용으로 고정한 학습 모델을 불러오고 영상 점수와 폭에 맞는 판정 경계를 제공한다.
 class PooledSmoothModel {
 public:
+    // 등록된 설정 바이트를 식별하는 SHA-256 값.
     static constexpr auto configHash = "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b";
 
+    // 설정과 모델 파일의 지문을 모두 확인한다. 일치하지 않으면 std::invalid_argument를 던진다.
     PooledSmoothModel(const std::filesystem::path& directory, const std::vector<unsigned char>& manifest)
         : PooledSmoothModel(directory, checked_settings(manifest)) {}
 
+    // 영상의 가로 픽셀 수로 통과와 불량의 경계를 구한다.
     ScoreBand band(int width) const {
         return pooled_texture::interpolated_band(width, inside_, outside_);
     }
+    // 8비트 영상의 질감 특징을 추출해 모델 점수를 구한다. 판정은 호출자가 경계와 비교해 내린다.
     double score(const cv::Mat& bgr) const {
         return trees_.predict(pooled_texture::describe(bgr));
     }

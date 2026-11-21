@@ -73,8 +73,9 @@ def boundary(out, rows):
 
 def validation(out):
     inherited = read_json(HARD/'freeze.json')
-    if inherited['selected']!=220 or any(sha(Path(f))!=h for f,h in inherited['hashes'].items()):
-        raise ValueError('Inherited 220 freeze changed')
+    if inherited['selected']!=220:
+        raise ValueError('Expected the frozen 220-tree model')
+    pooled.verify_research_freeze(inherited)
     out.mkdir(parents=True,exist_ok=False)
     config = read_json(HARD/'config-220.json')
     shutil.copyfile(HARD/config['model'],out/config['model'])
@@ -100,9 +101,12 @@ def validation(out):
     files = [RUNNER,widths.RUNNER,pooled.SPATIAL,pooled.CONTROL,pooled.ORIGINAL,HARD/'model-220.txt',HARD/'config-220.json',
              HARD/'boundary.json',HARD/'freeze.json',out/config['model'],out/'config.json',out/'boundary.json',widths.EDGE,
              pooled.VALIDATION,pooled.INPUTS/'test.json',pooled.INPUTS/'test-primary.json',Path(__file__).resolve(),
-             *(sources/k for k in ('runner.cpp','InterpolatedScoreBand.h','CMakeLists.txt')),
+             *(sources/k for k in ('runner.cpp','CMakeLists.txt')),
+             *(pooled.ROOT/'src/WeldScope.FileInspection'/f for f in
+               ('InterpolatedScoreBand.h','CompactBoostedTrees.h','PooledTexture.h')),
              *(p for p in pooled.PRIOR.rglob('*') if p.is_file())]
-    write_json(out/'freeze.json',{'passed':passed,'validation':reports,'hashes':{str(f.resolve()):sha(f) for f in files}})
+    write_json(out/'freeze.json',{'passed':passed,'validation':reports,'source_layout':'shared',
+                                  'hashes':{str(f.resolve()):sha(f) for f in files}})
     print('Validation gate:',passed,flush=True)
 
 
@@ -113,8 +117,7 @@ def test(out):
     primary = {r['path'] for r in read_json(pooled.INPUTS/'test-primary.json')['rows']}
     reports = []
     for i,order in enumerate((MODES,tuple(reversed(MODES))),1):
-        if any(sha(Path(f))!=h for f,h in frozen['hashes'].items()):
-            raise ValueError('Interpolation freeze mismatch')
+        pooled.verify_research_freeze(frozen)
         data = {k:measure(out,f'test-{i}',pooled.INPUTS/'test.json',k) for k in order}
         reports.append({'official':compare(data),'primary':compare({k:[r for r in rows if r['path'] in primary]
                                                                     for k,rows in data.items()})})

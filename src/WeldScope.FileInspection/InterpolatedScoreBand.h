@@ -3,8 +3,8 @@
 #include <algorithm>
 
 namespace pooled_texture {
-// Endpoints are inherited from the trained width calibrations. A six-pixel
-// radius spans one horizontal sampling pitch around either routing boundary.
+// 폭에 따라 두 판정 구간 사이의 통과 및 불량 경계를 선형으로 보간한다.
+// width의 단위는 픽셀이다. 두 폭 경계에서 6픽셀 이내일 때만 구간을 섞는다.
 inline weldscope::ScoreBand interpolated_band(int width, weldscope::ScoreBand inside, weldscope::ScoreBand outside)
 {
     constexpr double radius=6;

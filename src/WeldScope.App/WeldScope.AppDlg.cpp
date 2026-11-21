@@ -8,7 +8,6 @@
 #include <string>
 #include <opencv2/imgproc.hpp>
 #ifdef WELDSCOPE_S10
-#include "LocalContrastInspection.h"
 #include <cwchar>
 #endif
 
@@ -44,16 +43,6 @@ const wchar_t* StateText(State state)
     }
 }
 #endif
-
-std::filesystem::path BaselineConfigPath()
-{
-    std::wstring executable(32768, L'\0');
-    const DWORD capacity = static_cast<DWORD>(executable.size());
-    const DWORD length = ::GetModuleFileNameW(nullptr, executable.data(), capacity);
-    if (!length || length >= capacity) throw std::runtime_error("Executable path unavailable");
-    executable.resize(length);
-    return std::filesystem::path(executable).parent_path() / L"baseline.json";
-}
 
 #ifdef WELDSCOPE_S10
 constexpr unsigned int folderPageSize = 100;
@@ -142,45 +131,17 @@ unsigned int CountMatchingFolderResults(const BatchCounts& counts, unsigned int 
     return count ? counts.*count : counts.Total();
 }
 
-cv::Mat RebuildSavedCandidateOverlay(const cv::Mat& bgr, const InspectionRecord& record, const std::filesystem::path& baseline)
+const wchar_t* SourceStatusText(InspectionSourceStatus status)
 {
-    const auto attempt = std::find_if(record.attempts.rbegin(), record.attempts.rend(),
-        [](const AnalysisAttempt& stage) { return stage.score.has_value(); });
-    if (attempt == record.attempts.rend()) return {};
-
-    // An image-level model only produces a pixel mask when the precise stage ran.
-    if (attempt->stage == "POOLED_WIDTH" || attempt->stage == "POOLED" || attempt->stage == "SPATIAL") return {};
-    const bool isBaseline = record.algorithmVersion == inspection_version(InspectionMode::Baseline);
-    auto path = baseline;
-    if (!isBaseline) {
-        struct SavedConfig { const char* version; const wchar_t* filename; };
-        const SavedConfig configs[] = {
-            {inspection_version(InspectionMode::Selective), L"selective.json"},
-            {inspection_version(InspectionMode::PooledSmooth), pooledSmoothConfigFile},
-            {"openzdm-spatial-48-v1", L"spatial-48.json"}, {"openzdm-pooled-400-v1", L"pooled-400.json"},
-            {"openzdm-pooled-width-220-v1", L"pooled-width-220.json"}
-        };
-        const auto saved = std::find_if(std::begin(configs), std::end(configs),
-            [&](const SavedConfig& entry) { return record.algorithmVersion == entry.version; });
-        if (saved == std::end(configs)) throw std::runtime_error("The saved algorithm version is unavailable");
-        path = baseline.parent_path() / saved->filename;
+    switch (status) {
+    case InspectionSourceStatus::Available: return L"";
+    case InspectionSourceStatus::Unverifiable: return L"원본 확인 불가";
+    case InspectionSourceStatus::Changed: return L"원본 변경";
+    case InspectionSourceStatus::Missing: return L"원본 누락";
+    case InspectionSourceStatus::Unreadable: return L"원본 열기 실패";
+    case InspectionSourceStatus::OverlaySettingsUnavailable: return L"후보 표시 설정 확인";
     }
-    const auto config = read_bytes(path, config_file_limit);
-    if (sha256(config) != record.configSha256) throw std::runtime_error("The saved settings are unavailable");
-
-    cv::Mat mask;
-    if (isBaseline) {
-        mask = inspect_baseline(bgr, parse_baseline_config(read_json(config))).mask;
-    } else {
-        const bool precise = attempt->stage == "PRECISE";
-        const auto settings = parse_inspection_parameters(read_json(config), InspectionMode::Selective);
-        mask = inspect_local_contrast(bgr, precise ? LocalContrastMode::Precise : LocalContrastMode::Fast,
-            settings.threshold, precise ? settings.preciseBand.failMin : settings.fastBand.failMin).mask;
-    }
-    if (!cv::countNonZero(mask)) return {};
-    cv::Mat overlay;
-    cv::cvtColor(make_candidate_overlay(bgr, mask), overlay, cv::COLOR_BGR2BGRA);
-    return overlay;
+    return L"";
 }
 
 bool IntegrationBusy(IntegrationState state) {
@@ -289,7 +250,7 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
     CreateFolderControls();
     try {
         cv::setNumThreads(1);
-        const auto config = BaselineConfigPath();
+        const auto config = baseline_config_path();
         integration_ = std::make_unique<IntegratedInspection>(config, config.parent_path() / L"defect.png", DevicePort());
         pollTimer_ = SetTimer(inspectionTimerId, 25, nullptr);
         if (!pollTimer_) throw std::runtime_error("Inspection timer unavailable");
@@ -556,7 +517,7 @@ void CWeldScopeAppDlg::OnStart()
     if (closeRequested_ || !integration_ || !pollTimer_) return;
     if (folderMode_) { StartFolder(); return; }
     try {
-        if (integration_->StartFile(selectedFile_)) {
+        if (integration_->TryStartFile(selectedFile_)) {
             view_ = InspectionView::Live;
             ClearResult();
         }
@@ -569,7 +530,7 @@ void CWeldScopeAppDlg::OnStart()
     bool started = false;
     if (pollTimer_) {
         try {
-            started = job_.start(BaselineConfigPath());
+            started = job_.try_start(baseline_config_path());
         } catch (const std::exception&) {
             // A failed executable-path lookup leaves no worker to drain.
         }
@@ -803,7 +764,7 @@ void CWeldScopeAppDlg::StartFolder()
 {
     if (folderFiles_.empty() || folderScanTask_.valid()) return;
     try {
-        if (integration_->StartFolder(folderRoot_, folderFiles_)) {
+        if (integration_->TryStartFolder(folderRoot_, folderFiles_)) {
             folderFiles_.clear();
             folderNotice_.Empty();
             displayedBatch_.reset();
@@ -943,7 +904,7 @@ void CWeldScopeAppDlg::OnOpenFolderRow()
     const int row = folderResults_.GetNextItem(-1, LVNI_SELECTED);
     if (row < 0 || static_cast<std::size_t>(row) >= folderRows_.size()) return;
     selectedFolderInspectionId_ = folderRows_[static_cast<std::size_t>(row)].inspectionId;
-    if (!historyOpen_.valid()) RequestInspectionDetails(selectedFolderInspectionId_, true);
+    if (!historyOpen_.valid()) RequestInspectionDetails(selectedFolderInspectionId_, InspectionDetailSource::FolderResult);
     Refresh();
 }
 
@@ -1035,7 +996,7 @@ void CWeldScopeAppDlg::PollFolder(const IntegrationSnapshot& snapshot)
     if (folderPageRefreshPending_) RequestFolderPage();
     if (!selectedFolderInspectionId_.empty() && selectedFolderInspectionId_ != requestedFolderInspectionId_ &&
         !historyOpen_.valid())
-        RequestInspectionDetails(selectedFolderInspectionId_, true);
+        RequestInspectionDetails(selectedFolderInspectionId_, InspectionDetailSource::FolderResult);
 }
 
 void CWeldScopeAppDlg::PollFolderScan()
@@ -1170,40 +1131,18 @@ void CWeldScopeAppDlg::OnOpenHistory()
     const int row = history_.GetNextItem(-1, LVNI_SELECTED);
     if (row < 0 || static_cast<std::size_t>(row) >= historyRows_.size()) return;
     historyOpenRevision_ = integration_->Snapshot().revision;
-    RequestInspectionDetails(historyRows_[static_cast<std::size_t>(row)].inspectionId, false);
+    RequestInspectionDetails(historyRows_[static_cast<std::size_t>(row)].inspectionId, InspectionDetailSource::SingleFileHistory);
     Refresh();
 }
 
-void CWeldScopeAppDlg::RequestInspectionDetails(const std::string& inspectionId, bool folder)
+void CWeldScopeAppDlg::RequestInspectionDetails(const std::string& inspectionId, InspectionDetailSource source)
 {
-    isOpeningFolderResult_ = folder;
-    if (folder) requestedFolderInspectionId_ = inspectionId;
+    historyOpenSource_ = source;
+    if (source == InspectionDetailSource::FolderResult) requestedFolderInspectionId_ = inspectionId;
     try {
-        historyOpen_ = std::async(std::launch::async, [inspectionId, folder] {
-            OpenedInspection opened;
-            auto stored = InspectionHistory(HistoryConnectionFromEnvironment()).Get(inspectionId);
-            if (!stored) throw std::runtime_error("Inspection history row unavailable");
-            opened.record = std::move(*stored);
-            const auto& record = opened.record.record;
-            try {
-                const auto bytes = read_bytes(std::filesystem::u8path(record.sourcePath), image_file_limit);
-                if (record.sourceSha256.empty()) opened.sourceStatus = L"원본 확인 불가";
-                else if (sha256(bytes) != record.sourceSha256) opened.sourceStatus = L"원본 변경";
-                else {
-                    const auto bgr = decode_png(bytes);
-                    cv::cvtColor(bgr, opened.image, cv::COLOR_BGR2BGRA);
-                    if (folder) {
-                        try { opened.overlay = RebuildSavedCandidateOverlay(bgr, record, BaselineConfigPath()); }
-                        catch (const std::exception&) { opened.sourceStatus = L"후보 표시 설정 확인"; }
-                    }
-                }
-            } catch (const InspectionInputError& error) {
-                opened.sourceStatus = error.reason() == FileInspectionFailure::FileAccess ? L"원본 누락" : L"원본 열기 실패";
-            } catch (const std::exception&) { opened.sourceStatus = L"원본 열기 실패"; }
-            return opened;
-        });
+        historyOpen_ = std::async(std::launch::async, ReadInspectionDetails, inspectionId, source);
     } catch (const std::exception&) {
-        if (folder) detail_.SetWindowText(L"상세 조회 실패");
+        if (source == InspectionDetailSource::FolderResult) detail_.SetWindowText(L"상세 조회 실패");
         else historyNote_.SetWindowText(L"이력 열기 실패");
     }
 }
@@ -1224,10 +1163,11 @@ void CWeldScopeAppDlg::ShowHistory(std::vector<InspectionSummary> rows)
     historyNote_.SetWindowText(historyRows_.empty() ? L"저장 이력 없음" : L"최근 저장 이력");
 }
 
-void CWeldScopeAppDlg::ShowOpenedInspection(const OpenedInspection& opened, bool folder)
+void CWeldScopeAppDlg::ShowOpenedInspection(const OpenedInspection& opened, InspectionDetailSource source)
 {
+    const bool folder = source == InspectionDetailSource::FolderResult;
     ClearResult();
-    const auto& record = opened.record.record;
+    const auto& record = opened.record;
     if (!folder) {
         selectedFile_.clear();
         view_ = InspectionView::History;
@@ -1238,7 +1178,7 @@ void CWeldScopeAppDlg::ShowOpenedInspection(const OpenedInspection& opened, bool
     verdict_.SetWindowText(StoredDecision(record.workState, record.decision));
     fileName_.SetWindowText(std::filesystem::u8path(record.sourcePath).c_str());
     image_.SetImages(opened.image, opened.overlay);
-    imageMeta_.SetWindowText(opened.sourceStatus);
+    imageMeta_.SetWindowText(SourceStatusText(opened.sourceStatus));
     CString details;
     if (folder || (!record.attempts.empty() && record.attempts.front().stage != "BASELINE")) {
         for (const auto& attempt : record.attempts)
@@ -1300,15 +1240,16 @@ void CWeldScopeAppDlg::PollIntegration()
         Refresh();
     }
     if (historyOpen_.valid() && historyOpen_.wait_for(0ms) == std::future_status::ready) {
+        const bool openingFolderResult = historyOpenSource_ == InspectionDetailSource::FolderResult;
         try {
             const auto opened = historyOpen_.get();
-            if (!closeRequested_ && folderMode_ == isOpeningFolderResult_ &&
-                (folderMode_ ? selectedFolderInspectionId_ == opened.record.record.inspectionId : snapshot.revision == historyOpenRevision_))
-                ShowOpenedInspection(opened, folderMode_);
+            if (!closeRequested_ && folderMode_ == openingFolderResult &&
+                (folderMode_ ? selectedFolderInspectionId_ == opened.record.inspectionId : snapshot.revision == historyOpenRevision_))
+                ShowOpenedInspection(opened, historyOpenSource_);
         } catch (const std::exception&) {
-            if (folderMode_ && isOpeningFolderResult_ && selectedFolderInspectionId_ == requestedFolderInspectionId_)
+            if (folderMode_ && openingFolderResult && selectedFolderInspectionId_ == requestedFolderInspectionId_)
                 detail_.SetWindowText(L"상세 조회 실패");
-            else if (!isOpeningFolderResult_) historyNote_.SetWindowText(L"이력 열기 실패");
+            else if (!openingFolderResult) historyNote_.SetWindowText(L"이력 열기 실패");
         }
         Refresh();
     }

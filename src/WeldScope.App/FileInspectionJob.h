@@ -3,6 +3,7 @@
 #include "AnalysisPipeline.h"
 #include "InspectionInput.h"
 #include <atomic>
+#include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <future>
@@ -13,6 +14,7 @@
 #include <variant>
 
 namespace weldscope {
+// 파일 검사에 필요한 원본과 설정 경로를 전달한다. PooledSmooth에는 등록된 모델도 필요하다.
 struct FileInspectionRequest {
     std::filesystem::path path;
     std::filesystem::path config;
@@ -20,6 +22,7 @@ struct FileInspectionRequest {
     std::shared_ptr<const PooledSmoothModel> model = {};
 };
 
+// 판정, 근거와 화면 표시용 BGRA 영상. 표시할 후보가 없으면 overlay는 비어 있다.
 struct InspectedFile {
     std::filesystem::path path;
     std::string inputHash;
@@ -31,33 +34,49 @@ struct InspectedFile {
     double loadMs{}, analysisMs{};
 };
 
+// 검사 중 취소 요청을 확인했다. 파일 오류나 최종 판정과 구분하는 결과다.
 struct InspectionCancelled {};
+// 판정과 영상, 파일 처리 실패, 취소 중 하나를 전달한다.
 using FileInspectionResult = std::variant<InspectedFile, FileInspectionFailure, InspectionCancelled>;
 
+// 설정과 원본을 읽어 호출 스레드에서 한 장을 검사한다. 분석 사이에 취소 여부를 확인한다.
 FileInspectionResult inspect_file(const FileInspectionRequest& request, const std::atomic_bool& cancelled);
 
+// 저장할 원본과 설정의 지문. 처리 도중 실패하면 일부만 채워질 수 있다.
 struct InspectionEvidence {
     std::string sourceSha256;
     std::string configSha256;
 };
+// 고정 설정을 제공하면 파일에서 다시 읽지 않는다. 원본 지문을 지정하면 실제 원본과 일치해야 한다.
+// evidence에는 확보한 바이트의 지문을 기록한다. beforePrecise는 정밀 분석 직전에 호출한다.
 FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
     InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig = nullptr,
     std::string_view expectedSourceHash = {}, const std::function<void()>& beforePrecise = {});
 
+// 화면이 읽는 작업 상태. Cancelled나 Closing에서도 워커 회수가 남아 있을 수 있다.
 enum class InspectionJobState { Empty, Ready, Running, Complete, Cancelled, Error, Closing };
 
-// The owning UI thread selects, starts, cancels and polls the sole worker.
+// UI 스레드가 파일 선택과 검사 시작을 제어한다. 한 번에 워커 하나를 실행하며, UI가 poll로 회수한다.
 class FileInspectionJob {
 public:
+    // 워커에서 호출하는 검사 함수. 받은 취소 플래그로 취소 요청을 확인한다.
     using Runner = std::function<FileInspectionResult(const FileInspectionRequest&, const std::atomic_bool&)>;
+    // 검사 경로를 기억한다. 검사 중, 종료 중 또는 빈 경로면 false를 반환한다.
     bool select(const std::filesystem::path& path);
-    bool start(const std::filesystem::path& config, Runner run = inspect_file);
+    // 선택한 파일의 검사 요청을 수락하면 true를 반환한다. 이전 워커를 먼저 회수해야 한다.
+    bool try_start(const std::filesystem::path& config, Runner run = inspect_file);
+    // 진행 중인 작업에 취소를 요청하고 늦게 도착한 결과를 무시한다. 워커 종료는 기다리지 않는다.
     void cancel();
+    // 새 검사 시작을 막고 진행 중인 작업에 취소를 요청한다. poll로 남은 워커를 회수한다.
     void request_close();
+    // 끝나지 않은 워커를 기다리지 않는다. 화면에서 받아들일 완료 결과가 없으면 std::nullopt를 반환한다.
     std::optional<FileInspectionResult> poll();
 
+    // 화면 버튼과 상태를 갱신할 때 사용하는 작업 상태다.
     InspectionJobState state() const { return state_; }
+    // 완료 여부와 관계없이 아직 poll로 회수할 워커가 있는지 알려 준다.
     bool busy() const { return worker_.valid(); }
+    // 현재 선택 경로를 빌려 준다. 경로를 보존하려면 다음 선택 전에 복사한다.
     const std::filesystem::path& selected_path() const { return selected_; }
 
 private:

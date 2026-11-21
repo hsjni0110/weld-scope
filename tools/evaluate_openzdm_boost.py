@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import struct
 import subprocess
 import urllib.request
@@ -24,6 +25,43 @@ SPATIAL = STUDY/'budget-build/Release/openzdm_shape.exe'
 CONTROL = STUDY/'shape-build/Release/openzdm_eda_final.exe'
 WHEEL_HASH = '37089ee95664b6550a7189d887dbf098e3eadab03537e411f52c63c121e3ba4b'
 SIZES = (100, 220, 400)
+
+# 이 커밋에서 작성된 동결 기록에는 공용 모델 코드의 이전 경로가 들어 있다.
+PRE_SHARED_MODEL_REVISION = '7102863ec4ff9216e4549c81e31913625866ef9d'
+MOVED_RESEARCH_SOURCES = {
+    'tools/evaluate_openzdm_boost.py',
+    'tools/evaluate_openzdm_boost_widths.py',
+    'tools/evaluate_openzdm_smooth.py',
+    'tools/openzdm_boost/PooledTexture.h',
+    'tools/openzdm_boost/runner.cpp',
+    'tools/openzdm_boost_guard/CompactBoostedTrees.h',
+    'tools/openzdm_boost_guard/runner.cpp',
+    'tools/openzdm_boost_smooth/InterpolatedScoreBand.h',
+    'tools/openzdm_boost_smooth/runner.cpp',
+}
+
+
+def verify_research_freeze(frozen):
+    """동결 입력을 검증한다. 구형 기록에서 이동한 소스만 당시 Git 바이트로 검증한다."""
+    for name, expected in frozen['hashes'].items():
+        path = Path(name)
+        if path.is_file() and sha(path) == expected:
+            continue
+        relative = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else ''
+        if 'source_layout' not in frozen and relative in MOVED_RESEARCH_SOURCES:
+            git = os.environ.get('WELDSCOPE_GIT', 'git')
+            try:
+                blob = subprocess.run(
+                    [git, 'show', f'{PRE_SHARED_MODEL_REVISION}:{relative}'],
+                    cwd=ROOT, capture_output=True, check=True,
+                ).stdout
+            except (FileNotFoundError, subprocess.CalledProcessError) as error:
+                raise ValueError('Cannot read the historical research source. Check Git and WELDSCOPE_GIT.') from error
+            # 동결 기록은 작업 트리의 줄바꿈 바이트까지 해시했다.
+            windows_bytes = blob.replace(b'\r\n', b'\n').replace(b'\n', b'\r\n')
+            if any(hashlib.sha256(data).hexdigest() == expected for data in (blob, windows_bytes)):
+                continue
+        raise ValueError(f'Frozen research input changed or is missing: {path}')
 
 
 def fit(out):
@@ -158,10 +196,11 @@ def validate(out):
     selected = min(candidates)[2] if candidates else None
     files = [RUNNER,TRAINER,CONTROL,SPATIAL,ORIGINAL,FIT,VALIDATION,out/'calibration.json',out/'lib_lightgbm.dll',
              out/'trained.txt',out/'calibration-report.json',out/'parity.json',INPUTS/'test.json',INPUTS/'test-primary.json',
-             *(ROOT/'tools/openzdm_boost'/f for f in ('CMakeLists.txt','fit.cpp','runner.cpp','PooledTexture.h')),
+             *(ROOT/'tools/openzdm_boost'/f for f in ('CMakeLists.txt','fit.cpp','runner.cpp','BoostedTrees.h')),
+             ROOT/'src/WeldScope.FileInspection/PooledTexture.h',
              Path(__file__).resolve(),*(p for p in PRIOR.rglob('*') if p.is_file()),
              *(out/f'config-{i}.json' for i in SIZES),*(out/f'model-{i}.txt' for i in SIZES)]
-    write_json(out/'freeze.json',{'selected':selected,'hashes':{str(f.resolve()):sha(f) for f in files},
+    write_json(out/'freeze.json',{'selected':selected,'source_layout':'shared','hashes':{str(f.resolve()):sha(f) for f in files},
                                   'validation':reports})
     print('Validation selected',selected,flush=True)
 
@@ -174,8 +213,7 @@ def test(out):
     primary = {r['path'] for r in read_json(INPUTS/'test-primary.json')['rows']}
     trials = []
     for trial, order in enumerate([('S12','spatial',selected),(selected,'spatial','S12')],1):
-        if any(sha(Path(p)) != h for p,h in freeze['hashes'].items()):
-            raise ValueError('Frozen inputs changed')
+        verify_research_freeze(freeze)
         data = {mode:measure(out,f'test-{trial}',INPUTS/'test.json',mode) for mode in order}
         groups = {}
         for name, predicate in [('official',lambda r:True),('primary',lambda r:r['path'] in primary),
