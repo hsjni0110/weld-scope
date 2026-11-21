@@ -1,0 +1,126 @@
+{
+  "source": {
+    "figure": "https://mdpi-res.com/sensors/sensors-25-07301/article_deploy/html/images/sensors-25-07301-g002.png",
+    "figure_sha256": "342ce679c4617774f493288cc0f9e40c6893646a7a070d0444891e2e32d425ba",
+    "figure_page": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12693759/figure/sensors-25-07301-f002/",
+    "article": "https://doi.org/10.3390/s25237301",
+    "title": "Synthetic Data Generation for AI-Based Quality Inspection of Laser Welds in Lithium-Ion Batteries",
+    "creators": [
+      "Jonathan Zender",
+      "Stefan Maier",
+      "Alois Herkommer",
+      "Michael Layh"
+    ],
+    "article_figure_license": "https://creativecommons.org/licenses/by/4.0/",
+    "underlying_raw_dataset": "Permission from Swoboda Wiggensbach KG required; not used.",
+    "transformation": "Exact square photographic panels cropped from publisher PNG, identical RGB channels as required by the C++ precise path, area (BOX) downsampling from 656x656 to the authors' stated 128x128 input. Figure-rendered pixels, not raw.",
+    "exclusions": {
+      "a": "no OK/NOK label in caption",
+      "b": "red overlaid scale bar and text"
+    },
+    "scope": "Author-selected, horizontal, unwrapped seam patches; different field of view from OPENZDM strips. No rates, group independence, or production decision.",
+    "rows": [
+      {
+        "path": "panel-c.png",
+        "split": "external_illustration",
+        "label": "OK",
+        "sha256": "33069138c9a9515c0ffa3a21bb2ab906ab01990c5e72e92469c4ce08803f4822",
+        "source_panel": "c",
+        "box_xyxy": [
+          887,
+          401,
+          1543,
+          1057
+        ],
+        "physical_part_id": null,
+        "acquisition_batch_id": null,
+        "label_detail": "weld with soot; labeled acceptable by authors"
+      },
+      {
+        "path": "panel-d.png",
+        "split": "external_illustration",
+        "label": "KO",
+        "sha256": "096e40070ac7a5aeb60c648c87c193bae6bde2da69fde5c082d3eb00432cf7b5",
+        "source_panel": "d",
+        "box_xyxy": [
+          1760,
+          401,
+          2416,
+          1057
+        ],
+        "physical_part_id": null,
+        "acquisition_batch_id": null,
+        "label_detail": "missing weld"
+      },
+      {
+        "path": "panel-e.png",
+        "split": "external_illustration",
+        "label": "KO",
+        "sha256": "e1d075bd36b3dd4eeb4381a4b2315a0eef8475e60221907a769751442bf79999",
+        "source_panel": "e",
+        "box_xyxy": [
+          2634,
+          401,
+          3290,
+          1057
+        ],
+        "physical_part_id": null,
+        "acquisition_batch_id": null,
+        "label_detail": "long hole"
+      }
+    ],
+    "frozen_manifest": "docs/algorithms/evidence/openzdm-eda-spatial-policy.json",
+    "runner_sha256": "f3bb16a76804660f4749102a5d565953171d89b02a63aa2e613a0aa2edbc55cc",
+    "model_manifest_sha256": "5a8e94c12fa91deae4b486315d9896753a80616b6d86218514e1e5d62d0de6d9"
+  },
+  "model_sha256": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+  "config_sha256": "730940817505aec79fe9a9d7127d9ba96e6d6e48c42a5e3306588fdf242783f3",
+  "results": {
+    "forward": [
+      {
+        "path": "panel-c.png",
+        "label": "OK",
+        "fast_score": "0.66339583757813714",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted"
+      },
+      {
+        "path": "panel-d.png",
+        "label": "KO",
+        "fast_score": "0.013538155317581584",
+        "decision": "PASS",
+        "reason": "fast_threshold"
+      },
+      {
+        "path": "panel-e.png",
+        "label": "KO",
+        "fast_score": "0.036206717915963221",
+        "decision": "PASS",
+        "reason": "fast_threshold"
+      }
+    ],
+    "reverse": [
+      {
+        "path": "panel-e.png",
+        "label": "KO",
+        "fast_score": "0.036206717915963221",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted"
+      },
+      {
+        "path": "panel-d.png",
+        "label": "KO",
+        "fast_score": "0.013538155317581584",
+        "decision": "PASS",
+        "reason": "fast_threshold"
+      },
+      {
+        "path": "panel-c.png",
+        "label": "OK",
+        "fast_score": "0.66339583757813714",
+        "decision": "FAIL",
+        "reason": "fast_threshold"
+      }
+    ]
+  }
+}

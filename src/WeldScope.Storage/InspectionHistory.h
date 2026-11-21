@@ -42,6 +42,8 @@ struct InspectionRecord {
     std::string reason;
     std::vector<AnalysisAttempt> attempts;
     InspectionWorkState workState = InspectionWorkState::Completed;
+    std::string batchId = {};
+    unsigned int batchIndex = 0;
 };
 
 struct StoredInspection {
@@ -52,6 +54,28 @@ struct StoredInspection {
 struct InspectionSummary {
     std::string inspectionId, sourcePath, decision, createdAtUtc;
     InspectionWorkState workState = InspectionWorkState::Completed;
+};
+
+struct BatchSummary {
+    std::string batchId, rootPath, state;
+    unsigned int totalFiles = 0;
+};
+
+struct BatchCounts {
+    unsigned int passed = 0, failed = 0, review = 0, errors = 0, cancelled = 0;
+
+    unsigned int Total() const { return passed + failed + review + errors + cancelled; }
+};
+
+struct BatchRow {
+    std::string inspectionId, sourcePath, decision, reason;
+    double durationMs = 0;
+    InspectionWorkState workState = InspectionWorkState::Completed;
+};
+
+struct BatchPageView {
+    BatchCounts counts;
+    std::vector<BatchRow> rows;
 };
 
 enum class SaveStatus { Stored, Replay, Conflict };
@@ -67,10 +91,16 @@ public:
 
     std::string Version() const;
     void CheckReady() const;
+    void CheckBatchReady() const;
     SaveStatus Save(const InspectionRecord& record) const;
     std::optional<StoredInspection> Get(const std::string& inspectionId) const;
     std::optional<StoredInspection> GetByRequestId(const std::string& requestId) const;
     std::vector<InspectionSummary> Recent() const;
+    void CreateBatch(const std::string& batchId, const std::string& rootPath,
+                     const std::string& configSha256, unsigned int totalFiles) const;
+    void FinishBatch(const std::string& id, const std::string& state) const;
+    std::vector<BatchSummary> RecentBatches() const;
+    BatchPageView ReadBatchPage(const std::string& id, const std::string& filter, unsigned int offset) const;
 
 private:
     HistoryConnection settings_;

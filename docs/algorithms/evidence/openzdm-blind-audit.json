@@ -1,0 +1,561 @@
+{
+  "observations_sha256": "79b6644afc7e4dfdfe7c3b27e7e28ffa2227a33c3244974d2ec8dc1b311e4d37",
+  "validation_sha256": "2fab8de594403e465c85a1a96bfcf6936fb5394d608d59c390ae659599f51036",
+  "cases": {
+    "W001": {
+      "path": "val/OK/image_2580.png",
+      "sha256": "0aae37b73bdebc49e157696a40eacfb1738b65f09ea0680218f9aa2cccafad6f",
+      "prior": "REVIEW",
+      "score": 0.09296482412060302,
+      "gap_fraction": 0.0
+    },
+    "W002": {
+      "path": "val/OK/image_5587.png",
+      "sha256": "0546f4fa4fca6a5722e09bf7bb02efc27f9b1a7d9a3260302422ab6cc082d22e",
+      "prior": "FAIL",
+      "score": 0.2667584940312213,
+      "gap_fraction": 0.0
+    },
+    "W003": {
+      "path": "val/OK/image_3893.png",
+      "sha256": "0105373ed87f3c7b13fadcec2b6eb4815f63b64ad6212e695624fdfa3b0535f4",
+      "prior": "REVIEW",
+      "score": 0.09927634554500227,
+      "gap_fraction": 0.0
+    },
+    "W004": {
+      "path": "val/KO/image_946.png",
+      "sha256": "0453af8703c74e65e4a2f0df66cd31ae2d36563106b3ca4a05702df245e984f1",
+      "prior": "REVIEW",
+      "score": 0.09429280397022333,
+      "gap_fraction": 0.0
+    },
+    "W005": {
+      "path": "val/KO/image_1724.png",
+      "sha256": "017212e266b784ebb18d34c48aa6e69e52a299dcf5dcab29e567a39da973a1db",
+      "prior": "FAIL",
+      "score": 0.23333333333333334,
+      "gap_fraction": 0.0
+    },
+    "W006": {
+      "path": "val/KO/image_1112.png",
+      "sha256": "0391fbab261d2fc822038186b6c07105abeabad27f9c567ae1059c6cd90d28b9",
+      "prior": "FAIL",
+      "score": 0.14752475247524752,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 64,
+      "eligible_in_mark": 250,
+      "counted_in_image": 596,
+      "eligible_in_image": 4040
+    },
+    "W007": {
+      "path": "val/OK/image_3271.png",
+      "sha256": "009dc983c930dbff6d55d899e316940449967cdc748441994adaa065eb3f956f",
+      "prior": "PASS",
+      "score": 0.06282906282906284,
+      "gap_fraction": 0.0
+    },
+    "W008": {
+      "path": "val/KO/image_155.png",
+      "sha256": "03e88d7cd509848002c16bdf4a0814f94762cb35b4d877ff1068637ab3143e92",
+      "prior": "PASS",
+      "score": 0.09143576826196473,
+      "gap_fraction": 0.0
+    },
+    "W009": {
+      "path": "val/KO/image_1245.png",
+      "sha256": "022f95b7ee4b106065d465ef3cb692b640f65b604b4ddb897261d8f2c49e9b1b",
+      "prior": "FAIL",
+      "score": 0.18161865569272978,
+      "gap_fraction": 0.012195121951219513
+    },
+    "W010": {
+      "path": "val/OK/image_4183.png",
+      "sha256": "0983a3c6b7e654c07b8c01ef1e8241f17ec7bd0628e589cfbcf13ec66e079cb9",
+      "prior": "REVIEW",
+      "score": 0.10734353807401666,
+      "gap_fraction": 0.0
+    },
+    "W011": {
+      "path": "val/KO/image_153.png",
+      "sha256": "02503860686710ea17dd7077a0ca638f3caf3a0cd094e7fcfb4da311eea14c5f",
+      "prior": "FAIL",
+      "score": 0.12622465254044202,
+      "gap_fraction": 0.0
+    },
+    "W012": {
+      "path": "val/OK/image_2828.png",
+      "sha256": "01143b33657d0a247686c20423e07fb4b274dcd5c7514a0d3a6487149fffbd91",
+      "prior": "PASS",
+      "score": 0.0748020748020748,
+      "gap_fraction": 0.0
+    },
+    "W013": {
+      "path": "val/KO/image_808.png",
+      "sha256": "00a6b3077e66dcdf1f2f2a061b636e62fb835f6c3a229b4da743674f0981acca",
+      "prior": "PASS",
+      "score": 0.04785894206549119,
+      "gap_fraction": 0.0
+    },
+    "W014": {
+      "path": "val/OK/image_4402.png",
+      "sha256": "033b49ee31d3be06c942ca2f29166f564a405ed7d7784750a1376633409574c8",
+      "prior": "FAIL",
+      "score": 0.1300518134715026,
+      "gap_fraction": 0.0
+    },
+    "W015": {
+      "path": "val/OK/image_2772.png",
+      "sha256": "028520e0745892d391ecc6b7fb5a6deb5b07d6ecd4a47d5d8716dcaee5dfae34",
+      "prior": "FAIL",
+      "score": 0.09597989949748743,
+      "gap_fraction": 0.0
+    },
+    "W016": {
+      "path": "val/KO/image_1671.png",
+      "sha256": "01cda4a2a3aaf0d78d7a186cd02c65d2c422faa5d01a5cdae353b2f05b19d294",
+      "prior": "FAIL",
+      "score": 0.2743024302430243,
+      "gap_fraction": 0.0
+    },
+    "W017": {
+      "path": "val/OK/image_2309.png",
+      "sha256": "0c96aeccda85b50509cb9878fc75a5a200754f62f7c0e8e039af2471d2e1b36e",
+      "prior": "REVIEW",
+      "score": 0.0930379746835443,
+      "gap_fraction": 0.0
+    },
+    "W018": {
+      "path": "val/OK/image_5309.png",
+      "sha256": "01e52a5c5842171232a24606c14c55443c48637d03b4219851a627b4851937b6",
+      "prior": "FAIL",
+      "score": 0.23629629629629628,
+      "gap_fraction": 0.0
+    },
+    "W019": {
+      "path": "val/OK/image_5573.png",
+      "sha256": "018f75fb4f10ba7a27a3125ebc1c2f9891317900074b52bc0607805be0642be4",
+      "prior": "FAIL",
+      "score": 0.29974811083123426,
+      "gap_fraction": 0.0
+    },
+    "W020": {
+      "path": "val/KO/image_133.png",
+      "sha256": "07a91132c3d34c048f9625225e3f79fcd65e27ae843bda6f49b6126f8d1765bb",
+      "prior": "REVIEW",
+      "score": 0.09298043728423476,
+      "gap_fraction": 0.0
+    },
+    "W021": {
+      "path": "val/OK/image_1615.png",
+      "sha256": "01bcca761006f159eef759b0763bb1c3f0456964a030627e2ca43643d409eea7",
+      "prior": "PASS",
+      "score": 0.06535626535626535,
+      "gap_fraction": 0.0
+    },
+    "W022": {
+      "path": "val/OK/image_2409.png",
+      "sha256": "00be321400cec1bac11fd5f03c2ee712d2e46bfbdb124a0c31e5f8738f056ad3",
+      "prior": "FAIL",
+      "score": 0.09826912339475154,
+      "gap_fraction": 0.0
+    },
+    "W023": {
+      "path": "val/OK/image_4042.png",
+      "sha256": "0065c4f0041e0f1fe91ab138af9cfcf5c03453112a0537f49058728ffd3f612b",
+      "prior": "PASS",
+      "score": 0.07679324894514768,
+      "gap_fraction": 0.0
+    },
+    "W024": {
+      "path": "val/KO/image_914.png",
+      "sha256": "0014af8e3117933e452795ca563779944c8ef9c431a02030587271b4afabbb89",
+      "prior": "FAIL",
+      "score": 0.14442307692307693,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 262,
+      "eligible_in_mark": 1209,
+      "counted_in_image": 751,
+      "eligible_in_image": 5200
+    },
+    "W025": {
+      "path": "val/OK/image_1966.png",
+      "sha256": "01b4283af13e458216caddbf67dd1d2ee2b933049aeb1d72abbdaa1abe4bb963",
+      "prior": "PASS",
+      "score": 0.08567774936061381,
+      "gap_fraction": 0.0
+    },
+    "W026": {
+      "path": "val/KO/image_1430.png",
+      "sha256": "00a5703e9b07d7ad199ed36e324ad004a6366dac708740348eadef4a9b5d35c6",
+      "prior": "FAIL",
+      "score": 0.18737997256515776,
+      "gap_fraction": 0.0
+    },
+    "W027": {
+      "path": "val/KO/image_112.png",
+      "sha256": "0b4d0be1e1dec81fabe13bd6b95cb7153a4a9363c0804e0a2ce0c0fd5ec8e8d1",
+      "prior": "REVIEW",
+      "score": 0.10661764705882353,
+      "gap_fraction": 0.0
+    },
+    "W028": {
+      "path": "val/KO/image_1121.png",
+      "sha256": "10810ad6958fdc4c49f6265cc1903f83f9d6ed9d8ac89f82e93e0a47ba311d24",
+      "prior": "REVIEW",
+      "score": 0.10315121287689866,
+      "gap_fraction": 0.0
+    },
+    "W029": {
+      "path": "val/KO/image_488.png",
+      "sha256": "01535d5a80ac79b1ca147ca4f878bbec2bf2eb444d2c9e3af484a9e0665a59a4",
+      "prior": "REVIEW",
+      "score": 0.09961071673918022,
+      "gap_fraction": 0.0
+    },
+    "W030": {
+      "path": "val/OK/image_3150.png",
+      "sha256": "012fcd3eeb793eaf614d76fa164d8bc02e21ab4bbd5284b9460443d5833808c7",
+      "prior": "PASS",
+      "score": 0.028627069133398245,
+      "gap_fraction": 0.0
+    },
+    "W031": {
+      "path": "val/KO/image_1187.png",
+      "sha256": "0050232517bc2e716a0a0219c3b6807853d6b3b530e05355c309dcaa151f1247",
+      "prior": "PASS",
+      "score": 0.09,
+      "gap_fraction": 0.13580246913580246,
+      "counted_in_mark": 70,
+      "eligible_in_mark": 468,
+      "counted_in_image": 324,
+      "eligible_in_image": 3600
+    },
+    "W032": {
+      "path": "val/KO/image_991.png",
+      "sha256": "004d044ff8930bbd8e184bde076bc0beaf2fabbc0245ac3c0dca81d6b8ab70bf",
+      "prior": "FAIL",
+      "score": 0.11602578350744609,
+      "gap_fraction": 0.0
+    },
+    "W033": {
+      "path": "val/KO/image_1151.png",
+      "sha256": "006d876c217be56ff5749e318e267f4a2ffa90e42803e18986d977f5be609bf2",
+      "prior": "PASS",
+      "score": 0.08931297709923663,
+      "gap_fraction": 0.0
+    },
+    "W034": {
+      "path": "val/OK/image_1552.png",
+      "sha256": "0933e74ce5a71c8199edfa4e15c98054d0172ea59088eafd048ffdb17ebd52e6",
+      "prior": "REVIEW",
+      "score": 0.10279855915766141,
+      "gap_fraction": 0.0
+    },
+    "W035": {
+      "path": "val/KO/image_740.png",
+      "sha256": "013d339383887b86824ae9852347fcb441cfc38ba1356947679efbbe7b0b9335",
+      "prior": "FAIL",
+      "score": 0.10272952853598015,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 192,
+      "eligible_in_mark": 660,
+      "counted_in_image": 621,
+      "eligible_in_image": 6045
+    },
+    "W036": {
+      "path": "val/OK/image_2244.png",
+      "sha256": "05963f3a8b951e90dbb53288b7854d00d45c59b1d9a27aac4391e7fd0103a9be",
+      "prior": "REVIEW",
+      "score": 0.1107811786203746,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 46,
+      "eligible_in_mark": 220,
+      "counted_in_image": 485,
+      "eligible_in_image": 4378
+    },
+    "W037": {
+      "path": "val/KO/image_954.png",
+      "sha256": "06ffd20dad57b2386b44e5bf944264046e5eb496bc35a88d68e8025e39c6d56e",
+      "prior": "REVIEW",
+      "score": 0.09744868597736428,
+      "gap_fraction": 0.0
+    },
+    "W038": {
+      "path": "val/KO/image_365.png",
+      "sha256": "09d5b0fccec4d5f2ae94bc3a209e7fee1aa3d1a24182850a2315be54964809e9",
+      "prior": "PASS",
+      "score": 0.08074999999999999,
+      "gap_fraction": 0.0
+    },
+    "W039": {
+      "path": "val/KO/image_942.png",
+      "sha256": "0a40f2fcd910300d79ee2d4cea0571608811373d0a0445fa3d2609492390cbdc",
+      "prior": "PASS",
+      "score": 0.08402071743717629,
+      "gap_fraction": 0.0
+    },
+    "W040": {
+      "path": "val/KO/image_338.png",
+      "sha256": "0bfd1268211b406b95295f358b1c5297f08433b17dfc7c6b2a3cfcce4bcef6e4",
+      "prior": "REVIEW",
+      "score": 0.09752475247524753,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 53,
+      "eligible_in_mark": 290,
+      "counted_in_image": 394,
+      "eligible_in_image": 4040
+    },
+    "W041": {
+      "path": "val/KO/image_833.png",
+      "sha256": "049c41415590a9dcab3c9208cf892ccad9741d0856a6b688d55d10100b32347e",
+      "prior": "PASS",
+      "score": 0.09183673469387756,
+      "gap_fraction": 0.0
+    },
+    "W042": {
+      "path": "val/OK/image_525.png",
+      "sha256": "0553091b3723028f3aac107b42351b902b99873550f50bd813c8430f8f95e2bd",
+      "prior": "FAIL",
+      "score": 0.1225,
+      "gap_fraction": 0.0
+    },
+    "W043": {
+      "path": "val/KO/image_465.png",
+      "sha256": "0e0b856b7aac0d0889bb57c031f97b3f990e78180d3d3bf0f70158d3f3cc4aea",
+      "prior": "REVIEW",
+      "score": 0.11482066320775998,
+      "gap_fraction": 0.0
+    },
+    "W044": {
+      "path": "val/OK/image_2194.png",
+      "sha256": "0116b5a989cf58dfcaadd8207a9f6bb075012507c78839923415c0f301643bf8",
+      "prior": "REVIEW",
+      "score": 0.09321608040201004,
+      "gap_fraction": 0.0
+    },
+    "W045": {
+      "path": "val/OK/image_1704.png",
+      "sha256": "09dfac293a114c5196ef163d00fe833b4bb2ba0cfa901e089a72f02ed4feadb6",
+      "prior": "REVIEW",
+      "score": 0.10957178841309824,
+      "gap_fraction": 0.0
+    },
+    "W046": {
+      "path": "val/OK/image_3618.png",
+      "sha256": "00dc323791ede0a315a3318059e085b2d7e1ac301838c386b9b9fd5a53f7930d",
+      "prior": "PASS",
+      "score": 0.07106598984771574,
+      "gap_fraction": 0.0
+    },
+    "W047": {
+      "path": "val/KO/image_1055.png",
+      "sha256": "0172c52fa219eaca1f2f4666e1ac657cef52f9a7e5141527189972eaafcb5e07",
+      "prior": "PASS",
+      "score": 0.07815091210613598,
+      "gap_fraction": 0.0
+    },
+    "W048": {
+      "path": "val/OK/image_548.png",
+      "sha256": "02efca42808bf64dc668c347ad455c7bf3967cb1a18b2e5ace3f991bbad1c3fa",
+      "prior": "REVIEW",
+      "score": 0.09301745635910225,
+      "gap_fraction": 0.0
+    },
+    "W049": {
+      "path": "val/KO/image_1439.png",
+      "sha256": "0318352a5d8065e4740b68c3684b5147bd18a916d9a5c84b58d57f33b2d9fb0d",
+      "prior": "FAIL",
+      "score": 0.21313131313131314,
+      "gap_fraction": 0.0
+    },
+    "W050": {
+      "path": "val/OK/image_2736.png",
+      "sha256": "01309239734ca431ed4d01d6e618895d6689a0ec90903d95ed09b489ba4787ac",
+      "prior": "PASS",
+      "score": 0.08435960591133006,
+      "gap_fraction": 0.0
+    },
+    "W051": {
+      "path": "val/KO/image_693.png",
+      "sha256": "037a7bbb5d69e67015d089dfb796ef9f6188ae69232118db5bc5e8e6cf395431",
+      "prior": "REVIEW",
+      "score": 0.09189640768588136,
+      "gap_fraction": 0.0
+    },
+    "W052": {
+      "path": "val/KO/image_180.png",
+      "sha256": "02f1588f08c700732ddefc4d6504fdf44bdb4a839114de2f00c07d45b9c23eeb",
+      "prior": "PASS",
+      "score": 0.08414832925835371,
+      "gap_fraction": 0.0
+    },
+    "W053": {
+      "path": "val/KO/image_928.png",
+      "sha256": "07fda81c315952c71af6f6991ddbce722b8d05c226486821efe6e89192b1d097",
+      "prior": "PASS",
+      "score": 0.028814262023217248,
+      "gap_fraction": 0.0
+    },
+    "W054": {
+      "path": "val/KO/image_792.png",
+      "sha256": "08610960cc8602628fd13ebfe458f1a023c5ddf380f130309d254a5192aa77f4",
+      "prior": "PASS",
+      "score": 0.03380102040816326,
+      "gap_fraction": 0.0
+    },
+    "W055": {
+      "path": "val/OK/image_2540.png",
+      "sha256": "034d296837b968946a45b369e04df885475e7806478b2ad2859cdfc70eebff58",
+      "prior": "REVIEW",
+      "score": 0.09876543209876544,
+      "gap_fraction": 0.0
+    },
+    "W056": {
+      "path": "val/OK/image_281.png",
+      "sha256": "03edb2c37f4cf058c56601b8aeda6d9203a22b0a4ab66e54d9a1230bf5fda1de",
+      "prior": "FAIL",
+      "score": 0.18637469586374697,
+      "gap_fraction": 0.0
+    },
+    "W057": {
+      "path": "val/KO/image_516.png",
+      "sha256": "14c88b962d85a5c0b1d269ad046c16eb83127a941a0eedabd4e4eee814f7355c",
+      "prior": "REVIEW",
+      "score": 0.10677850827476763,
+      "gap_fraction": 0.0
+    },
+    "W058": {
+      "path": "val/OK/image_3072.png",
+      "sha256": "00dac2435fbd9a29a9122d2fd71aa33b528c0af346d2f047b7bc82747b43d45b",
+      "prior": "PASS",
+      "score": 0.03395130667857941,
+      "gap_fraction": 0.0
+    },
+    "W059": {
+      "path": "val/OK/image_721.png",
+      "sha256": "01071b641ed4fdbaefce56f43ee640317b35f3b6ff5c37740b66a034c9ec1689",
+      "prior": "FAIL",
+      "score": 0.12098255280073461,
+      "gap_fraction": 0.0
+    },
+    "W060": {
+      "path": "val/KO/image_428.png",
+      "sha256": "0183de1ef89c56963ad22dea1e71ee59cc7311abb21a5e47a8750c68c8dbc78d",
+      "prior": "FAIL",
+      "score": 0.15235267245317496,
+      "gap_fraction": 0.0
+    },
+    "W061": {
+      "path": "val/KO/image_1093.png",
+      "sha256": "097da2decbe60165d560d6472e11c63941428b078ec5a22c670a1ec12d90aaf5",
+      "prior": "REVIEW",
+      "score": 0.09617003367003367,
+      "gap_fraction": 0.0
+    },
+    "W062": {
+      "path": "val/OK/image_2923.png",
+      "sha256": "01ae0ff14598189b77559883b90163b4b3e3ef7cbff68958f161b10bd8ef7892",
+      "prior": "PASS",
+      "score": 0.08944444444444445,
+      "gap_fraction": 0.0
+    },
+    "W063": {
+      "path": "val/OK/image_1343.png",
+      "sha256": "002e679e95fc9f1f5f14b9d47080ce95409f421b2b3c097e355e55410df6e78e",
+      "prior": "FAIL",
+      "score": 0.1316831683168317,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 76,
+      "eligible_in_mark": 200,
+      "counted_in_image": 532,
+      "eligible_in_image": 4040
+    },
+    "W064": {
+      "path": "val/OK/image_2275.png",
+      "sha256": "034095daac1d773c89bddb67e354a71f8212397b5946a8ba20a1640b56fd1cce",
+      "prior": "FAIL",
+      "score": 0.1297029702970297,
+      "gap_fraction": 0.0
+    },
+    "W065": {
+      "path": "val/KO/image_694.png",
+      "sha256": "009c154a6ddf07f029d6ef1c084b32960d82c8a72e52897228a089719b1de9a3",
+      "prior": "FAIL",
+      "score": 0.12270285552728301,
+      "gap_fraction": 0.02531645569620253,
+      "counted_in_mark": 98,
+      "eligible_in_mark": 603,
+      "counted_in_image": 434,
+      "eligible_in_image": 3537
+    },
+    "W066": {
+      "path": "val/KO/image_789.png",
+      "sha256": "00a1c951a31315f32e6e26c49d20e8e9a44a56cbe025a63bdf0eb96b40962ac8",
+      "prior": "PASS",
+      "score": 0.08048084759576202,
+      "gap_fraction": 0.0,
+      "counted_in_mark": 157,
+      "eligible_in_mark": 888,
+      "counted_in_image": 395,
+      "eligible_in_image": 4908
+    },
+    "W067": {
+      "path": "val/OK/image_2789.png",
+      "sha256": "0121f89273bd6f68b3be8078500713c4ac1ce9af6b377f453eba436382e56ba7",
+      "prior": "PASS",
+      "score": 0.06206030150753769,
+      "gap_fraction": 0.0
+    },
+    "W068": {
+      "path": "val/OK/image_2481.png",
+      "sha256": "0949f42a5367121a6630e36354bc969dd61f055bd3c1efa908d1197d574b09d5",
+      "prior": "REVIEW",
+      "score": 0.09798994974874371,
+      "gap_fraction": 0.0
+    },
+    "W069": {
+      "path": "val/OK/image_4843.png",
+      "sha256": "05290a7f6c2696628f9e947d451a180a8630a53b4ef517f356d5a5aa6e1bb395",
+      "prior": "FAIL",
+      "score": 0.21683168316831683,
+      "gap_fraction": 0.0
+    },
+    "W070": {
+      "path": "val/OK/image_2975.png",
+      "sha256": "010e003207092898578da71d757b5ee6264b8591ad62ab5978ab3c57818a6325",
+      "prior": "PASS",
+      "score": 0.07653846153846154,
+      "gap_fraction": 0.0
+    },
+    "W071": {
+      "path": "val/KO/image_1127.png",
+      "sha256": "0210856c935ecc6d397aa18301f3b99217a4d15c251ed866322eee18f9d56a43",
+      "prior": "REVIEW",
+      "score": 0.11089906700593724,
+      "gap_fraction": 0.0
+    },
+    "W072": {
+      "path": "val/OK/image_2790.png",
+      "sha256": "0cdbfc93728f368e72b328b653e5f6fc9f5705262bfc79c494eda744225dcf8a",
+      "prior": "REVIEW",
+      "score": 0.09370277078085641,
+      "gap_fraction": 0.0
+    }
+  },
+  "gap_counts": {
+    "blind/KO/FAIL/clear": 12,
+    "blind/KO/PASS/clear": 11,
+    "blind/KO/PASS/flag": 1,
+    "blind/KO/REVIEW/clear": 12,
+    "blind/OK/FAIL/clear": 12,
+    "blind/OK/PASS/clear": 12,
+    "blind/OK/REVIEW/clear": 12,
+    "remaining/KO/FAIL/clear": 840,
+    "remaining/KO/PASS/clear": 322,
+    "remaining/KO/REVIEW/clear": 184,
+    "remaining/OK/FAIL/clear": 620,
+    "remaining/OK/PASS/clear": 852,
+    "remaining/OK/REVIEW/clear": 357
+  }
+}

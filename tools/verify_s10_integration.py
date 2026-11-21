@@ -68,7 +68,7 @@ def table_lock(admin, mode="READ"):
 
 
 @contextmanager
-def fault_proxy(mysql_port, target, forward_commit):
+def fault_proxy(mysql_port, target, forward_commit, after=None):
     with socket.create_server(("127.0.0.1", 0)) as listener:
         listener.settimeout(0.2)
         stopped = threading.Event()
@@ -84,12 +84,14 @@ def fault_proxy(mysql_port, target, forward_commit):
                 try:
                     with client, socket.create_connection(("127.0.0.1", mysql_port), timeout=8) as server:
                         client.settimeout(8)
+                        eligible = after is None
                         while not stopped.is_set():
                             for source in select.select([client, server], [], [], 0.2)[0]:
                                 packet = read_packet(source)
-                                if source is client and not fired.is_set() and packet[3:5] == b"\0\3" and (
-                                    packet[5:].upper() in (target, b"\0\1" + target)
-                                ):
+                                query = packet[5:].upper() if source is client and packet[3:5] == b"\0\3" else b""
+                                if after is not None and query in (after, b"\0\1" + after):
+                                    eligible = True
+                                if eligible and not fired.is_set() and query in (target, b"\0\1" + target):
                                     if forward_commit:
                                         server.sendall(packet)
                                         assert read_packet(server)[4] == 0

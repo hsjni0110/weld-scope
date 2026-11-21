@@ -2,6 +2,7 @@
 
 - 상태는 승인이다. 사용자가 S11 실행 계획을 승인하고 구현을 요청했다.
 - 관련 단계는 [S11](../steps/S11-algorithm-integration-evaluation.md)이다.
+- 이 문서의 로컬 기본값은 S11 당시의 선택이다. 현재 포트폴리오 앱의 기본값과 이전 장비 요청 호환 범위는 [ADR 0013](0013-portfolio-default-inspection.md)을 따른다.
 - 관련 요구사항은 F02, F03, F04, F05, F09다.
 - [ADR 0003의 평가 보류 조건](0003-dataset-preparation.md#재검토-조건)에 따라 S11의 데이터 사용 범위를 이 문서에서 확정한다.
 

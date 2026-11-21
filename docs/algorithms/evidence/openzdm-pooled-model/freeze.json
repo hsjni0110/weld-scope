@@ -1,0 +1,1621 @@
+{
+  "passed": true,
+  "validation": [
+    {
+      "all": {
+        "metrics": {
+          "S12": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 4969,
+                "FAIL": 1027,
+                "REVIEW": 594,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 736,
+                "FAIL": 608,
+                "REVIEW": 204,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 806,
+            "analysis_ns_p50_p95": [
+              25958,
+              84875
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 5,
+              "KO/budget_before_precise/REVIEW": 3,
+              "KO/fast/FAIL": 599,
+              "KO/fast/PASS": 736,
+              "KO/precise/FAIL": 9,
+              "KO/precise/REVIEW": 196,
+              "OK/budget_after_precise/REVIEW": 9,
+              "OK/budget_before_precise/REVIEW": 4,
+              "OK/fast/FAIL": 1021,
+              "OK/fast/PASS": 4969,
+              "OK/precise/FAIL": 6,
+              "OK/precise/REVIEW": 581
+            }
+          },
+          "spatial": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5389,
+                "FAIL": 680,
+                "REVIEW": 521,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 258,
+                "FAIL": 1166,
+                "REVIEW": 124,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 669,
+            "analysis_ns_p50_p95": [
+              37208,
+              95583
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 17,
+              "KO/budget_before_precise/REVIEW": 1,
+              "KO/fast/FAIL": 1150,
+              "KO/fast/PASS": 258,
+              "KO/precise/FAIL": 16,
+              "KO/precise/REVIEW": 106,
+              "OK/budget_after_precise/REVIEW": 42,
+              "OK/budget_before_precise/REVIEW": 12,
+              "OK/fast/FAIL": 663,
+              "OK/fast/PASS": 5385,
+              "OK/precise/FAIL": 17,
+              "OK/precise/PASS": 4,
+              "OK/precise/REVIEW": 467
+            }
+          },
+          "hard": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5441,
+                "FAIL": 627,
+                "REVIEW": 522,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 201,
+                "FAIL": 1211,
+                "REVIEW": 136,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 704,
+            "analysis_ns_p50_p95": [
+              27917,
+              87334
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 5,
+              "KO/budget_before_precise/REVIEW": 2,
+              "KO/fast/FAIL": 1191,
+              "KO/fast/PASS": 201,
+              "KO/precise/FAIL": 20,
+              "KO/precise/REVIEW": 129,
+              "OK/budget_after_precise/REVIEW": 15,
+              "OK/budget_before_precise/REVIEW": 5,
+              "OK/fast/FAIL": 594,
+              "OK/fast/PASS": 5441,
+              "OK/precise/FAIL": 33,
+              "OK/precise/REVIEW": 502
+            }
+          },
+          "smooth": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5428,
+                "FAIL": 638,
+                "REVIEW": 524,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 200,
+                "FAIL": 1211,
+                "REVIEW": 137,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 706,
+            "analysis_ns_p50_p95": [
+              28000,
+              92167
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 19,
+              "KO/budget_before_precise/REVIEW": 3,
+              "KO/fast/FAIL": 1192,
+              "KO/fast/PASS": 200,
+              "KO/precise/FAIL": 19,
+              "KO/precise/REVIEW": 115,
+              "OK/budget_after_precise/REVIEW": 21,
+              "OK/budget_before_precise/REVIEW": 7,
+              "OK/fast/FAIL": 602,
+              "OK/fast/PASS": 5428,
+              "OK/precise/FAIL": 36,
+              "OK/precise/REVIEW": 496
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 101,
+              "removed": 637,
+              "delta_pp": -34.62532299741602,
+              "ci95_pp": [
+                -37.60216319610328,
+                -31.64848279872876
+              ]
+            },
+            "OK_FAIL": {
+              "added": 405,
+              "removed": 794,
+              "delta_pp": -5.90288315629742,
+              "ci95_pp": [
+                -6.922916216612303,
+                -4.882850095982539
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 516,
+              "KO/FAIL/PASS": 72,
+              "KO/FAIL/REVIEW": 20,
+              "KO/PASS/FAIL": 549,
+              "KO/PASS/PASS": 99,
+              "KO/PASS/REVIEW": 88,
+              "KO/REVIEW/FAIL": 146,
+              "KO/REVIEW/PASS": 29,
+              "KO/REVIEW/REVIEW": 29,
+              "OK/FAIL/FAIL": 233,
+              "OK/FAIL/PASS": 718,
+              "OK/FAIL/REVIEW": 76,
+              "OK/PASS/FAIL": 313,
+              "OK/PASS/PASS": 4279,
+              "OK/PASS/REVIEW": 377,
+              "OK/REVIEW/FAIL": 92,
+              "OK/REVIEW/PASS": 431,
+              "OK/REVIEW/REVIEW": 71
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 69,
+              "removed": 127,
+              "delta_pp": -3.7467700258397936,
+              "ci95_pp": [
+                -5.510095296116189,
+                -1.9834447555633978
+              ]
+            },
+            "OK_FAIL": {
+              "added": 234,
+              "removed": 276,
+              "delta_pp": -0.637329286798179,
+              "ci95_pp": [
+                -1.3088736323117423,
+                0.03421505871538423
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1069,
+              "KO/FAIL/PASS": 46,
+              "KO/FAIL/REVIEW": 51,
+              "KO/PASS/FAIL": 80,
+              "KO/PASS/PASS": 131,
+              "KO/PASS/REVIEW": 47,
+              "KO/REVIEW/FAIL": 62,
+              "KO/REVIEW/PASS": 23,
+              "KO/REVIEW/REVIEW": 39,
+              "OK/FAIL/FAIL": 404,
+              "OK/FAIL/PASS": 175,
+              "OK/FAIL/REVIEW": 101,
+              "OK/PASS/FAIL": 144,
+              "OK/PASS/PASS": 4971,
+              "OK/PASS/REVIEW": 274,
+              "OK/REVIEW/FAIL": 90,
+              "OK/REVIEW/PASS": 282,
+              "OK/REVIEW/REVIEW": 149
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 1,
+              "removed": 2,
+              "delta_pp": -0.06459948320413438,
+              "ci95_pp": [
+                -0.283950322257697,
+                0.15475135584942823
+              ]
+            },
+            "OK_FAIL": {
+              "added": 15,
+              "removed": 4,
+              "delta_pp": 0.1669195751138088,
+              "ci95_pp": [
+                0.037329881428153196,
+                0.2965092687994644
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1208,
+              "KO/FAIL/REVIEW": 3,
+              "KO/PASS/PASS": 199,
+              "KO/PASS/REVIEW": 2,
+              "KO/REVIEW/FAIL": 3,
+              "KO/REVIEW/PASS": 1,
+              "KO/REVIEW/REVIEW": 132,
+              "OK/FAIL/FAIL": 623,
+              "OK/FAIL/REVIEW": 4,
+              "OK/PASS/FAIL": 5,
+              "OK/PASS/PASS": 5421,
+              "OK/PASS/REVIEW": 15,
+              "OK/REVIEW/FAIL": 10,
+              "OK/REVIEW/PASS": 7,
+              "OK/REVIEW/REVIEW": 505
+            }
+          }
+        }
+      },
+      "inside": {
+        "metrics": {
+          "S12": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 841,
+                "FAIL": 637,
+                "REVIEW": 351,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 589,
+                "FAIL": 574,
+                "REVIEW": 183,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 543,
+            "analysis_ns_p50_p95": [
+              31000,
+              95001
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 4,
+              "KO/budget_before_precise/REVIEW": 3,
+              "KO/fast/FAIL": 565,
+              "KO/fast/PASS": 589,
+              "KO/precise/FAIL": 9,
+              "KO/precise/REVIEW": 176,
+              "OK/budget_after_precise/REVIEW": 9,
+              "OK/budget_before_precise/REVIEW": 2,
+              "OK/fast/FAIL": 632,
+              "OK/fast/PASS": 841,
+              "OK/precise/FAIL": 5,
+              "OK/precise/REVIEW": 340
+            }
+          },
+          "spatial": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1104,
+                "FAIL": 557,
+                "REVIEW": 168,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 198,
+                "FAIL": 1076,
+                "REVIEW": 72,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 257,
+            "analysis_ns_p50_p95": [
+              44125,
+              107958
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 9,
+              "KO/fast/FAIL": 1063,
+              "KO/fast/PASS": 198,
+              "KO/precise/FAIL": 13,
+              "KO/precise/REVIEW": 63,
+              "OK/budget_after_precise/REVIEW": 15,
+              "OK/budget_before_precise/REVIEW": 8,
+              "OK/fast/FAIL": 545,
+              "OK/fast/PASS": 1104,
+              "OK/precise/FAIL": 12,
+              "OK/precise/REVIEW": 145
+            }
+          },
+          "hard": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1162,
+                "FAIL": 513,
+                "REVIEW": 154,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 159,
+                "FAIL": 1104,
+                "REVIEW": 83,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 281,
+            "analysis_ns_p50_p95": [
+              30042,
+              95124
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 4,
+              "KO/budget_before_precise/REVIEW": 2,
+              "KO/fast/FAIL": 1085,
+              "KO/fast/PASS": 159,
+              "KO/precise/FAIL": 19,
+              "KO/precise/REVIEW": 77,
+              "OK/budget_after_precise/REVIEW": 4,
+              "OK/fast/FAIL": 486,
+              "OK/fast/PASS": 1162,
+              "OK/precise/FAIL": 27,
+              "OK/precise/REVIEW": 150
+            }
+          },
+          "smooth": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1144,
+                "FAIL": 526,
+                "REVIEW": 159,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 158,
+                "FAIL": 1104,
+                "REVIEW": 84,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 285,
+            "analysis_ns_p50_p95": [
+              30125,
+              100875
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 10,
+              "KO/budget_before_precise/REVIEW": 3,
+              "KO/fast/FAIL": 1086,
+              "KO/fast/PASS": 158,
+              "KO/precise/FAIL": 18,
+              "KO/precise/REVIEW": 71,
+              "OK/budget_after_precise/REVIEW": 10,
+              "OK/budget_before_precise/REVIEW": 3,
+              "OK/fast/FAIL": 496,
+              "OK/fast/PASS": 1144,
+              "OK/precise/FAIL": 30,
+              "OK/precise/REVIEW": 146
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 94,
+              "removed": 525,
+              "delta_pp": -32.02080237741456,
+              "ci95_pp": [
+                -35.21557958337663,
+                -28.82602517145249
+              ]
+            },
+            "OK_FAIL": {
+              "added": 319,
+              "removed": 430,
+              "delta_pp": -6.068890103881903,
+              "ci95_pp": [
+                -8.989275613138037,
+                -3.148504594625768
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 492,
+              "KO/FAIL/PASS": 68,
+              "KO/FAIL/REVIEW": 14,
+              "KO/PASS/FAIL": 477,
+              "KO/PASS/PASS": 64,
+              "KO/PASS/REVIEW": 48,
+              "KO/REVIEW/FAIL": 135,
+              "KO/REVIEW/PASS": 26,
+              "KO/REVIEW/REVIEW": 22,
+              "OK/FAIL/FAIL": 207,
+              "OK/FAIL/PASS": 406,
+              "OK/FAIL/REVIEW": 24,
+              "OK/PASS/FAIL": 233,
+              "OK/PASS/PASS": 509,
+              "OK/PASS/REVIEW": 99,
+              "OK/REVIEW/FAIL": 86,
+              "OK/REVIEW/PASS": 229,
+              "OK/REVIEW/REVIEW": 36
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 54,
+              "removed": 94,
+              "delta_pp": -2.9717682020802374,
+              "ci95_pp": [
+                -4.736798361379662,
+                -1.2067380427808134
+              ]
+            },
+            "OK_FAIL": {
+              "added": 171,
+              "removed": 202,
+              "delta_pp": -1.694915254237288,
+              "ci95_pp": [
+                -3.763672062131322,
+                0.37384155365674554
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 994,
+              "KO/FAIL/PASS": 44,
+              "KO/FAIL/REVIEW": 38,
+              "KO/PASS/FAIL": 68,
+              "KO/PASS/PASS": 104,
+              "KO/PASS/REVIEW": 26,
+              "KO/REVIEW/FAIL": 42,
+              "KO/REVIEW/PASS": 10,
+              "KO/REVIEW/REVIEW": 20,
+              "OK/FAIL/FAIL": 355,
+              "OK/FAIL/PASS": 139,
+              "OK/FAIL/REVIEW": 63,
+              "OK/PASS/FAIL": 117,
+              "OK/PASS/PASS": 914,
+              "OK/PASS/REVIEW": 73,
+              "OK/REVIEW/FAIL": 54,
+              "OK/REVIEW/PASS": 91,
+              "OK/REVIEW/REVIEW": 23
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 1,
+              "removed": 2,
+              "delta_pp": -0.07429420505200594,
+              "ci95_pp": [
+                -0.32657212643004296,
+                0.1779837163260311
+              ]
+            },
+            "OK_FAIL": {
+              "added": 14,
+              "removed": 1,
+              "delta_pp": 0.7107709130672498,
+              "ci95_pp": [
+                0.2968999235709137,
+                1.1246419025635859
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1101,
+              "KO/FAIL/REVIEW": 3,
+              "KO/PASS/PASS": 157,
+              "KO/PASS/REVIEW": 2,
+              "KO/REVIEW/FAIL": 3,
+              "KO/REVIEW/PASS": 1,
+              "KO/REVIEW/REVIEW": 79,
+              "OK/FAIL/FAIL": 512,
+              "OK/FAIL/REVIEW": 1,
+              "OK/PASS/FAIL": 5,
+              "OK/PASS/PASS": 1144,
+              "OK/PASS/REVIEW": 13,
+              "OK/REVIEW/FAIL": 9,
+              "OK/REVIEW/REVIEW": 145
+            }
+          }
+        }
+      },
+      "outside": {
+        "metrics": {
+          "S12": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4128,
+                "FAIL": 390,
+                "REVIEW": 243,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 147,
+                "FAIL": 34,
+                "REVIEW": 21,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 263,
+            "analysis_ns_p50_p95": [
+              22041,
+              61792
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 1,
+              "KO/fast/FAIL": 34,
+              "KO/fast/PASS": 147,
+              "KO/precise/REVIEW": 20,
+              "OK/budget_before_precise/REVIEW": 2,
+              "OK/fast/FAIL": 389,
+              "OK/fast/PASS": 4128,
+              "OK/precise/FAIL": 1,
+              "OK/precise/REVIEW": 241
+            }
+          },
+          "spatial": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4285,
+                "FAIL": 123,
+                "REVIEW": 353,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 60,
+                "FAIL": 90,
+                "REVIEW": 52,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 412,
+            "analysis_ns_p50_p95": [
+              30666,
+              85666
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 8,
+              "KO/budget_before_precise/REVIEW": 1,
+              "KO/fast/FAIL": 87,
+              "KO/fast/PASS": 60,
+              "KO/precise/FAIL": 3,
+              "KO/precise/REVIEW": 43,
+              "OK/budget_after_precise/REVIEW": 27,
+              "OK/budget_before_precise/REVIEW": 4,
+              "OK/fast/FAIL": 118,
+              "OK/fast/PASS": 4281,
+              "OK/precise/FAIL": 5,
+              "OK/precise/PASS": 4,
+              "OK/precise/REVIEW": 322
+            }
+          },
+          "hard": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4279,
+                "FAIL": 114,
+                "REVIEW": 368,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 42,
+                "FAIL": 107,
+                "REVIEW": 53,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 423,
+            "analysis_ns_p50_p95": [
+              25459,
+              81166
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 1,
+              "KO/fast/FAIL": 106,
+              "KO/fast/PASS": 42,
+              "KO/precise/FAIL": 1,
+              "KO/precise/REVIEW": 52,
+              "OK/budget_after_precise/REVIEW": 11,
+              "OK/budget_before_precise/REVIEW": 5,
+              "OK/fast/FAIL": 108,
+              "OK/fast/PASS": 4279,
+              "OK/precise/FAIL": 6,
+              "OK/precise/REVIEW": 352
+            }
+          },
+          "smooth": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4284,
+                "FAIL": 112,
+                "REVIEW": 365,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 42,
+                "FAIL": 107,
+                "REVIEW": 53,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 421,
+            "analysis_ns_p50_p95": [
+              25500,
+              84833
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 9,
+              "KO/fast/FAIL": 106,
+              "KO/fast/PASS": 42,
+              "KO/precise/FAIL": 1,
+              "KO/precise/REVIEW": 44,
+              "OK/budget_after_precise/REVIEW": 11,
+              "OK/budget_before_precise/REVIEW": 4,
+              "OK/fast/FAIL": 106,
+              "OK/fast/PASS": 4284,
+              "OK/precise/FAIL": 6,
+              "OK/precise/REVIEW": 350
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 7,
+              "removed": 112,
+              "delta_pp": -51.98019801980198,
+              "ci95_pp": [
+                -59.7873995136555,
+                -44.17299652594846
+              ]
+            },
+            "OK_FAIL": {
+              "added": 86,
+              "removed": 364,
+              "delta_pp": -5.839109430791851,
+              "ci95_pp": [
+                -6.69660502380463,
+                -4.981613837779071
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 24,
+              "KO/FAIL/PASS": 4,
+              "KO/FAIL/REVIEW": 6,
+              "KO/PASS/FAIL": 72,
+              "KO/PASS/PASS": 35,
+              "KO/PASS/REVIEW": 40,
+              "KO/REVIEW/FAIL": 11,
+              "KO/REVIEW/PASS": 3,
+              "KO/REVIEW/REVIEW": 7,
+              "OK/FAIL/FAIL": 26,
+              "OK/FAIL/PASS": 312,
+              "OK/FAIL/REVIEW": 52,
+              "OK/PASS/FAIL": 80,
+              "OK/PASS/PASS": 3770,
+              "OK/PASS/REVIEW": 278,
+              "OK/REVIEW/FAIL": 6,
+              "OK/REVIEW/PASS": 202,
+              "OK/REVIEW/REVIEW": 35
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 15,
+              "removed": 33,
+              "delta_pp": -8.91089108910891,
+              "ci95_pp": [
+                -15.536454474848854,
+                -2.2853277033689654
+              ]
+            },
+            "OK_FAIL": {
+              "added": 63,
+              "removed": 74,
+              "delta_pp": -0.23104389834068476,
+              "ci95_pp": [
+                -0.7129068107277446,
+                0.2508190140463752
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 75,
+              "KO/FAIL/PASS": 2,
+              "KO/FAIL/REVIEW": 13,
+              "KO/PASS/FAIL": 12,
+              "KO/PASS/PASS": 27,
+              "KO/PASS/REVIEW": 21,
+              "KO/REVIEW/FAIL": 20,
+              "KO/REVIEW/PASS": 13,
+              "KO/REVIEW/REVIEW": 19,
+              "OK/FAIL/FAIL": 49,
+              "OK/FAIL/PASS": 36,
+              "OK/FAIL/REVIEW": 38,
+              "OK/PASS/FAIL": 27,
+              "OK/PASS/PASS": 4057,
+              "OK/PASS/REVIEW": 201,
+              "OK/REVIEW/FAIL": 36,
+              "OK/REVIEW/PASS": 191,
+              "OK/REVIEW/REVIEW": 126
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 0,
+              "removed": 0,
+              "delta_pp": 0.0,
+              "ci95_pp": [
+                0.0,
+                0.0
+              ]
+            },
+            "OK_FAIL": {
+              "added": 1,
+              "removed": 3,
+              "delta_pp": -0.04200798151648813,
+              "ci95_pp": [
+                -0.12434362528880487,
+                0.0403276622558286
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 107,
+              "KO/PASS/PASS": 42,
+              "KO/REVIEW/REVIEW": 53,
+              "OK/FAIL/FAIL": 111,
+              "OK/FAIL/REVIEW": 3,
+              "OK/PASS/PASS": 4277,
+              "OK/PASS/REVIEW": 2,
+              "OK/REVIEW/FAIL": 1,
+              "OK/REVIEW/PASS": 7,
+              "OK/REVIEW/REVIEW": 360
+            }
+          }
+        }
+      }
+    },
+    {
+      "all": {
+        "metrics": {
+          "smooth": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5431,
+                "FAIL": 636,
+                "REVIEW": 523,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 197,
+                "FAIL": 1199,
+                "REVIEW": 152,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 707,
+            "analysis_ns_p50_p95": [
+              28750,
+              93292
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 27,
+              "KO/budget_before_precise/REVIEW": 13,
+              "KO/fast/FAIL": 1185,
+              "KO/fast/PASS": 197,
+              "KO/precise/FAIL": 14,
+              "KO/precise/REVIEW": 112,
+              "OK/budget_after_precise/REVIEW": 21,
+              "OK/budget_before_precise/REVIEW": 4,
+              "OK/fast/FAIL": 601,
+              "OK/fast/PASS": 5431,
+              "OK/precise/FAIL": 35,
+              "OK/precise/REVIEW": 498
+            }
+          },
+          "hard": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5431,
+                "FAIL": 628,
+                "REVIEW": 531,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 198,
+                "FAIL": 1197,
+                "REVIEW": 153,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 703,
+            "analysis_ns_p50_p95": [
+              28542,
+              93666
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 24,
+              "KO/budget_before_precise/REVIEW": 16,
+              "KO/fast/FAIL": 1180,
+              "KO/fast/PASS": 198,
+              "KO/precise/FAIL": 17,
+              "KO/precise/REVIEW": 113,
+              "OK/budget_after_precise/REVIEW": 22,
+              "OK/budget_before_precise/REVIEW": 16,
+              "OK/fast/FAIL": 594,
+              "OK/fast/PASS": 5431,
+              "OK/precise/FAIL": 34,
+              "OK/precise/REVIEW": 493
+            }
+          },
+          "spatial": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 5398,
+                "FAIL": 685,
+                "REVIEW": 507,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 258,
+                "FAIL": 1165,
+                "REVIEW": 125,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 668,
+            "analysis_ns_p50_p95": [
+              36333,
+              94375
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 16,
+              "KO/budget_before_precise/REVIEW": 2,
+              "KO/fast/FAIL": 1149,
+              "KO/fast/PASS": 258,
+              "KO/precise/FAIL": 16,
+              "KO/precise/REVIEW": 107,
+              "OK/budget_after_precise/REVIEW": 38,
+              "OK/budget_before_precise/REVIEW": 3,
+              "OK/fast/FAIL": 664,
+              "OK/fast/PASS": 5394,
+              "OK/precise/FAIL": 21,
+              "OK/precise/PASS": 4,
+              "OK/precise/REVIEW": 466
+            }
+          },
+          "S12": {
+            "n": 8138,
+            "counts": {
+              "OK": {
+                "PASS": 4934,
+                "FAIL": 1014,
+                "REVIEW": 642,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 736,
+                "FAIL": 604,
+                "REVIEW": 208,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 796,
+            "analysis_ns_p50_p95": [
+              27750,
+              97666
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 15,
+              "KO/budget_before_precise/REVIEW": 11,
+              "KO/fast/FAIL": 595,
+              "KO/fast/PASS": 736,
+              "KO/precise/FAIL": 9,
+              "KO/precise/REVIEW": 182,
+              "OK/budget_after_precise/REVIEW": 60,
+              "OK/budget_before_precise/REVIEW": 58,
+              "OK/fast/FAIL": 1008,
+              "OK/fast/PASS": 4934,
+              "OK/precise/FAIL": 6,
+              "OK/precise/REVIEW": 524
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 99,
+              "removed": 638,
+              "delta_pp": -34.81912144702842,
+              "ci95_pp": [
+                -37.78764222432504,
+                -31.850600669731804
+              ]
+            },
+            "OK_FAIL": {
+              "added": 407,
+              "removed": 785,
+              "delta_pp": -5.735963581183611,
+              "ci95_pp": [
+                -6.753513123643992,
+                -4.718414038723232
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 506,
+              "KO/FAIL/PASS": 69,
+              "KO/FAIL/REVIEW": 29,
+              "KO/PASS/FAIL": 547,
+              "KO/PASS/PASS": 98,
+              "KO/PASS/REVIEW": 91,
+              "KO/REVIEW/FAIL": 146,
+              "KO/REVIEW/PASS": 30,
+              "KO/REVIEW/REVIEW": 32,
+              "OK/FAIL/FAIL": 229,
+              "OK/FAIL/PASS": 709,
+              "OK/FAIL/REVIEW": 76,
+              "OK/PASS/FAIL": 311,
+              "OK/PASS/PASS": 4256,
+              "OK/PASS/REVIEW": 367,
+              "OK/REVIEW/FAIL": 96,
+              "OK/REVIEW/PASS": 466,
+              "OK/REVIEW/REVIEW": 80
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 68,
+              "removed": 129,
+              "delta_pp": -3.940568475452196,
+              "ci95_pp": [
+                -5.707389967047957,
+                -2.1737469838564354
+              ]
+            },
+            "OK_FAIL": {
+              "added": 231,
+              "removed": 280,
+              "delta_pp": -0.7435508345978755,
+              "ci95_pp": [
+                -1.4156899660760565,
+                -0.07141170311969464
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1058,
+              "KO/FAIL/PASS": 45,
+              "KO/FAIL/REVIEW": 62,
+              "KO/PASS/FAIL": 78,
+              "KO/PASS/PASS": 129,
+              "KO/PASS/REVIEW": 51,
+              "KO/REVIEW/FAIL": 63,
+              "KO/REVIEW/PASS": 23,
+              "KO/REVIEW/REVIEW": 39,
+              "OK/FAIL/FAIL": 405,
+              "OK/FAIL/PASS": 176,
+              "OK/FAIL/REVIEW": 104,
+              "OK/PASS/FAIL": 144,
+              "OK/PASS/PASS": 4981,
+              "OK/PASS/REVIEW": 273,
+              "OK/REVIEW/FAIL": 87,
+              "OK/REVIEW/PASS": 274,
+              "OK/REVIEW/REVIEW": 146
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 4,
+              "removed": 5,
+              "delta_pp": -0.06459948320413438,
+              "ci95_pp": [
+                -0.44455355610522,
+                0.31535458969695124
+              ]
+            },
+            "OK_FAIL": {
+              "added": 14,
+              "removed": 6,
+              "delta_pp": 0.12139605462822459,
+              "ci95_pp": [
+                -0.011592154977098324,
+                0.2543842642335475
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1183,
+              "KO/FAIL/REVIEW": 14,
+              "KO/PASS/PASS": 193,
+              "KO/PASS/REVIEW": 5,
+              "KO/REVIEW/FAIL": 16,
+              "KO/REVIEW/PASS": 4,
+              "KO/REVIEW/REVIEW": 133,
+              "OK/FAIL/FAIL": 622,
+              "OK/FAIL/PASS": 1,
+              "OK/FAIL/REVIEW": 5,
+              "OK/PASS/FAIL": 4,
+              "OK/PASS/PASS": 5414,
+              "OK/PASS/REVIEW": 13,
+              "OK/REVIEW/FAIL": 10,
+              "OK/REVIEW/PASS": 16,
+              "OK/REVIEW/REVIEW": 505
+            }
+          }
+        }
+      },
+      "inside": {
+        "metrics": {
+          "smooth": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1146,
+                "FAIL": 523,
+                "REVIEW": 160,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 155,
+                "FAIL": 1092,
+                "REVIEW": 99,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 285,
+            "analysis_ns_p50_p95": [
+              31250,
+              103624
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 20,
+              "KO/budget_before_precise/REVIEW": 13,
+              "KO/fast/FAIL": 1079,
+              "KO/fast/PASS": 155,
+              "KO/precise/FAIL": 13,
+              "KO/precise/REVIEW": 66,
+              "OK/budget_after_precise/REVIEW": 7,
+              "OK/budget_before_precise/REVIEW": 3,
+              "OK/fast/FAIL": 494,
+              "OK/fast/PASS": 1146,
+              "OK/precise/FAIL": 29,
+              "OK/precise/REVIEW": 150
+            }
+          },
+          "hard": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1157,
+                "FAIL": 512,
+                "REVIEW": 160,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 156,
+                "FAIL": 1091,
+                "REVIEW": 99,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 280,
+            "analysis_ns_p50_p95": [
+              30917,
+              103584
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 14,
+              "KO/budget_before_precise/REVIEW": 16,
+              "KO/fast/FAIL": 1074,
+              "KO/fast/PASS": 156,
+              "KO/precise/FAIL": 17,
+              "KO/precise/REVIEW": 69,
+              "OK/budget_after_precise/REVIEW": 8,
+              "OK/budget_before_precise/REVIEW": 7,
+              "OK/fast/FAIL": 485,
+              "OK/fast/PASS": 1157,
+              "OK/precise/FAIL": 27,
+              "OK/precise/REVIEW": 145
+            }
+          },
+          "spatial": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 1110,
+                "FAIL": 562,
+                "REVIEW": 157,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 198,
+                "FAIL": 1076,
+                "REVIEW": 72,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 255,
+            "analysis_ns_p50_p95": [
+              43792,
+              106250
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 8,
+              "KO/budget_before_precise/REVIEW": 1,
+              "KO/fast/FAIL": 1063,
+              "KO/fast/PASS": 198,
+              "KO/precise/FAIL": 13,
+              "KO/precise/REVIEW": 63,
+              "OK/budget_after_precise/REVIEW": 12,
+              "OK/budget_before_precise/REVIEW": 2,
+              "OK/fast/FAIL": 546,
+              "OK/fast/PASS": 1110,
+              "OK/precise/FAIL": 16,
+              "OK/precise/REVIEW": 143
+            }
+          },
+          "S12": {
+            "n": 3175,
+            "counts": {
+              "OK": {
+                "PASS": 829,
+                "FAIL": 627,
+                "REVIEW": 373,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 589,
+                "FAIL": 572,
+                "REVIEW": 185,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 535,
+            "analysis_ns_p50_p95": [
+              33250,
+              110125
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 13,
+              "KO/budget_before_precise/REVIEW": 8,
+              "KO/fast/FAIL": 563,
+              "KO/fast/PASS": 589,
+              "KO/precise/FAIL": 9,
+              "KO/precise/REVIEW": 164,
+              "OK/budget_after_precise/REVIEW": 37,
+              "OK/budget_before_precise/REVIEW": 29,
+              "OK/fast/FAIL": 622,
+              "OK/fast/PASS": 829,
+              "OK/precise/FAIL": 5,
+              "OK/precise/REVIEW": 307
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 92,
+              "removed": 526,
+              "delta_pp": -32.24368499257058,
+              "ci95_pp": [
+                -35.42872356473968,
+                -29.058646420401484
+              ]
+            },
+            "OK_FAIL": {
+              "added": 319,
+              "removed": 423,
+              "delta_pp": -5.686167304537999,
+              "ci95_pp": [
+                -8.594375645252917,
+                -2.777958963823079
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 483,
+              "KO/FAIL/PASS": 66,
+              "KO/FAIL/REVIEW": 23,
+              "KO/PASS/FAIL": 475,
+              "KO/PASS/PASS": 63,
+              "KO/PASS/REVIEW": 51,
+              "KO/REVIEW/FAIL": 134,
+              "KO/REVIEW/PASS": 26,
+              "KO/REVIEW/REVIEW": 25,
+              "OK/FAIL/FAIL": 204,
+              "OK/FAIL/PASS": 399,
+              "OK/FAIL/REVIEW": 24,
+              "OK/PASS/FAIL": 231,
+              "OK/PASS/PASS": 504,
+              "OK/PASS/REVIEW": 94,
+              "OK/REVIEW/FAIL": 88,
+              "OK/REVIEW/PASS": 243,
+              "OK/REVIEW/REVIEW": 42
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 53,
+              "removed": 96,
+              "delta_pp": -3.1946508172362553,
+              "ci95_pp": [
+                -4.9645733855282055,
+                -1.4247282489443052
+              ]
+            },
+            "OK_FAIL": {
+              "added": 167,
+              "removed": 206,
+              "delta_pp": -2.1323127392017494,
+              "ci95_pp": [
+                -4.20021910175213,
+                -0.06440637665136965
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 984,
+              "KO/FAIL/PASS": 43,
+              "KO/FAIL/REVIEW": 49,
+              "KO/PASS/FAIL": 66,
+              "KO/PASS/PASS": 102,
+              "KO/PASS/REVIEW": 30,
+              "KO/REVIEW/FAIL": 42,
+              "KO/REVIEW/PASS": 10,
+              "KO/REVIEW/REVIEW": 20,
+              "OK/FAIL/FAIL": 356,
+              "OK/FAIL/PASS": 140,
+              "OK/FAIL/REVIEW": 66,
+              "OK/PASS/FAIL": 117,
+              "OK/PASS/PASS": 921,
+              "OK/PASS/REVIEW": 72,
+              "OK/REVIEW/FAIL": 50,
+              "OK/REVIEW/PASS": 85,
+              "OK/REVIEW/REVIEW": 22
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 4,
+              "removed": 5,
+              "delta_pp": -0.07429420505200594,
+              "ci95_pp": [
+                -0.5112884604637974,
+                0.36270005035978553
+              ]
+            },
+            "OK_FAIL": {
+              "added": 14,
+              "removed": 3,
+              "delta_pp": 0.6014215418261345,
+              "ci95_pp": [
+                0.16031967532643487,
+                1.042523408325834
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 1077,
+              "KO/FAIL/REVIEW": 14,
+              "KO/PASS/PASS": 151,
+              "KO/PASS/REVIEW": 5,
+              "KO/REVIEW/FAIL": 15,
+              "KO/REVIEW/PASS": 4,
+              "KO/REVIEW/REVIEW": 80,
+              "OK/FAIL/FAIL": 509,
+              "OK/FAIL/REVIEW": 3,
+              "OK/PASS/FAIL": 4,
+              "OK/PASS/PASS": 1141,
+              "OK/PASS/REVIEW": 12,
+              "OK/REVIEW/FAIL": 10,
+              "OK/REVIEW/PASS": 5,
+              "OK/REVIEW/REVIEW": 145
+            }
+          }
+        }
+      },
+      "outside": {
+        "metrics": {
+          "smooth": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4285,
+                "FAIL": 113,
+                "REVIEW": 363,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 42,
+                "FAIL": 107,
+                "REVIEW": 53,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 422,
+            "analysis_ns_p50_p95": [
+              25958,
+              84791
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 7,
+              "KO/fast/FAIL": 106,
+              "KO/fast/PASS": 42,
+              "KO/precise/FAIL": 1,
+              "KO/precise/REVIEW": 46,
+              "OK/budget_after_precise/REVIEW": 14,
+              "OK/budget_before_precise/REVIEW": 1,
+              "OK/fast/FAIL": 107,
+              "OK/fast/PASS": 4285,
+              "OK/precise/FAIL": 6,
+              "OK/precise/REVIEW": 348
+            }
+          },
+          "hard": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4274,
+                "FAIL": 116,
+                "REVIEW": 371,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 42,
+                "FAIL": 106,
+                "REVIEW": 54,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 423,
+            "analysis_ns_p50_p95": [
+              26292,
+              85083
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 10,
+              "KO/fast/FAIL": 106,
+              "KO/fast/PASS": 42,
+              "KO/precise/REVIEW": 44,
+              "OK/budget_after_precise/REVIEW": 14,
+              "OK/budget_before_precise/REVIEW": 9,
+              "OK/fast/FAIL": 109,
+              "OK/fast/PASS": 4274,
+              "OK/precise/FAIL": 7,
+              "OK/precise/REVIEW": 348
+            }
+          },
+          "spatial": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4288,
+                "FAIL": 123,
+                "REVIEW": 350,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 60,
+                "FAIL": 89,
+                "REVIEW": 53,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 413,
+            "analysis_ns_p50_p95": [
+              29833,
+              84667
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 8,
+              "KO/budget_before_precise/REVIEW": 1,
+              "KO/fast/FAIL": 86,
+              "KO/fast/PASS": 60,
+              "KO/precise/FAIL": 3,
+              "KO/precise/REVIEW": 44,
+              "OK/budget_after_precise/REVIEW": 26,
+              "OK/budget_before_precise/REVIEW": 1,
+              "OK/fast/FAIL": 118,
+              "OK/fast/PASS": 4284,
+              "OK/precise/FAIL": 5,
+              "OK/precise/PASS": 4,
+              "OK/precise/REVIEW": 323
+            }
+          },
+          "S12": {
+            "n": 4963,
+            "counts": {
+              "OK": {
+                "PASS": 4105,
+                "FAIL": 387,
+                "REVIEW": 269,
+                "ERROR": 0
+              },
+              "KO": {
+                "PASS": 147,
+                "FAIL": 32,
+                "REVIEW": 23,
+                "ERROR": 0
+              }
+            },
+            "precise_calls": 261,
+            "analysis_ns_p50_p95": [
+              23250,
+              75042
+            ],
+            "stages": {
+              "KO/budget_after_precise/REVIEW": 2,
+              "KO/budget_before_precise/REVIEW": 3,
+              "KO/fast/FAIL": 32,
+              "KO/fast/PASS": 147,
+              "KO/precise/REVIEW": 18,
+              "OK/budget_after_precise/REVIEW": 23,
+              "OK/budget_before_precise/REVIEW": 29,
+              "OK/fast/FAIL": 386,
+              "OK/fast/PASS": 4105,
+              "OK/precise/FAIL": 1,
+              "OK/precise/REVIEW": 217
+            }
+          }
+        },
+        "paired": {
+          "S12": {
+            "KO_PASS": {
+              "added": 7,
+              "removed": 112,
+              "delta_pp": -51.98019801980198,
+              "ci95_pp": [
+                -59.7873995136555,
+                -44.17299652594846
+              ]
+            },
+            "OK_FAIL": {
+              "added": 88,
+              "removed": 362,
+              "delta_pp": -5.755093467758874,
+              "ci95_pp": [
+                -6.61304733978276,
+                -4.897139595734988
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 23,
+              "KO/FAIL/PASS": 3,
+              "KO/FAIL/REVIEW": 6,
+              "KO/PASS/FAIL": 72,
+              "KO/PASS/PASS": 35,
+              "KO/PASS/REVIEW": 40,
+              "KO/REVIEW/FAIL": 12,
+              "KO/REVIEW/PASS": 4,
+              "KO/REVIEW/REVIEW": 7,
+              "OK/FAIL/FAIL": 25,
+              "OK/FAIL/PASS": 310,
+              "OK/FAIL/REVIEW": 52,
+              "OK/PASS/FAIL": 80,
+              "OK/PASS/PASS": 3752,
+              "OK/PASS/REVIEW": 273,
+              "OK/REVIEW/FAIL": 8,
+              "OK/REVIEW/PASS": 223,
+              "OK/REVIEW/REVIEW": 38
+            }
+          },
+          "spatial": {
+            "KO_PASS": {
+              "added": 15,
+              "removed": 33,
+              "delta_pp": -8.91089108910891,
+              "ci95_pp": [
+                -15.536454474848854,
+                -2.2853277033689654
+              ]
+            },
+            "OK_FAIL": {
+              "added": 64,
+              "removed": 74,
+              "delta_pp": -0.21003990758244068,
+              "ci95_pp": [
+                -0.6936663015623146,
+                0.27358648639743316
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 74,
+              "KO/FAIL/PASS": 2,
+              "KO/FAIL/REVIEW": 13,
+              "KO/PASS/FAIL": 12,
+              "KO/PASS/PASS": 27,
+              "KO/PASS/REVIEW": 21,
+              "KO/REVIEW/FAIL": 21,
+              "KO/REVIEW/PASS": 13,
+              "KO/REVIEW/REVIEW": 19,
+              "OK/FAIL/FAIL": 49,
+              "OK/FAIL/PASS": 36,
+              "OK/FAIL/REVIEW": 38,
+              "OK/PASS/FAIL": 27,
+              "OK/PASS/PASS": 4060,
+              "OK/PASS/REVIEW": 201,
+              "OK/REVIEW/FAIL": 37,
+              "OK/REVIEW/PASS": 189,
+              "OK/REVIEW/REVIEW": 124
+            }
+          },
+          "hard": {
+            "KO_PASS": {
+              "added": 0,
+              "removed": 0,
+              "delta_pp": 0.0,
+              "ci95_pp": [
+                0.0,
+                0.0
+              ]
+            },
+            "OK_FAIL": {
+              "added": 0,
+              "removed": 3,
+              "delta_pp": -0.0630119722747322,
+              "ci95_pp": [
+                -0.1343017498532286,
+                0.008277805303764181
+              ]
+            },
+            "transitions": {
+              "KO/FAIL/FAIL": 106,
+              "KO/PASS/PASS": 42,
+              "KO/REVIEW/FAIL": 1,
+              "KO/REVIEW/REVIEW": 53,
+              "OK/FAIL/FAIL": 113,
+              "OK/FAIL/PASS": 1,
+              "OK/FAIL/REVIEW": 2,
+              "OK/PASS/PASS": 4273,
+              "OK/PASS/REVIEW": 1,
+              "OK/REVIEW/PASS": 11,
+              "OK/REVIEW/REVIEW": 360
+            }
+          }
+        }
+      }
+    }
+  ],
+  "hashes": {
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-smooth-build\\Release\\openzdm_smooth.exe": "391c21ebdd980ddaabe852a3e32a4189796951a5c9ef648e9a4d192d766e7bee",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-guard-build\\Release\\openzdm_boost_guard.exe": "54d31b261f6b7cd89b399f1b407888282f907f286ceab216724ee80baa56ddeb",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\budget-build\\Release\\openzdm_shape.exe": "f3bb16a76804660f4749102a5d565953171d89b02a63aa2e613a0aa2edbc55cc",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\shape-build\\Release\\openzdm_eda_final.exe": "dcf6a322d8ad69ad52a495214cc9eca0fe8ae1136e824fdcdbf4a9236480d0ca",
+    "C:\\dev\\weld-scope\\docs\\steps\\S11-evidence\\config\\selective.json": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-priority\\model-220.txt": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-priority\\config-220.json": "d7f3d023828f8cf05717e9bb15997a6c7376f6842f05fc7d5ce28e645e5a619b",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-priority\\boundary.json": "2fdd57abea95f4253eeb1ba69333732f611ed4f9ab935f1dc6d8a1367fd65357",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-priority\\freeze.json": "bff8856cb4f35a47b5dd9ab8a3ed6b7c24b430e6eec960a4327253f8ba5d5bd1",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-smooth\\model-220.txt": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-smooth\\config.json": "730940817505aec79fe9a9d7127d9ba96e6d6e48c42a5e3306588fdf242783f3",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\boost-smooth\\boundary.json": "17b3b1b1eb64c1ee0f474b6197f92be6f3ebc2b8bfaa0dae81f2ebe73b48ba5d",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\validity-final\\edge.json": "0bff49e386b8b0583055fb424292f29329dbbf074134cd13224dea29c36bc6da",
+    "C:\\dev\\weld-scope\\artifacts\\OPENZDM-EDA\\width-budget\\validation.json": "963503ed00a1b9650ba5897e726cb9d2fd948480aa552acde5794efb03561cc6",
+    "C:\\dev\\weld-scope\\artifacts\\S11\\evaluation\\inputs\\test.json": "1da18f57e30683676e8e3525a7d4b42935fe86868fcb80323cb9db879cb67bfb",
+    "C:\\dev\\weld-scope\\artifacts\\S11\\evaluation\\inputs\\test-primary.json": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "C:\\dev\\weld-scope\\tools\\evaluate_openzdm_smooth.py": "7de1fef476885f9ae1a08367137910f2b4fc0051d6701739edc8e6314b69f282",
+    "C:\\dev\\weld-scope\\tools\\openzdm_boost_smooth\\runner.cpp": "b57bacfc566a2dcb01e436a0085036edb0e64df4d8fee456fff21880830c4173",
+    "C:\\dev\\weld-scope\\tools\\openzdm_boost_smooth\\InterpolatedScoreBand.h": "224d67d7bc683c13e8e6b58fbed2db31048f63732be53cae741babbca31b09de",
+    "C:\\dev\\weld-scope\\tools\\openzdm_boost_smooth\\CMakeLists.txt": "df965a40b13044171c477fedaa00cb882ee1fba2aef234ffe7d4f68a7568e267",
+    "C:\\dev\\weld-scope\\docs\\algorithms\\evidence\\openzdm-spatial-model\\config.json": "94c10201f7d2fc44d29c0ee3a54c2a9d1049dd734092f186e3a53f97a1165083",
+    "C:\\dev\\weld-scope\\docs\\algorithms\\evidence\\openzdm-spatial-model\\outside.json": "be4a128dcbb28a8abdfc534f6d0071547ec81dea581687765515b3819fb4072c",
+    "C:\\dev\\weld-scope\\docs\\algorithms\\evidence\\openzdm-spatial-model\\inside\\whole.xml.gz": "3c7e0c11915126be7e5a4f8677dcf81ab8c327bd6263222a8edce9d68d08520d",
+    "C:\\dev\\weld-scope\\docs\\algorithms\\evidence\\openzdm-spatial-model\\outside\\whole.xml.gz": "3ca07cfc23be57b0f7ebe64ad6253e85b29e92abc1b87d1d92016c7fda78b134"
+  }
+}

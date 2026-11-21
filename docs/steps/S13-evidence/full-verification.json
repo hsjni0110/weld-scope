@@ -1,0 +1,44 @@
+{
+  "batch_id": "8c7545f7-aa8f-42a9-b136-172c3f0a1b5a",
+  "files": 61670,
+  "elapsed_seconds": 870.8459132910011,
+  "counts": {
+    "PASS": 43899,
+    "FAIL": 11086,
+    "REVIEW": 6685,
+    "ERROR": 0,
+    "CANCELLED": 0
+  },
+  "reasons": {
+    "budget_exhausted": 3929,
+    "fast_threshold": 54913,
+    "precise_uncertain": 2756,
+    "precise_threshold": 72
+  },
+  "timings_us": {
+    "FAST": {
+      "n": 61670,
+      "mean": 55.2,
+      "maximum": 7939.04
+    },
+    "PRECISE": {
+      "n": 5678,
+      "mean": 89.81,
+      "maximum": 4795.54
+    }
+  },
+  "source_paths_verified": 61670,
+  "reopened": true,
+  "tcp_replay": true,
+  "commit_retry": false,
+  "stopped": false,
+  "single_file_completed": false,
+  "app_sha256": "d241a32ea8eb1265c78be817a74213145fac7fcd37b897407d523649a9def442",
+  "config_sha256": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93",
+  "input_manifest_sha256": "0f5f002834e629496e024a7d376065ac75e9bad58b92784afad0dae7f5264fa3",
+  "mysql": {
+    "version": "8.4.13",
+    "innodb_flush_log_at_trx_commit": 2,
+    "sync_binlog": 0
+  }
+}

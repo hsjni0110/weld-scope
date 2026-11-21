@@ -1,6 +1,8 @@
 #include "AnalysisPipeline.h"
+#include "PooledSmoothModel.h"
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -56,12 +58,49 @@ void test_selective_config() {
         require(false, "selective settings rejected in baseline mode");
     } catch (const std::invalid_argument&) {}
 }
+void test_frozen_model(const std::filesystem::path& directory, const std::filesystem::path& sample) {
+    auto manifest = read_bytes(directory / pooledSmoothConfigFile, config_file_limit);
+    const PooledSmoothModel model(directory, manifest);
+    const auto parameters = parse_inspection_parameters(read_json(manifest), InspectionMode::PooledSmooth);
+    const auto image = decode_png(read_bytes(sample, image_file_limit));
+    const auto output = analyze_image(image, parameters, {}, &model);
+    require(!output.attempts.empty() && output.attempts.front().stage == "POOLED_WIDTH" && output.attempts.front().score &&
+        std::abs(*output.attempts.front().score - 0.7688432614002394) < 1e-12, "frozen defect score and stage");
+    require(model.band(415).passMax > model.band(416).passMax &&
+        model.band(416).passMax > model.band(422).passMax, "smooth calibration across the width boundary");
+
+    const auto emptyDir = std::filesystem::temp_directory_path() /
+        ("weldscope-model-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    require(std::filesystem::create_directory(emptyDir), "could not create a model fixture directory");
+    try {
+        const PooledSmoothModel missing(emptyDir, manifest);
+        require(false, "missing model accepted");
+    } catch (const InspectionInputError& error) {
+        require(error.reason() == FileInspectionFailure::FileAccess, "unexpected missing model error");
+    }
+    const auto weights = emptyDir / "model-220.txt";
+    std::filesystem::copy_file(directory / weights.filename(), weights);
+    std::ofstream(weights, std::ios::app).put('\n');
+    try {
+        const PooledSmoothModel corrupt(emptyDir, manifest);
+        require(false, "altered model accepted");
+    } catch (const std::invalid_argument&) {}
+    std::filesystem::remove(weights);
+    std::filesystem::remove(emptyDir);
+    manifest.push_back(' ');
+    try {
+        const PooledSmoothModel altered(directory, manifest);
+        require(false, "altered manifest accepted for frozen model");
+    } catch (const std::invalid_argument&) {}
+}
 }
 
-int main() {
+int main(int argc, char** argv) {
     try {
         test_shared_analysis();
         test_selective_config();
+        require(argc == 3, "expected the frozen model directory and defect sample");
+        test_frozen_model(argv[1], argv[2]);
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;

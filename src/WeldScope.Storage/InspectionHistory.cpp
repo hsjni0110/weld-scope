@@ -98,8 +98,8 @@ Connection Connect(const HistoryConnection& settings) {
 
 class Transaction {
 public:
-    explicit Transaction(MYSQL* connection) : connection_(connection) {
-        CheckConnection(connection_, mysql_query(connection_, "START TRANSACTION") == 0, "Start transaction");
+    explicit Transaction(MYSQL* connection, const char* start = "START TRANSACTION") : connection_(connection) {
+        CheckConnection(connection_, mysql_query(connection_, start) == 0, "Start transaction");
     }
 
     Transaction(const Transaction&) = delete;
@@ -166,6 +166,11 @@ MYSQL_BIND Parameter(const std::optional<double>& value) {
 
 struct Column {
     explicit Column(std::string& value) : text(&value) { bind.buffer_type = MYSQL_TYPE_STRING; }
+    explicit Column(unsigned int& value) {
+        bind.buffer_type = MYSQL_TYPE_LONG;
+        bind.buffer = &value;
+        bind.is_unsigned = true;
+    }
     explicit Column(double& value) {
         bind.buffer_type = MYSQL_TYPE_DOUBLE;
         bind.buffer = &value;
@@ -219,6 +224,8 @@ public:
         }
     }
 
+    my_ulonglong AffectedRows() const { return mysql_stmt_affected_rows(statement_.get()); }
+
     template<class... Values>
     bool Fetch(Values&... values) {
         auto* statement = statement_.get();
@@ -266,6 +273,16 @@ auto RecordFields(const InspectionRecord& record) {
     return std::tie(record.inspectionId, record.requestId, record.inputId, record.sourcePath, record.sourceSha256,
                     record.configSha256, record.algorithmVersion, record.datasetVersion, record.decision, record.reason,
                     record.attempts, record.workState);
+}
+
+bool MatchesBatchMembership(MYSQL* mysql, const InspectionRecord& record) {
+    if (record.batchId.empty()) return true; // The standalone schema need only have the original tables.
+    Statement member(mysql, "Read batch membership",
+        "SELECT batch_id, sequence_no FROM inspection_batch_members WHERE inspection_id = ?");
+    member.Execute(record.inspectionId);
+    std::string id;
+    unsigned int sequence = 0;
+    return member.Fetch(id, sequence) && id == record.batchId && sequence == record.batchIndex;
 }
 
 std::optional<StoredInspection> ReadInspection(MYSQL* mysql, const std::string& inspectionId) {
@@ -341,6 +358,12 @@ std::string InspectionHistory::Version() const {
 SaveStatus InspectionHistory::Save(const InspectionRecord& record) const {
     ValidateId(record.inspectionId);
     ValidateId(record.requestId);
+    if (record.batchId.empty() != (record.batchIndex == 0))
+        throw std::invalid_argument("Batch membership requires an ID and a positive sequence");
+    if (!record.batchId.empty()) {
+        ValidateId(record.batchId);
+        ValidateSha256(record.configSha256);
+    }
     const bool cancelled = record.workState == InspectionWorkState::Cancelled;
     if (cancelled && (!record.decision.empty() || !record.attempts.empty()))
         throw std::invalid_argument("Cancellation cannot have a verdict or attempts");
@@ -365,7 +388,23 @@ SaveStatus InspectionHistory::Save(const InspectionRecord& record) const {
         transaction.Rollback();
         const auto existing = ReadInspection(mysql, record.inspectionId);
         // A matching request_id on this row also proves ownership of the unique request key.
-        return existing && RecordFields(existing->record) == RecordFields(record) ? SaveStatus::Replay : SaveStatus::Conflict;
+        return existing && RecordFields(existing->record) == RecordFields(record) && MatchesBatchMembership(mysql, record)
+            ? SaveStatus::Replay : SaveStatus::Conflict;
+    }
+    if (!record.batchId.empty()) {
+        try {
+            Statement member(mysql, "Insert batch membership",
+                "INSERT INTO inspection_batch_members (batch_id, sequence_no, inspection_id) "
+                "SELECT batch_id, ?, ? FROM inspection_batches "
+                "WHERE batch_id = ? AND state = 'running' AND total_files >= ? AND config_sha256 = ?");
+            member.ExecuteWrite(mysql, record.batchIndex, record.inspectionId, record.batchId,
+                                record.batchIndex, record.configSha256);
+            if (member.AffectedRows() != 1) throw std::runtime_error("Batch cannot accept inspection");
+        } catch (const DatabaseError& error) {
+            if (error.code != ER_DUP_ENTRY) throw;
+            transaction.Rollback();
+            return SaveStatus::Conflict;
+        }
     }
     if (!record.attempts.empty()) {
         Statement insert(mysql, "Insert analysis attempt", insertAttempt);
@@ -391,6 +430,22 @@ void InspectionHistory::CheckReady() const {
     Statement(connection.get(), "Check attempt schema", "SELECT sequence_no FROM analysis_attempts WHERE FALSE").Execute();
     Statement(connection.get(), "Check inspection writer", insertInspection);
     Statement(connection.get(), "Check attempt writer", insertAttempt);
+}
+
+void InspectionHistory::CheckBatchReady() const {
+    const auto connection = Connect(settings_);
+    auto* mysql = connection.get();
+    Statement(mysql, "Check inspection batch schema",
+        "SELECT batch_id, root_path, config_sha256, state, total_files FROM inspection_batches WHERE FALSE").Execute();
+    Statement(mysql, "Check batch membership schema",
+        "SELECT batch_id, sequence_no, inspection_id FROM inspection_batch_members WHERE FALSE").Execute();
+    Statement(mysql, "Check inspection batch writer",
+        "INSERT INTO inspection_batches (batch_id, root_path, config_sha256, state, total_files) "
+        "VALUES (?, ?, ?, ?, ?)");
+    Statement(mysql, "Check batch membership writer",
+        "INSERT INTO inspection_batch_members (batch_id, sequence_no, inspection_id) VALUES (?, ?, ?)");
+    Statement(mysql, "Check inspection batch state writer",
+        "UPDATE inspection_batches SET state = 'running' WHERE FALSE").Execute();
 }
 
 std::optional<StoredInspection> InspectionHistory::GetByRequestId(const std::string& requestId) const {
@@ -419,6 +474,126 @@ std::vector<InspectionSummary> InspectionHistory::Recent() const {
         records.push_back(std::move(row));
     }
     return records;
+}
+
+void InspectionHistory::CreateBatch(const std::string& batchId, const std::string& rootPath,
+                                    const std::string& configSha256, unsigned int totalFiles) const {
+    ValidateId(batchId);
+    ValidateSha256(configSha256);
+    if (rootPath.empty() || totalFiles == 0)
+        throw std::invalid_argument("A new batch requires a root and input count");
+    const auto connection = Connect(settings_);
+    auto* mysql = connection.get();
+    try {
+        Statement insert(mysql, "Create inspection batch",
+            "INSERT INTO inspection_batches (batch_id, root_path, config_sha256, state, total_files) "
+            "VALUES (?, ?, ?, 'running', ?)");
+        insert.ExecuteWrite(mysql, batchId, rootPath, configSha256, totalFiles);
+    } catch (const DatabaseError& error) {
+        if (error.code != ER_DUP_ENTRY) throw;
+        Statement lookup(mysql, "Confirm inspection batch",
+            "SELECT root_path, config_sha256, state, total_files FROM inspection_batches WHERE batch_id = ?");
+        lookup.Execute(batchId);
+        std::string storedRoot, storedConfigSha256, storedState;
+        unsigned int storedTotal = 0;
+        if (!lookup.Fetch(storedRoot, storedConfigSha256, storedState, storedTotal) ||
+            storedRoot != rootPath || storedConfigSha256 != configSha256 ||
+            storedState != "running" || storedTotal != totalFiles)
+            throw std::runtime_error("Conflicting inspection batch");
+    }
+}
+
+void InspectionHistory::FinishBatch(const std::string& id, const std::string& state) const {
+    ValidateId(id);
+    if (state != "completed" && state != "stopped")
+        throw std::invalid_argument("Batch can finish as completed or stopped");
+    const auto connection = Connect(settings_);
+    auto* mysql = connection.get();
+    {
+        Statement update(mysql, "Finish inspection batch",
+            "UPDATE inspection_batches SET state = ? WHERE batch_id = ? AND state = 'running' "
+            "AND (? = 'stopped' OR total_files = "
+            "(SELECT COUNT(*) FROM inspection_batch_members WHERE batch_id = ?))");
+        update.ExecuteWrite(mysql, state, id, state, id);
+        if (update.AffectedRows() == 1) return;
+    }
+    Statement lookup(mysql, "Confirm finished inspection batch",
+        "SELECT state FROM inspection_batches WHERE batch_id = ?");
+    lookup.Execute(id);
+    std::string existingState;
+    if (!lookup.Fetch(existingState) || existingState != state)
+        throw std::runtime_error("Batch cannot finish in requested state");
+}
+
+std::vector<BatchSummary> InspectionHistory::RecentBatches() const {
+    const auto connection = Connect(settings_);
+    Statement list(connection.get(), "List inspection batches",
+        "SELECT batch_id, root_path, state, total_files FROM inspection_batches "
+        "ORDER BY created_at DESC, batch_id DESC LIMIT 50");
+    list.Execute();
+    std::vector<BatchSummary> batches;
+    BatchSummary batch;
+    while (list.Fetch(batch.batchId, batch.rootPath, batch.state, batch.totalFiles))
+        batches.push_back(std::move(batch));
+    return batches;
+}
+
+namespace {
+
+BatchCounts ReadBatchCounts(MYSQL* mysql, const std::string& id) {
+    Statement count(mysql, "Count inspection batch results",
+        "SELECT COUNT(CASE WHEN i.decision = 'PASS' THEN 1 END), "
+        "COUNT(CASE WHEN i.decision = 'FAIL' THEN 1 END), "
+        "COUNT(CASE WHEN i.decision = 'REVIEW' THEN 1 END), "
+        "COUNT(CASE WHEN i.decision = 'ERROR' THEN 1 END), "
+        "COUNT(CASE WHEN i.work_state = 'CANCELLED' THEN 1 END) "
+        "FROM inspection_batch_members m JOIN inspections i ON i.inspection_id = m.inspection_id WHERE m.batch_id = ?");
+    count.Execute(id);
+    BatchCounts totals;
+    if (!count.Fetch(totals.passed, totals.failed, totals.review, totals.errors, totals.cancelled))
+        throw std::runtime_error("MySQL returned no batch totals");
+    return totals;
+}
+
+void ValidateBatchFilter(const std::string& filter) {
+    if (!filter.empty() && filter != "PASS" && filter != "FAIL" && filter != "REVIEW" && filter != "ERROR" &&
+        filter != "CANCELLED")
+        throw std::invalid_argument("Unknown batch result filter");
+}
+
+std::vector<BatchRow> ReadBatchRows(MYSQL* mysql, const std::string& id, const std::string& filter,
+                                   unsigned int offset) {
+    Statement list(mysql, "List inspection batch results",
+        "SELECT i.inspection_id, i.source_path, COALESCE(i.decision, ''), i.work_state, i.reason, "
+        "COALESCE((SELECT SUM(a.duration_ms) FROM analysis_attempts a WHERE a.inspection_id = i.inspection_id), 0) "
+        "FROM inspection_batch_members m JOIN inspections i ON i.inspection_id = m.inspection_id "
+        "WHERE m.batch_id = ? AND (? = '' OR COALESCE(i.decision, i.work_state) = ?) "
+        "ORDER BY m.sequence_no LIMIT 100 OFFSET ?");
+    list.Execute(id, filter, filter, offset);
+    std::vector<BatchRow> results;
+    BatchRow row;
+    std::string state;
+    while (list.Fetch(row.inspectionId, row.sourcePath, row.decision, state, row.reason, row.durationMs)) {
+        row.workState = state == "CANCELLED" ? InspectionWorkState::Cancelled : InspectionWorkState::Completed;
+        results.push_back(std::move(row));
+    }
+    return results;
+}
+
+} // namespace
+
+BatchPageView InspectionHistory::ReadBatchPage(const std::string& id, const std::string& filter,
+                                                unsigned int offset) const {
+    ValidateId(id);
+    ValidateBatchFilter(filter);
+    const auto connection = Connect(settings_);
+    auto* mysql = connection.get();
+    CheckConnection(mysql, mysql_query(mysql, "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ") == 0,
+                    "Set batch snapshot isolation");
+    Transaction snapshot(mysql, "START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY");
+    BatchPageView view{ReadBatchCounts(mysql, id), ReadBatchRows(mysql, id, filter, offset)};
+    snapshot.Commit();
+    return view;
 }
 
 } // namespace weldscope

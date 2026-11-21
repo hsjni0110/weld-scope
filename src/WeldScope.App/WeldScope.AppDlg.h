@@ -3,6 +3,7 @@
 #include "InspectionImageView.h"
 #ifdef WELDSCOPE_S10
 #include "IntegratedInspection.h"
+#include <array>
 #endif
 
 class CWeldScopeAppDlg : public CDialogEx {
@@ -41,17 +42,41 @@ private:
     enum class InspectionView { Live, FileSelection, History, PendingDeviceSave };
     struct OpenedInspection {
         weldscope::StoredInspection record;
-        cv::Mat image;
+        cv::Mat image, overlay;
         CString sourceStatus;
     };
     void OnRetrySave();
     void OnRefreshHistory();
     void OnOpenHistory();
+    void RequestInspectionDetails(const std::string& inspectionId, bool folder);
     void PollIntegration();
     void RefreshIntegration();
     void ShowHistory(std::vector<weldscope::InspectionSummary> rows);
-    void ShowOpenedInspection(const OpenedInspection& opened);
+    void ShowOpenedInspection(const OpenedInspection& opened, bool folder);
     void ShowCurrentInspection(const weldscope::IntegrationSnapshot& snapshot);
+    void CreateFolderControls();
+    void LayoutFolder(int width, int contentHeight);
+    void OnInspectionTabChanged(NMHDR*, LRESULT* result);
+    void OnSelectFolder();
+    void OnFolderHistory();
+    void OnFolderFilter(UINT id);
+    void OnFolderPrevious();
+    void OnFolderNext();
+    void OnOpenFolderRow();
+    void OnFolderRowChanged(NMHDR* header, LRESULT* result);
+    void SelectFolderResultPage(unsigned int offset);
+    void ResetFolderResults();
+    void StartFolder();
+    void RefreshFolder(const weldscope::IntegrationSnapshot& snapshot);
+    void RefreshFolderResultControls(unsigned int totalFiles);
+    void PollFolder(const weldscope::IntegrationSnapshot& snapshot);
+    void PollFolderScan();
+    void PollFolderQueries();
+    void TrackFolderBatch(const weldscope::IntegrationSnapshot& snapshot);
+    void RequestBatchHistory();
+    void RequestFolderPage();
+    void ShowRecentFolderBatches(std::vector<weldscope::BatchSummary> batches);
+    void ShowFolderPage(weldscope::BatchPageView page);
     std::unique_ptr<weldscope::IntegratedInspection> integration_;
     std::future<std::vector<weldscope::InspectionSummary>> historyRefresh_;
     std::future<OpenedInspection> historyOpen_;
@@ -65,6 +90,28 @@ private:
     InspectionView view_ = InspectionView::Live;
     const wchar_t* historyTask_ = L"완료";
     bool closeRequested_ = false, closingIntegration_ = false, refreshHistoryPending_ = false;
+    CTabCtrl inspectionTabs_;
+    CButton folderPicker_, folderPrevious_, folderNext_, folderOpen_;
+    CStatic folderPath_, folderProgress_, folderStatus_, folderPageNumber_, folderCurrent_;
+    CComboBox folderHistory_;
+    CListCtrl folderResults_;
+    std::array<CButton, IDC_FOLDER_CANCELLED - IDC_FOLDER_ALL + 1> folderFilters_;
+    std::filesystem::path folderRoot_;
+    std::vector<std::filesystem::path> folderFiles_;
+    std::future<std::vector<std::filesystem::path>> folderScanTask_;
+    std::future<std::vector<weldscope::BatchSummary>> batchHistoryQuery_;
+    std::future<weldscope::BatchPageView> folderPageQuery_;
+    std::vector<weldscope::BatchSummary> recentFolderBatches_;
+    std::vector<weldscope::BatchRow> folderRows_;
+    std::optional<weldscope::BatchSummary> displayedBatch_;
+    weldscope::BatchCounts folderCounts_;
+    CString folderNotice_;
+    std::filesystem::path folderErrorPath_;
+    std::string lastObservedBatchId_, selectedFolderInspectionId_, requestedFolderInspectionId_;
+    std::chrono::steady_clock::time_point nextFolderPageRefresh_;
+    unsigned int folderFilterIndex_ = 0, folderPageOffset_ = 0, folderSelectionRevision_ = 0, folderPageRequestRevision_ = 0;
+    bool folderMode_ = false, folderPageRefreshPending_ = false, rebuildingFolderRows_ = false;
+    bool isOpeningFolderResult_ = false, wasFolderBatchActive_ = false, batchHistoryRefreshPending_ = false;
 #else
     void AddHistory(const weldscope::InspectedFile& inspected);
     weldscope::FileInspectionJob job_;

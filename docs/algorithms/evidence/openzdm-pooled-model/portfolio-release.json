@@ -1,0 +1,455 @@
+{
+  "zip_sha256": "675568ebfe37e15431e6addbd23fee9f25fbd6fa903e079fa0c46fc6a9966df4",
+  "weights_sha256": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+  "launcher": {
+    "default": "\uc5f0\uc18d \ubcf4\uac04",
+    "result": [
+      "RESULT",
+      "launch-ae6e31766a604885811012b5949e6790",
+      "fe0d1da9-cdc4-4ff0-b4ce-90c37e6d8c81",
+      "REVIEW"
+    ],
+    "closed": true
+  },
+  "folder_fixture": {
+    "batch_id": "db0b28d3-33c2-4204-a05a-0e3ea2e18697",
+    "files": 4,
+    "elapsed_seconds": 0.5800957920000656,
+    "counts": {
+      "PASS": 2,
+      "FAIL": 0,
+      "REVIEW": 1,
+      "ERROR": 1,
+      "CANCELLED": 0
+    },
+    "reasons": {
+      "budget_exhausted": 1,
+      "unsupported_format": 1,
+      "fast_threshold": 2
+    },
+    "timings_us": {
+      "POOLED_WIDTH": {
+        "n": 3,
+        "mean": 149.88,
+        "maximum": 343.71
+      }
+    },
+    "source_paths_verified": 4,
+    "reopened": true,
+    "tcp_replay": true,
+    "commit_retry": true,
+    "tcp_config": "pooled-smooth-220-v1",
+    "tcp_busy": true,
+    "stopped": true,
+    "single_file_completed": true,
+    "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+    "budget_us": 132,
+    "model_measurements": {
+      "\ubd88\ub7c9/\uac19\uc74c.png": {
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "duration_ms": 0.343708,
+        "band": "FAIL",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted"
+      },
+      "\uc815\uc0c1/\uc0d8\ud50c.PNG": {
+        "stage": "POOLED_WIDTH",
+        "score": 0.019665122185335945,
+        "duration_ms": 0.043167,
+        "band": "PASS",
+        "decision": "PASS",
+        "reason": "fast_threshold"
+      },
+      "\uc815\uc0c1/\uac19\uc74c.png": {
+        "stage": "POOLED_WIDTH",
+        "score": 0.010489226697190355,
+        "duration_ms": 0.06275,
+        "band": "PASS",
+        "decision": "PASS",
+        "reason": "fast_threshold"
+      }
+    }
+  },
+  "file_and_device": {
+    "executable_sha256": "d852b58403ed9f79aa7b250bc0039a3d425875a29acd3288354e03ee5f531ec4",
+    "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+    "settings": {
+      "schema_version": 1,
+      "contrast_threshold": 12,
+      "budget_us": 132,
+      "fast_pass_max": 0.24418902562879677,
+      "fast_fail_min": 0.33445160863388457,
+      "precise_pass_max": 0,
+      "precise_fail_min": 0.5498386386973741,
+      "model": "model-220.txt",
+      "outside_pass": 0.06060167201188642,
+      "outside_fail": 0.19334990845531436,
+      "width_calibration": "linear-6px-v1",
+      "model_sha256": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+      "width_min": 385,
+      "width_max": 415
+    },
+    "version": "openzdm-pooled-smooth-220-v1",
+    "observations": [
+      {
+        "inspection_id": "e56950df-d94b-4180-8159-c142fde4669a",
+        "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted",
+        "stage": "POOLED_WIDTH",
+        "score": 0.010489226697190355,
+        "analysis_ms": 3.815875,
+        "input": "file",
+        "filename": "normal.png",
+        "observation": 1,
+        "click_to_saved_ms": 119.29304099976434
+      },
+      {
+        "inspection_id": "3722787e-2f77-472b-9bf6-ffff238e7c25",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "FAIL",
+        "reason": "fast_threshold",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.095,
+        "input": "file",
+        "filename": "defect.png",
+        "observation": 1,
+        "click_to_saved_ms": 63.99645800047438
+      },
+      {
+        "inspection_id": "c607915a-3af6-4543-8721-e8c0a324d1a8",
+        "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted",
+        "stage": "POOLED_WIDTH",
+        "score": 0.010489226697190355,
+        "analysis_ms": 0.151334,
+        "input": "file",
+        "filename": "normal.png",
+        "observation": 2,
+        "click_to_saved_ms": 43.82866699961596
+      },
+      {
+        "inspection_id": "317b61c9-b04e-4311-8155-afaabb9a2a6d",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "FAIL",
+        "reason": "fast_threshold",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.085667,
+        "input": "file",
+        "filename": "defect.png",
+        "observation": 2,
+        "click_to_saved_ms": 63.199250002071494
+      },
+      {
+        "inspection_id": "f797b5a1-ca8a-49a8-8e02-a99c6d677c25",
+        "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+        "decision": "PASS",
+        "reason": "fast_threshold",
+        "stage": "POOLED_WIDTH",
+        "score": 0.010489226697190355,
+        "analysis_ms": 0.108792,
+        "input": "file",
+        "filename": "normal.png",
+        "observation": 3,
+        "click_to_saved_ms": 77.00520900107222
+      },
+      {
+        "inspection_id": "c5e86326-a428-4fe6-a9e7-5f0d2661f956",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.1765,
+        "input": "file",
+        "filename": "defect.png",
+        "observation": 3,
+        "click_to_saved_ms": 56.76191699967603
+      },
+      {
+        "inspection_id": "7e6a87c7-7a92-4a56-8407-f815c08bed88",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "REVIEW",
+        "reason": "budget_exhausted",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.201917,
+        "input": "TCP",
+        "observation": 1,
+        "frame": [
+          "RESULT",
+          "research-2e8344aa5dc741778d387ab6b810c45b-0",
+          "7e6a87c7-7a92-4a56-8407-f815c08bed88",
+          "REVIEW"
+        ],
+        "polling_ms": 121.03454200041597
+      },
+      {
+        "inspection_id": "71e36e79-6d77-4ccd-ba61-a35c51d4ad79",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "FAIL",
+        "reason": "fast_threshold",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.072708,
+        "input": "TCP",
+        "observation": 2,
+        "frame": [
+          "RESULT",
+          "research-2e8344aa5dc741778d387ab6b810c45b-1",
+          "71e36e79-6d77-4ccd-ba61-a35c51d4ad79",
+          "FAIL"
+        ],
+        "polling_ms": 47.99970900057815
+      },
+      {
+        "inspection_id": "9e19a383-acc3-4747-ba75-b7b5ed0c1108",
+        "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+        "decision": "FAIL",
+        "reason": "fast_threshold",
+        "stage": "POOLED_WIDTH",
+        "score": 0.7688432614002394,
+        "analysis_ms": 0.051833,
+        "input": "TCP",
+        "observation": 3,
+        "frame": [
+          "RESULT",
+          "research-2e8344aa5dc741778d387ab6b810c45b-2",
+          "9e19a383-acc3-4747-ba75-b7b5ed0c1108",
+          "FAIL"
+        ],
+        "polling_ms": 84.92854199721478
+      }
+    ],
+    "legacy": {
+      "baseline-v1": {
+        "frame": [
+          "RESULT",
+          "research-2e8344aa5dc741778d387ab6b810c45bbaseline-v1",
+          "1a868de5-0824-447b-9d7e-0b25afd440b9",
+          "FAIL"
+        ],
+        "attempts": [
+          [
+            "BASELINE",
+            "0.9690217391304348",
+            "FAIL",
+            "dark_pixel_ratio",
+            "1.651875"
+          ]
+        ]
+      },
+      "selective-v1": {
+        "frame": [
+          "RESULT",
+          "research-2e8344aa5dc741778d387ab6b810c45bselective-v1",
+          "731c1197-705c-4bb0-ad5c-a2f5cb3def46",
+          "REVIEW"
+        ],
+        "attempts": [
+          [
+            "FAST",
+            "0.11570048309178745",
+            "PASS",
+            "fast_threshold",
+            "3.4565"
+          ]
+        ]
+      }
+    },
+    "history_after_restart": true,
+    "replay_after_restart": true,
+    "replay_rows": 1,
+    "corrupt_model_rejected": true,
+    "replay_with_corrupt_model": true,
+    "missing_manifest_rejected": true,
+    "retired_request_replayed": true
+  },
+  "cohort": {
+    "batch_id": "fb6693d2-47e7-45d6-80a1-dc13113735c4",
+    "n": 8104,
+    "file_sha256": "181d9b0838d54e6cfab5885dab0c51a94b20a6776bf74de91465b4b692495a8b",
+    "reference_sha256": "52464dc38d2501b2eb2ca8627d34d82bc673a9c335251e3a74f6362e6aa2d868",
+    "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "executable_sha256": "d852b58403ed9f79aa7b250bc0039a3d425875a29acd3288354e03ee5f531ec4",
+    "algorithm_version": "openzdm-pooled-smooth-220-v1",
+    "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+    "decisions": {
+      "KO/REVIEW": 158,
+      "KO/PASS": 172,
+      "KO/FAIL": 1239,
+      "OK/PASS": 5323,
+      "OK/FAIL": 619,
+      "OK/REVIEW": 593
+    },
+    "cli_to_mfc": {
+      "REVIEW/REVIEW": 625,
+      "PASS/PASS": 5437,
+      "FAIL/FAIL": 1845,
+      "FAIL/REVIEW": 75,
+      "PASS/REVIEW": 51,
+      "REVIEW/PASS": 58,
+      "REVIEW/FAIL": 13
+    },
+    "reasons": {
+      "budget_exhausted": 626,
+      "fast_threshold": 7347,
+      "precise_uncertain": 125,
+      "precise_threshold": 6
+    },
+    "precise_calls": 670,
+    "identical_first_scores": 8104
+  },
+  "cohort_gui": {
+    "batch_id": "fb6693d2-47e7-45d6-80a1-dc13113735c4",
+    "files": 8104,
+    "elapsed_seconds": 144.37133762499798,
+    "counts": {
+      "PASS": 5495,
+      "FAIL": 1858,
+      "REVIEW": 751,
+      "ERROR": 0,
+      "CANCELLED": 0
+    },
+    "reasons": {
+      "budget_exhausted": 626,
+      "fast_threshold": 7347,
+      "precise_uncertain": 125,
+      "precise_threshold": 6
+    },
+    "timings_us": {
+      "POOLED_WIDTH": {
+        "n": 8104,
+        "mean": 47.89,
+        "maximum": 9266.12
+      },
+      "PRECISE": {
+        "n": 670,
+        "mean": 137.66,
+        "maximum": 10703.33
+      }
+    },
+    "source_paths_verified": 8104,
+    "reopened": true,
+    "tcp_replay": true,
+    "commit_retry": false,
+    "tcp_config": "pooled-smooth-220-v1",
+    "tcp_busy": true,
+    "stopped": false,
+    "single_file_completed": false
+  },
+  "prior_to_initial_header_fix": {
+    "batch_id": "0f5fae39-2f59-4ebc-9ab3-ca79fba2f13f",
+    "n": 8104,
+    "file_sha256": "c6c003f19f947a805f411a08b580deac63cb0273937fc1fa24647a5be51e2547",
+    "reference_sha256": "52464dc38d2501b2eb2ca8627d34d82bc673a9c335251e3a74f6362e6aa2d868",
+    "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "executable_sha256": "acc4586903e65a3b92e8c6f62dc0ee3bbde138965919c9e1a604de9c3bbe9ab0",
+    "algorithm_version": "openzdm-pooled-smooth-220-v1",
+    "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+    "decisions": {
+      "KO/REVIEW": 179,
+      "KO/PASS": 167,
+      "KO/FAIL": 1223,
+      "OK/PASS": 5299,
+      "OK/FAIL": 599,
+      "OK/REVIEW": 637
+    },
+    "cli_to_mfc": {
+      "REVIEW/REVIEW": 625,
+      "PASS/PASS": 5408,
+      "FAIL/FAIL": 1809,
+      "FAIL/REVIEW": 111,
+      "PASS/REVIEW": 80,
+      "REVIEW/PASS": 58,
+      "REVIEW/FAIL": 13
+    },
+    "reasons": {
+      "budget_exhausted": 739,
+      "fast_threshold": 7286,
+      "precise_uncertain": 77,
+      "precise_threshold": 2
+    },
+    "precise_calls": 640,
+    "identical_first_scores": 8104
+  },
+  "precommit_verification": {
+    "cohort": {
+      "batch_id": "80dcd602-0c01-4248-aa9d-21fe920dc82d",
+      "n": 8104,
+      "file_sha256": "da178775126be804ce9bb0c762020073874dc3f21505a8d6ae1d711734dda565",
+      "reference_sha256": "52464dc38d2501b2eb2ca8627d34d82bc673a9c335251e3a74f6362e6aa2d868",
+      "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+      "executable_sha256": "d852b58403ed9f79aa7b250bc0039a3d425875a29acd3288354e03ee5f531ec4",
+      "algorithm_version": "openzdm-pooled-smooth-220-v1",
+      "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+      "decisions": {
+        "KO/REVIEW": 194,
+        "KO/PASS": 159,
+        "KO/FAIL": 1216,
+        "OK/PASS": 5317,
+        "OK/FAIL": 627,
+        "OK/REVIEW": 591
+      },
+      "cli_to_mfc": {
+        "REVIEW/REVIEW": 622,
+        "PASS/PASS": 5419,
+        "FAIL/FAIL": 1826,
+        "FAIL/REVIEW": 94,
+        "PASS/REVIEW": 69,
+        "REVIEW/PASS": 57,
+        "REVIEW/FAIL": 17
+      },
+      "reasons": {
+        "budget_exhausted": 539,
+        "fast_threshold": 7305,
+        "precise_uncertain": 246,
+        "precise_threshold": 14
+      },
+      "precise_calls": 662,
+      "identical_first_scores": 8104
+    },
+    "gui": {
+      "batch_id": "80dcd602-0c01-4248-aa9d-21fe920dc82d",
+      "files": 8104,
+      "elapsed_seconds": 144.326115459,
+      "counts": {
+        "PASS": 5476,
+        "FAIL": 1843,
+        "REVIEW": 785,
+        "ERROR": 0,
+        "CANCELLED": 0
+      },
+      "reasons": {
+        "budget_exhausted": 539,
+        "fast_threshold": 7305,
+        "precise_uncertain": 246,
+        "precise_threshold": 14
+      },
+      "timings_us": {
+        "POOLED_WIDTH": {
+          "n": 8104,
+          "mean": 45.67,
+          "maximum": 470.83
+        },
+        "PRECISE": {
+          "n": 662,
+          "mean": 101.36,
+          "maximum": 482.58
+        }
+      },
+      "source_paths_verified": 8104,
+      "reopened": true,
+      "tcp_replay": true,
+      "commit_retry": false,
+      "tcp_config": "pooled-smooth-220-v1",
+      "tcp_busy": true,
+      "stopped": false,
+      "single_file_completed": false
+    }
+  }
+}

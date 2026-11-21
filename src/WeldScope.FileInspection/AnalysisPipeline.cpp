@@ -1,5 +1,6 @@
 #include "AnalysisPipeline.h"
 #include "LocalContrastInspection.h"
+#include "PooledSmoothModel.h"
 
 #include <utility>
 
@@ -77,7 +78,7 @@ InspectionParameters parse_inspection_parameters(const cv::FileStorage& json, In
         const auto baseline = parse_baseline_config(json);
         parameters.threshold = baseline.intensityThreshold();
         parameters.failRatio = baseline.failRatio();
-    } else if (mode == InspectionMode::Selective) {
+    } else if (mode == InspectionMode::Selective || mode == InspectionMode::PooledSmooth) {
         if (read_integer(json["schema_version"], "schema_version") != 1)
             throw std::invalid_argument("Unsupported config schema");
         parameters.threshold = read_integer(json["contrast_threshold"], "contrast_threshold");
@@ -102,6 +103,7 @@ const char* inspection_version(InspectionMode mode)
     case InspectionMode::Fast: return "local-contrast-fast-v1";
     case InspectionMode::Precise: return "local-contrast-precise-v1";
     case InspectionMode::Selective: return "local-contrast-selective-v1";
+    case InspectionMode::PooledSmooth: return "openzdm-pooled-smooth-220-v1";
     }
     throw std::logic_error("Unknown inspection mode");
 }
@@ -118,12 +120,30 @@ const char* outcome_name(InspectionOutcome outcome)
 }
 
 AnalysisOutput analyze_image(const cv::Mat& bgr, const InspectionParameters& parameters,
-    const std::function<void()>& beforePrecise)
+    const std::function<void()>& beforePrecise, const PooledSmoothModel* model)
 {
     AnalysisOutput output;
-    if (parameters.mode == InspectionMode::Selective) {
-        const SelectiveInspectionPolicy policy(parameters.fastBand, parameters.preciseBand, parameters.budget);
-        const auto fast = observe_local(output, bgr, parameters.threshold, LocalContrastMode::Fast, parameters.fastBand);
+    if ((parameters.mode == InspectionMode::PooledSmooth) != (model != nullptr))
+        throw std::invalid_argument("Frozen model registration mismatch");
+    if (parameters.mode == InspectionMode::Selective || model) {
+        // The frozen first-stage budget includes width calibration.
+        const auto start = model ? Clock::now() : Clock::time_point{};
+        const auto band = model ? model->band(bgr.cols) : parameters.fastBand;
+        const SelectiveInspectionPolicy policy(band, parameters.preciseBand, parameters.budget);
+        const auto fast = [&] {
+            if (!model) return observe_local(output, bgr, parameters.threshold, LocalContrastMode::Fast, band);
+            std::optional<double> score;
+            try { score = model->score(bgr); }
+            catch (const std::invalid_argument&) {}
+            catch (const cv::Exception&) {}
+            const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start);
+            output.analysisMs = std::chrono::duration<double, std::milli>(duration).count();
+            output.score = score;
+            const auto outcome = score ? SelectiveInspectionPolicy::classify_score(*score, band) : Outcome::Error;
+            output.attempts.push_back({"POOLED_WIDTH", score, outcome, !score ? "fast_analysis_error" :
+                outcome == Outcome::Review ? "fast_uncertain" : "fast_threshold", duration});
+            return AnalysisMeasurement::from_nanoseconds(score, duration);
+        }();
         const auto result = policy.evaluate(fast, [&] {
             if (beforePrecise) beforePrecise();
             return observe_local(output, bgr, parameters.threshold, LocalContrastMode::Precise, parameters.preciseBand);

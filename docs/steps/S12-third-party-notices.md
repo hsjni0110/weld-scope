@@ -13,6 +13,8 @@
 
 작성자는 OPENZDM이고 자료명은 *2D image dataset for the presence or absence of aesthetical defects on EV battery welds.*이다. DOI는 10.5281/zenodo.14025630이다. [Zenodo 원본](https://zenodo.org/records/14025630) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
+포트폴리오 앱에 동봉한 `model-220.txt`는 위 OPENZDM의 학습 분할로 훈련한 모델이다.
+
 | 패키지 파일 | 원본 또는 제작 경위 |
 |---|---|
 | `defect.png` | `train/KO/image_1.png` |

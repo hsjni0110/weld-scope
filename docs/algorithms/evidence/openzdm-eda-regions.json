@@ -1,0 +1,259 @@
+{
+  "counts": {
+    "train/KO": 7226,
+    "train/OK": 9497,
+    "validation/KO": 1382,
+    "validation/OK": 1865
+  },
+  "probes": {
+    "dark_core_density": {
+      "auc": 0.6882598169494419,
+      "same_geometry": {
+        "auc": 0.6804659136748689,
+        "opposite_label_pairs": 9916,
+        "images_in_mixed_groups": 2883
+      },
+      "policy": {
+        "schema_version": 1,
+        "contrast_threshold": 12,
+        "budget_us": 132,
+        "fast_pass_max": 0.09179104477611941,
+        "fast_fail_min": 0.11539333484470642,
+        "precise_pass_max": 0.27325289089994975,
+        "precise_fail_min": 0.5391484449273394
+      },
+      "validation": {
+        "counts": {
+          "OK": {
+            "PASS": 864,
+            "FAIL": 632,
+            "REVIEW": 369
+          },
+          "KO": {
+            "PASS": 334,
+            "FAIL": 852,
+            "REVIEW": 196
+          }
+        },
+        "precise_calls": 703
+      },
+      "train_fast_pass": 5856,
+      "train_fast_fail": 7527,
+      "paired_errors": {
+        "OK_FAIL": {
+          "removed": 0,
+          "added": 0,
+          "net_rate_change_pp": 0.0,
+          "approx_image_level_95_interval_pp": [
+            0.0,
+            0.0
+          ]
+        },
+        "KO_PASS": {
+          "removed": 0,
+          "added": 0,
+          "net_rate_change_pp": 0.0,
+          "approx_image_level_95_interval_pp": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "inner": {
+      "auc": 0.7376390435433746,
+      "same_geometry": {
+        "auc": 0.7139975796692215,
+        "opposite_label_pairs": 9916,
+        "images_in_mixed_groups": 2883
+      },
+      "policy": {
+        "schema_version": 1,
+        "contrast_threshold": 12,
+        "budget_us": 132,
+        "fast_pass_max": 0.32356403279469675,
+        "fast_fail_min": 0.4329339221288742,
+        "precise_pass_max": 0.27325289089994975,
+        "precise_fail_min": 0.5391484449273394
+      },
+      "validation": {
+        "counts": {
+          "OK": {
+            "PASS": 936,
+            "FAIL": 622,
+            "REVIEW": 307
+          },
+          "KO": {
+            "PASS": 249,
+            "FAIL": 967,
+            "REVIEW": 166
+          }
+        },
+        "precise_calls": 698
+      },
+      "train_fast_pass": 5856,
+      "train_fast_fail": 7527,
+      "paired_errors": {
+        "OK_FAIL": {
+          "removed": 341,
+          "added": 331,
+          "net_rate_change_pp": -0.5361930294906166,
+          "approx_image_level_95_interval_pp": [
+            -3.261158533412789,
+            2.1887724744315555
+          ]
+        },
+        "KO_PASS": {
+          "removed": 240,
+          "added": 155,
+          "net_rate_change_pp": -6.150506512301012,
+          "approx_image_level_95_interval_pp": [
+            -8.951490125338555,
+            -3.34952289926347
+          ]
+        }
+      }
+    },
+    "outer": {
+      "auc": 0.6688290273644677,
+      "same_geometry": {
+        "auc": 0.623336022589754,
+        "opposite_label_pairs": 9916,
+        "images_in_mixed_groups": 2883
+      },
+      "policy": {
+        "schema_version": 1,
+        "contrast_threshold": 12,
+        "budget_us": 132,
+        "fast_pass_max": 0.35303137754013814,
+        "fast_fail_min": 0.4115881686653823,
+        "precise_pass_max": 0.27325289089994975,
+        "precise_fail_min": 0.5391484449273394
+      },
+      "validation": {
+        "counts": {
+          "OK": {
+            "PASS": 902,
+            "FAIL": 652,
+            "REVIEW": 311
+          },
+          "KO": {
+            "PASS": 351,
+            "FAIL": 826,
+            "REVIEW": 205
+          }
+        },
+        "precise_calls": 709
+      },
+      "train_fast_pass": 5856,
+      "train_fast_fail": 7527,
+      "paired_errors": {
+        "OK_FAIL": {
+          "removed": 325,
+          "added": 345,
+          "net_rate_change_pp": 1.0723860589812333,
+          "approx_image_level_95_interval_pp": [
+            -1.6481944188778939,
+            3.79296653684036
+          ]
+        },
+        "KO_PASS": {
+          "removed": 215,
+          "added": 232,
+          "net_rate_change_pp": 1.2301013024602026,
+          "approx_image_level_95_interval_pp": [
+            -1.7687667782980767,
+            4.228969383218482
+          ]
+        }
+      }
+    },
+    "both": {
+      "auc": 0.7462313234501033,
+      "same_geometry": {
+        "auc": 0.7196450181524808,
+        "opposite_label_pairs": 9916,
+        "images_in_mixed_groups": 2883
+      },
+      "policy": {
+        "schema_version": 1,
+        "contrast_threshold": 12,
+        "budget_us": 132,
+        "fast_pass_max": 0.31970641213902756,
+        "fast_fail_min": 0.4301618514460566,
+        "precise_pass_max": 0.27325289089994975,
+        "precise_fail_min": 0.5391484449273394
+      },
+      "validation": {
+        "counts": {
+          "OK": {
+            "PASS": 966,
+            "FAIL": 611,
+            "REVIEW": 288
+          },
+          "KO": {
+            "PASS": 250,
+            "FAIL": 964,
+            "REVIEW": 168
+          }
+        },
+        "precise_calls": 667
+      },
+      "train_fast_pass": 5856,
+      "train_fast_fail": 7527,
+      "paired_errors": {
+        "OK_FAIL": {
+          "removed": 340,
+          "added": 319,
+          "net_rate_change_pp": -1.1260053619302948,
+          "approx_image_level_95_interval_pp": [
+            -3.824108059991886,
+            1.5720973361312962
+          ]
+        },
+        "KO_PASS": {
+          "removed": 240,
+          "added": 156,
+          "net_rate_change_pp": -6.078147612156296,
+          "approx_image_level_95_interval_pp": [
+            -8.883160819542478,
+            -3.2731344047701123
+          ]
+        }
+      }
+    }
+  },
+  "paired_dark_to_both": {
+    "KO/FAIL/FAIL": 682,
+    "KO/FAIL/PASS": 102,
+    "KO/FAIL/REVIEW": 68,
+    "KO/PASS/FAIL": 186,
+    "KO/PASS/PASS": 94,
+    "KO/PASS/REVIEW": 54,
+    "KO/REVIEW/FAIL": 96,
+    "KO/REVIEW/PASS": 54,
+    "KO/REVIEW/REVIEW": 46,
+    "OK/FAIL/FAIL": 292,
+    "OK/FAIL/PASS": 259,
+    "OK/FAIL/REVIEW": 81,
+    "OK/PASS/FAIL": 226,
+    "OK/PASS/PASS": 514,
+    "OK/PASS/REVIEW": 124,
+    "OK/REVIEW/FAIL": 93,
+    "OK/REVIEW/PASS": 193,
+    "OK/REVIEW/REVIEW": 83
+  },
+  "blind_sample": {
+    "OK/REVIEW": 12,
+    "OK/FAIL": 12,
+    "KO/REVIEW": 12,
+    "KO/FAIL": 12,
+    "OK/PASS": 12,
+    "KO/PASS": 12
+  },
+  "inputs": {
+    "seam": "785650d6de17f3e84fda09be85bbf3d9eddb6aa708347799931d54dfd0e6d217",
+    "policy_summary": "92bde1dd52db1fd9ba5d1e431d8e1ae5c68a83e0ed1c53cffc818c54292ff486"
+  },
+  "validation_csv_sha256": "2fab8de594403e465c85a1a96bfcf6936fb5394d608d59c390ae659599f51036"
+}

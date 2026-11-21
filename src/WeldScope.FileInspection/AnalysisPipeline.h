@@ -7,7 +7,9 @@
 
 namespace weldscope {
 
-enum class InspectionMode { Baseline, Fast, Precise, Selective };
+enum class InspectionMode { Baseline, Fast, Precise, Selective, PooledSmooth };
+inline constexpr auto pooledSmoothConfigFile = L"pooled-smooth-220.json";
+class PooledSmoothModel;
 
 struct InspectionParameters {
     InspectionMode mode;
@@ -40,6 +42,6 @@ InspectionParameters parse_inspection_parameters(const cv::FileStorage& json, In
 const char* inspection_version(InspectionMode mode);
 const char* outcome_name(InspectionOutcome outcome);
 AnalysisOutput analyze_image(const cv::Mat& bgr, const InspectionParameters& parameters,
-    const std::function<void()>& beforePrecise = {});
+    const std::function<void()>& beforePrecise = {}, const PooledSmoothModel* model = nullptr);
 
 }
