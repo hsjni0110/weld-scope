@@ -1,11 +1,17 @@
 #pragma once
-#include "../openzdm_boost/PooledTexture.h"
+#include "PooledTexture.h"
+#include <cmath>
 #include <cstdint>
+#include <istream>
 #include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace pooled_texture {
+// 같은 특징과 모델 형식을 사용하면서 트리 탐색용 노드를 연속된 배열에 보관한다.
 class CompactBoostedTrees {
-    // A split's two children are adjacent. Indexes are relative to this tree.
+    // 분기 노드의 두 자식은 인접해 있다. 번호는 해당 트리의 시작 위치를 기준으로 한다.
     struct Node { float threshold; int16_t feature, left; };
     static_assert(sizeof(Node)==8);
     struct Tree { size_t root, leafStart; };
@@ -14,6 +20,7 @@ class CompactBoostedTrees {
     std::vector<double> leaves_;
 
 public:
+    // 호출자가 연 스트림에서 모델을 읽고 검증한다. 읽기 오류가 나면 스트림이 예외를 던지도록 설정한다.
     explicit CompactBoostedTrees(std::istream& input)
     {
         input.exceptions(std::ios::badbit | std::ios::failbit);
@@ -35,8 +42,7 @@ public:
                 const auto valid = [=](int child) { return child >= -leaves && (child < 0 || (child > i && child < leaves-1)); };
                 if (feature < 0 || feature >= featureCount || !std::isfinite(threshold) || !valid(left) || !valid(right))
                     throw std::invalid_argument("Invalid tree node");
-                // Features are float. Rounding the cut down preserves comparison
-                // with the original double threshold, including exact ties.
+                // float인 특징을 원래 double 경계와 비교했을 때와 같은 결과가 나도록 경계를 아래로 맞춘다.
                 float cut = static_cast<float>(threshold);
                 if (cut > threshold) cut = std::nextafter(cut,-std::numeric_limits<float>::infinity());
                 source.push_back({cut,static_cast<int16_t>(feature),static_cast<int16_t>(left),static_cast<int16_t>(right)});
@@ -65,6 +71,7 @@ public:
             if (original.size() != static_cast<size_t>(2*leaves-1)) throw std::invalid_argument("Unreachable tree nodes");
         }
     }
+    // describe와 같은 순서의 특징을 받아, 트리 출력의 합을 0~1 점수로 바꾼다.
     double predict(const Features& features) const
     {
         double raw = 0;

@@ -41,6 +41,16 @@ void validate_png_end(const std::vector<unsigned char>& bytes)
 }
 }
 
+std::filesystem::path baseline_config_path()
+{
+    std::wstring executable(32768, L'\0');
+    const DWORD capacity = static_cast<DWORD>(executable.size());
+    const DWORD length = ::GetModuleFileNameW(nullptr, executable.data(), capacity);
+    if (!length || length >= capacity) throw std::runtime_error("Executable path unavailable");
+    executable.resize(length);
+    return std::filesystem::path(executable).parent_path() / L"baseline.json";
+}
+
 std::vector<unsigned char> read_bytes(const std::filesystem::path& path, std::size_t limit)
 {
     std::ifstream input(path, std::ios::binary | std::ios::ate);

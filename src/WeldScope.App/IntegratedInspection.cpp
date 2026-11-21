@@ -197,7 +197,7 @@ bool IntegratedInspection::HasActiveInspection() const {
     return folder_ || snapshot_.state == IntegrationState::Inspecting || snapshot_.state == IntegrationState::Saving;
 }
 
-bool IntegratedInspection::StartFile(const std::filesystem::path& path) {
+bool IntegratedInspection::TryStartFile(const std::filesystem::path& path) {
     const std::lock_guard lock(mutex_);
     if (!CanStartInspection() || path.empty() || !snapshot_.fileMode) return false;
     const auto mode = *snapshot_.fileMode;
@@ -206,7 +206,7 @@ bool IntegratedInspection::StartFile(const std::filesystem::path& path) {
     return true;
 }
 
-bool IntegratedInspection::StartFolder(const std::filesystem::path& root, std::vector<std::filesystem::path> files) {
+bool IntegratedInspection::TryStartFolder(const std::filesystem::path& root, std::vector<std::filesystem::path> files) {
     if (!root.is_absolute() || files.empty() || files.size() > std::numeric_limits<unsigned int>::max() ||
         !std::is_sorted(files.begin(), files.end()) || std::adjacent_find(files.begin(), files.end()) != files.end() ||
         std::any_of(files.begin(), files.end(), [](const auto& path) {

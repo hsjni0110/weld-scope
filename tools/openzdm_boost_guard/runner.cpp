@@ -1,4 +1,5 @@
 #include "CompactBoostedTrees.h"
+#include "InspectionInput.h"
 #include "../openzdm_eda/StudyMeasurements.h"
 
 int wmain(int argc,wchar_t** argv)

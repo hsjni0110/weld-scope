@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -16,6 +17,7 @@ using Clock = std::chrono::steady_clock;
 using namespace std::chrono;
 namespace fs = std::filesystem;
 
+// 연구 CSV에 저장할 판정 사유 코드로 변환한다.
 inline const char* reason_name(PolicyReason reason)
 {
     switch (reason) {
@@ -31,6 +33,8 @@ inline const char* reason_name(PolicyReason reason)
     throw std::logic_error("Unknown policy reason");
 }
 
+// 한 장의 점수와 소요 시간을 측정한다. center면 가운데 영역의 후보 비율을 센다.
+// 분석에 실패하면 걸린 시간과 함께 빈 점수를 반환한다.
 inline AnalysisMeasurement observe(const cv::Mat& image, int threshold, LocalContrastMode mode, bool center = false)
 {
     const auto start = Clock::now();
@@ -49,6 +53,7 @@ inline AnalysisMeasurement observe(const cv::Mat& image, int threshold, LocalCon
     return AnalysisMeasurement::from_nanoseconds(score, duration_cast<nanoseconds>(Clock::now() - start));
 }
 
+// 점수와 나노초 시간을 CSV 열 두 개에 쓴다. 실패 시 점수 열을 비우며 줄바꿈은 호출자가 쓴다.
 inline void write_measurement(std::ostream& output, const AnalysisMeasurement& measurement)
 {
     if (measurement.score) output << *measurement.score;

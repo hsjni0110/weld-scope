@@ -16,7 +16,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IntegratedInspection.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)InspectionDetails.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)InspectionDetails.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\LoopbackServer.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>

@@ -9,7 +9,8 @@
 #include <vector>
 
 namespace weldscope::spatial {
-// Same number of samples per quarter for the central and exterior controls.
+// 가로 10픽셀, 세로 16픽셀 이상인 8비트 회색 영상의 구역별 질감 특징을 result에 추가한다.
+// outer면 바깥쪽을 쓰며, removeOrder면 위치 순서의 영향을 비교할 수 있게 구역을 정렬한다.
 inline void tile_features(const cv::Mat& gray, bool outer, bool removeOrder, std::vector<float>& result)
 {
     if (gray.type()!=CV_8UC1 || gray.rows<16 || gray.cols<10)
@@ -69,7 +70,7 @@ inline void tile_features(const cv::Mat& gray, bool outer, bool removeOrder, std
     }
 }
 
-// Inference for these numeric regression trees only. Sibling nodes occupy adjacent slots.
+// 수치형 회귀 트리의 값을 비교 측정하기 위한 읽기 전용 예측 경로.
 class PackedForest {
     struct Node { int feature=-1, left=0; double value=0; };
     std::vector<Node> nodes_;
@@ -88,6 +89,8 @@ class PackedForest {
         copy_node(forest,original.right,left+1);
     }
 public:
+    // 회귀 모델의 앞 limit개 트리를 복사한다. 지정한 수가 유효하지 않거나 분류 모델이면 거부한다.
+    // 기존 트리를 교체하지 않으므로 새 비교를 시작할 때는 새 객체를 사용한다.
     template<class Forest>
     void load(const Forest& forest, int limit) {
         if (forest.isClassifier() || forest.getRoots().empty()) throw std::runtime_error("Expected regression trees");
@@ -100,6 +103,7 @@ public:
             copy_node(forest,r,roots_.back());
         }
     }
+    // load 이후 모델 학습과 같은 순서의 float 특징 행을 받는다. 각 트리 결과의 평균을 반환한다.
     float predict(const cv::Mat& x) const {
         const float* values=x.ptr<float>();
         double sum=0;

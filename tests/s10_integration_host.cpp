@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
                 holdVerdict = command == "inspect_hold";
                 reachedVerdict = false;
             }
-            const bool accepted = inspection.StartFile(argv[3]);
+            const bool accepted = inspection.TryStartFile(argv[3]);
             std::cout << (accepted ? "ACCEPTED" : "BLOCKED") << std::endl;
         }
         if (command == "wait_verdict") {

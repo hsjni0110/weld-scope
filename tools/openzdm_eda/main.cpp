@@ -1,5 +1,6 @@
 #include "StudyMeasurements.h"
 #include "PatternStudy.h"
+#include "InspectionInput.h"
 
 using namespace study;
 

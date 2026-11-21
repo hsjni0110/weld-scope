@@ -85,7 +85,7 @@ bool FileInspectionJob::select(const std::filesystem::path& path)
     return true;
 }
 
-bool FileInspectionJob::start(const std::filesystem::path& config, Runner run)
+bool FileInspectionJob::try_start(const std::filesystem::path& config, Runner run)
 {
     if (busy() || selected_.empty() || state_ == State::Closing) return false;
     try {

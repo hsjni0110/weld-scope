@@ -1,6 +1,7 @@
 #include "PatternStudy.h"
 #include "SpatialForest.h"
 #include "StudyMeasurements.h"
+#include "InspectionInput.h"
 #include <opencv2/ml.hpp>
 #include <algorithm>
 #include <numeric>
