@@ -10,9 +10,11 @@
 
 Windows에서 WeldScope를 열고 **폴더 검사 → 폴더 선택 → 검사 시작**을 누른다. 하위 폴더까지 검색한 PNG 수를 시작 전에 확인한다. 검사 중에는 진행 상황을 보고, 완료 후에는 **정상**, **불량**, **검토 필요**, **처리 오류**를 눌러 해당 결과만 확인한다. 결과를 선택하면 기존 원본·후보 오버레이, 단계별 점수·시간, 최종 판정 사유를 표시한다. 앱을 다시 열어 저장된 폴더 검사 결과를 조회할 수 있다.
 
-검수 환경에서는 더블클릭으로 앱과 전용 MySQL을 연다. 런타임과 MySQL 경로는 처음 한 번 준비한다. 이후 폴더 선택, 검사, 저장, 조회는 앱에서 수행한다. [패키지 실행 안내](S13-run-package.md)
+검수 환경에서는 더블클릭으로 앱과 전용 MySQL을 연다. 런타임과 MySQL 경로는 처음 한 번 준비한다. 현재 x64 배포본의 파일·폴더 기본 모델은 연속 보간이다. 아래 61,670장 집계는 S13 당시의 선택적 검사 결과다. [패키지 실행 안내](S13-run-package.md) · [기본 모델 채택 결정](../adr/0013-portfolio-default-inspection.md) · [새 모델 검수](../algorithms/openzdm-false-pass-eda.md#실제-mfc-검수)
 
 ## 화면 구성
+
+창 제목과 화면 상단에는 검사 용도를 그대로 보여 주는 **용접 외관 검사**를 표시한다. Visualize의 `mockups.md`와 UI UX 원칙에 따라 기존 Windows 화면 구성과 짧은 명사형을 적용했다. x64 Release 앱에서 제목의 잘림과 필터 배치를 육안으로 확인했고, 검수용 네 장의 판정과 저장 재시도를 다시 검증했다. [변경 후 화면](../portfolio/evidence/folder-monitor.png) [재검수 기록](../portfolio/evidence/verification.json)
 
 | 구성 | 검토 결과 |
 |---|---|
@@ -49,7 +51,7 @@ Visualize의 직접 라벨, 주요 동작 우선, 필요한 정보만 표시하�
 
 ## 시간 예산과 판정
 
-현재 S11의 **132µs** 설정으로 실습한 네 건은 모두 시간 초과로 보류됐다. 새 폴더 검사 경로에서 실제 분석 시간을 측정하고, 폴더 검사의 설정은 시작할 때 확정한다. 실습 환경에 다른 예산이 필요하면 **검증 세트**에서 불량 자동 통과 및 보류율을 확인한 로컬 설정을 제안한다. 사용한 설정 이름·해시와 측정 조건을 기록한다. S11 동결 시험과 등록 TCP 검사는 각각 기록된 설정을 사용한다.
+S13 개발 초기에는 S11의 **132µs** 설정으로 실습한 네 건이 모두 시간 초과로 보류됐다. 현재 포트폴리오 앱도 동결된 132µs 예산을 쓰며, 폴더 검사 시작 시 모델과 설정 해시가 확정된다. 같은 사진도 제한 시간을 넘으면 보류될 수 있다. [현재 모델의 시간 측정과 판정](../algorithms/openzdm-false-pass-eda.md#실제-mfc-검수)
 
 ## E2E 검수
 
@@ -77,7 +79,7 @@ Visualize의 직접 라벨, 주요 동작 우선, 필요한 정보만 표시하�
 
 ```powershell
 $python = (Resolve-Path .tools/python/python.exe).Path
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/build-s10.ps1 -OutputRoot artifacts/S13 -StagedMfc artifacts/S10/vs-x64 -SelectiveFreeze docs/steps/S11-evidence/freeze.json
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/build-s10.ps1 -OutputRoot artifacts/S13 -StagedMfc artifacts/S10/vs-x64
 & $python -m tools.verify_folder_e2e prepare --output artifacts/S13/OPENZDM
 ```
 
@@ -89,7 +91,7 @@ $app = 'artifacts/S13/x64/Release/WeldScope.App.exe'
 & $python -m tools.verify_folder_e2e verify --app $app --input artifacts/S13/OPENZDM --output artifacts/S13/gui-full-new
 ```
 
-소규모 검수는 테스트용 판정 설정으로 실제 PNG 네 장을 처리했다. 정상·불량·검토 필요·처리 오류가 각각 1건이었다. 커밋 응답 유실 뒤 재시도, 검사 중지, 한 장 검사 완료, 앱 재시작 뒤 이력 조회와 같은 TCP 요청의 재전송을 확인했다. [판정 필터와 후보 영상](S13-evidence/04-row-detail.png) · [저장 재시도 화면](S13-evidence/02-storage-retry.png) · [실제 검수 기록](S13-evidence/fixture-verification.json)
+S13 당시 소규모 검수용 설정에서는 정상·불량·검토 필요·처리 오류가 각각 1건이었다. 현재의 작은 검수는 배포 설정 그대로 공개 PNG 세 장과 손상 파일을 넣어 저장된 점수와 시간으로 예상 판정을 대조한다. 두 경로에서 커밋 응답 유실 뒤 재시도, 검사 중지, 한 장 검사 완료, 이력 조회와 TCP 재전송을 확인한다. [S13 당시 판정 필터](S13-evidence/04-row-detail.png) · [저장 재시도 화면](S13-evidence/02-storage-retry.png) · [기존 검수 기록](S13-evidence/fixture-verification.json)
 
 S13 스키마가 없는 DB에서는 폴더 검사 준비 상태를 표시하고 단일 파일 검사는 계속 실행된다. 실제 x64 앱으로 기존 스키마에 검사 결과 1건을 저장해 확인했다. 최종 ZIP을 푼 뒤 실행 런처로 전용 DB를 준비하고 동봉된 PNG 3장을 앱에서 폴더 검사했다. 기본 화면과 축소한 창을 96 DPI에서 확인했다.
 

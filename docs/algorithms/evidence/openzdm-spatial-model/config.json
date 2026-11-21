@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "contrast_threshold": 12,
+  "budget_us": 132,
+  "fast_pass_max": 0.34339088201522827,
+  "fast_fail_min": 0.38996514678001404,
+  "precise_pass_max": 0,
+  "precise_fail_min": 0.5498386386973741,
+  "outside_pass": 0.35029682517051697,
+  "outside_fail": 0.39598512649536133,
+  "forests": "inside",
+  "descriptor": "tiles",
+  "all_widths": 0,
+  "packed": 1,
+  "tree_count": 48,
+  "outside_config": "outside.json"
+}

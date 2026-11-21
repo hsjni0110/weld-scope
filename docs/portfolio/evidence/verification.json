@@ -1,0 +1,35 @@
+{
+  "batch_id": "b880f317-f52d-4c98-b48d-0f542584ff47",
+  "files": 4,
+  "elapsed_seconds": 0.5914691670004686,
+  "counts": {
+    "PASS": 1,
+    "FAIL": 1,
+    "REVIEW": 1,
+    "ERROR": 1,
+    "CANCELLED": 0
+  },
+  "reasons": {
+    "precise_uncertain": 1,
+    "fast_threshold": 2,
+    "unsupported_format": 1
+  },
+  "timings_us": {
+    "FAST": {
+      "n": 3,
+      "mean": 7434.64,
+      "maximum": 21865.38
+    },
+    "PRECISE": {
+      "n": 1,
+      "mean": 4277.83,
+      "maximum": 4277.83
+    }
+  },
+  "source_paths_verified": 4,
+  "reopened": true,
+  "tcp_replay": true,
+  "commit_retry": true,
+  "stopped": true,
+  "single_file_completed": true
+}

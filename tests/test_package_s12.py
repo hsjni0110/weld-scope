@@ -16,7 +16,8 @@ class PackageS12Tests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        script = Path(__file__).resolve().parents[1] / "tools/package-s12.ps1"
+        self.repo = Path(__file__).resolve().parents[1]
+        script = self.repo / "tools/package-s12.ps1"
         (self.root / "tools").mkdir()
         shutil.copyfile(script, self.root / "tools" / script.name)
         self.output = self.root / "output [1]" / "package.zip"
@@ -36,7 +37,9 @@ class PackageS12Tests(unittest.TestCase):
         self.write(source + "normal.png", b"normal")
         self.write(source + "corrupt.png", b"corrupt")
         for path in (
-            "db/s05/schema.sql", "docs/steps/S12-run-package.md",
+            "db/s05/schema.sql", "db/s13/schema.sql", "docs/steps/S12-run-package.md",
+            "docs/steps/S13-run-package.md", "tools/WeldScope-Start.cmd",
+            "tools/Start-WeldScope-Practice.ps1",
             "docs/steps/S12-third-party-notices.md", ".tools/opencv/install-x64/LICENSE",
             ".tools/opencv/install-x64/etc/licenses/libpng-LICENSE",
             ".tools/opencv/install-x64/etc/licenses/zlib-LICENSE",
@@ -44,6 +47,8 @@ class PackageS12Tests(unittest.TestCase):
             self.write(path, b"packaging input")
         self.write("app/WeldScope.App.exe", self.pe_header())
         self.write("inspect.exe", self.pe_header())
+        for name in ("pooled-smooth-220.json", "model-220.txt"):
+            self.write("config/" + name, (self.repo / "config" / name).read_bytes())
 
     def write(self, name, data):
         target = self.root / name
@@ -67,11 +72,12 @@ class PackageS12Tests(unittest.TestCase):
         struct.pack_into("<H", data, pe_offset + 24, 0x20B)
         return data
 
-    def package(self, output=None):
+    def package(self, output=None, folder=False):
         return subprocess.run(
             ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
              "-File", "tools/package-s12.ps1", "-AppDir", "app", "-Inspect", "inspect.exe",
-             "-TwoStageSample", "sample.png", "-Output", str(output or self.output)],
+             "-TwoStageSample", "sample.png", "-Output", str(output or self.output),
+             *(["-FolderInspection"] if folder else [])],
             cwd=self.root, capture_output=True, text=True, errors="replace", timeout=30,
         )
 
@@ -103,3 +109,50 @@ class PackageS12Tests(unittest.TestCase):
             self.assertEqual(archive.read("WeldScope.App.exe"), self.pe_header())
             self.assertEqual(archive.read("weldscope_inspect.exe"), self.pe_header())
             self.assertIn("SHA256SUMS.txt", archive.namelist())
+
+    def install_model(self):
+        for name in ("pooled-smooth-220.json", "model-220.txt"):
+            shutil.copyfile(self.root / "config" / name, self.root / "app" / name)
+
+    def test_current_build_ships_registered_model_in_both_packages(self):
+        self.install_model()
+        for folder in (True, False):
+            with self.subTest(folder=folder):
+                archive_path = self.output.with_name(f"model-{folder}.zip")
+                result = self.package(output=archive_path, folder=folder)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                with ZipFile(archive_path) as archive:
+                    manifest = "pooled-smooth-220.json"
+                    self.assertIn(manifest, archive.namelist())
+                    settings = archive.read(manifest)
+                    expected = "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b"
+                    self.assertEqual(self.digest(settings), expected)
+                    model = json.loads(settings)
+                    self.assertEqual(self.digest(archive.read(model["model"])), model["model_sha256"])
+                    sums = archive.read("SHA256SUMS.txt").decode("ascii").splitlines()
+                    self.assertIn(f"{expected}  {manifest}", sums)
+                    self.assertIn(f'{model["model_sha256"]}  {model["model"]}', sums)
+
+    def test_folder_package_rejects_missing_or_modified_model(self):
+        for bad_file in (None, "pooled-smooth-220.json", "model-220.txt"):
+            with self.subTest(bad_file=bad_file):
+                if bad_file:
+                    self.install_model()
+                    self.write("app/" + bad_file, b"altered")
+                output = self.output.with_name(f"bad-{bad_file}.zip")
+                result = self.package(output=output, folder=True)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(bad_file or "pooled-smooth-220.json", result.stderr)
+                self.assertFalse(output.exists())
+
+    def test_rejects_unregistered_thresholds_even_when_sources_match(self):
+        self.install_model()
+        name = "pooled-smooth-220.json"
+        model = json.loads((self.root / "config" / name).read_bytes())
+        model["budget_us"] += 1
+        for directory in ("config", "app"):
+            self.write(directory + "/" + name, json.dumps(model).encode("ascii"))
+        result = self.package(folder=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(name, result.stderr)
+        self.assertFalse(self.output.exists())

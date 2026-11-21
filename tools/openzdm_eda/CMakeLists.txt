@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.24)
+project(OpenZdmEda LANGUAGES CXX)
+
+add_compile_options(/EHsc)
+add_subdirectory(../.. weldscope)
+add_executable(openzdm_eda_final main.cpp PatternStudy.cpp)
+target_link_libraries(openzdm_eda_final PRIVATE weldscope_inspection_input)
+target_compile_options(openzdm_eda_final PRIVATE /W4 /WX /utf-8 /permissive-)
+
+option(OPENZDM_SHAPE_STUDY "Build the cross-section experiment with OpenCV ML" OFF)
+if(OPENZDM_SHAPE_STUDY)
+    find_package(OpenCV 4 REQUIRED COMPONENTS core imgproc imgcodecs ml)
+    add_executable(openzdm_shape shape.cpp PatternStudy.cpp)
+    target_link_libraries(openzdm_shape PRIVATE weldscope_inspection_input opencv_ml)
+    target_compile_options(openzdm_shape PRIVATE /W4 /WX /utf-8 /permissive-)
+endif()

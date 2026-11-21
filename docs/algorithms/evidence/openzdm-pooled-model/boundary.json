@@ -1,0 +1,490 @@
+{
+  "cases": [
+    {
+      "source": "val/KO/image_1166.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_1201.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_1296.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_147.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "REVIEW",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/KO/image_1709.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_215.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_232.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_261.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_307.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_316.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_420.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_5.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_54.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_603.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/KO/image_633.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_652.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_793.png",
+      "label": "KO",
+      "width": 385,
+      "edited_width": 384,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_796.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_80.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_849.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_864.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_866.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_875.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_9.png",
+      "label": "KO",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/KO/image_90.png",
+      "label": "KO",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_1086.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "REVIEW",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_1214.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "PASS",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_1325.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_148.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "PASS",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_1557.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_1594.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_17.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_1740.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_1752.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_2613.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_2771.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_2784.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_3115.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "PASS",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_3298.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_3316.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_3613.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_3627.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_3631.png",
+      "label": "OK",
+      "width": 384,
+      "edited_width": 385,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_4089.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_4107.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "PASS",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_4246.png",
+      "label": "OK",
+      "width": 384,
+      "edited_width": 385,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_4300.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_4460.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_4840.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_49.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "FAIL",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "REVIEW"
+    },
+    {
+      "source": "val/OK/image_746.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "REVIEW",
+      "edited_fixed": "FAIL",
+      "edited_routed": "FAIL"
+    },
+    {
+      "source": "val/OK/image_893.png",
+      "label": "OK",
+      "width": 415,
+      "edited_width": 416,
+      "original": "PASS",
+      "edited_fixed": "PASS",
+      "edited_routed": "PASS"
+    },
+    {
+      "source": "val/OK/image_91.png",
+      "label": "OK",
+      "width": 416,
+      "edited_width": 415,
+      "original": "REVIEW",
+      "edited_fixed": "REVIEW",
+      "edited_routed": "PASS"
+    }
+  ],
+  "same_edited_score": {
+    "changes": 5,
+    "direct_pass_fail": 0
+  },
+  "original_to_edited": {
+    "changes": 11,
+    "direct_pass_fail": 0
+  },
+  "hard_same_edited_score_changes": 21
+}

@@ -87,6 +87,15 @@ $expectedHashes = @{
     'samples/image_10513.png' = $demo.modes.selective.image_sha256
 }
 
+# Archived S12 builds predate the model. Supply the current assets when packaging those builds.
+$configDir = Join-Path $repo 'config'
+$modelDir = if ($FolderInspection) { $app } else { $configDir }
+$manifestName = 'pooled-smooth-220.json'
+$weightsName = 'model-220.txt'
+$files[$manifestName] = Join-Path $modelDir $manifestName
+$files[$weightsName] = Join-Path $modelDir $weightsName
+$expectedHashes[$manifestName] = '6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b'
+
 $parent = [IO.Path]::GetDirectoryName($destination)
 [IO.Directory]::CreateDirectory($parent) | Out-Null
 $temporary = Join-Path $parent ('.s12-' + [guid]::NewGuid().ToString('N'))
@@ -105,6 +114,10 @@ try {
         $hash = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
         if ($expectedHashes.ContainsKey($item.Key) -and $hash -ne $expectedHashes[$item.Key]) {
             throw "Package input SHA-256 mismatch: $($item.Key)"
+        }
+        if ($item.Key -eq $manifestName) {
+            $model = Get-Content -LiteralPath $target -Raw -Encoding UTF8 | ConvertFrom-Json
+            $expectedHashes[$weightsName] = $model.model_sha256
         }
         "$($hash.ToLowerInvariant())  $($item.Key)"
     }

@@ -34,7 +34,8 @@ foreach(target weldscope_baseline weldscope_inspect weldscope_inspection_input b
 endforeach()
 add_test(NAME baseline_engine COMMAND baseline_inspection_tests)
 add_test(NAME local_contrast_engine COMMAND local_contrast_inspection_tests)
-add_test(NAME analysis_pipeline COMMAND analysis_pipeline_tests)
+add_test(NAME analysis_pipeline COMMAND analysis_pipeline_tests "${CMAKE_CURRENT_SOURCE_DIR}/config"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/WeldScope.App/res/samples/defect.png")
 add_test(NAME baseline_cli COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_s04_cli.py $<TARGET_FILE:weldscope_inspect>)
 add_executable(file_inspection_job_tests tests/file_inspection_job_tests.cpp src/WeldScope.App/FileInspectionJob.cpp)
 target_include_directories(file_inspection_job_tests PRIVATE src/WeldScope.App)

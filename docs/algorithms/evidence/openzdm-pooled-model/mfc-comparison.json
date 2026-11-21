@@ -1,0 +1,381 @@
+{
+  "n": 8104,
+  "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+  "baseline": {
+    "batch_id": "8814d2e7-a9e7-4a47-ace7-0dfcad3f0f78",
+    "n": 8104,
+    "file_sha256": "52818b6cf3f51132dcd3dce6a1ff8c52ee930c0b87003e8427b6567fda88dfb2",
+    "reference_sha256": "602cb1db306e58562186a93c81ab82ed6ceeb566add83708f5bf15d2bcda6c25",
+    "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "executable_sha256": "15d30a140630c9ed8fcf37f2fafd75d9d17caf18681239bb632dfb26bb0b9969",
+    "algorithm_version": "local-contrast-selective-v1",
+    "config_sha256": "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93",
+    "decisions": {
+      "KO/REVIEW": 291,
+      "KO/PASS": 695,
+      "KO/FAIL": 583,
+      "OK/PASS": 4709,
+      "OK/REVIEW": 802,
+      "OK/FAIL": 1024
+    },
+    "cli_to_mfc": {
+      "PASS/REVIEW": 228,
+      "PASS/PASS": 5401,
+      "FAIL/FAIL": 1601,
+      "REVIEW/REVIEW": 798,
+      "FAIL/REVIEW": 67,
+      "REVIEW/FAIL": 6,
+      "REVIEW/PASS": 3
+    },
+    "reasons": {
+      "budget_exhausted": 814,
+      "fast_threshold": 7005,
+      "precise_uncertain": 279,
+      "precise_threshold": 6
+    },
+    "precise_calls": 792,
+    "identical_first_scores": 8104
+  },
+  "candidate": {
+    "batch_id": "8e629091-da01-4b19-b58e-794539cbd2a7",
+    "n": 8104,
+    "file_sha256": "740ce4d35f5f516ecd6126175a03ef4c17bd2694a2c7a6195ed7fdc0783f8486",
+    "reference_sha256": "52464dc38d2501b2eb2ca8627d34d82bc673a9c335251e3a74f6362e6aa2d868",
+    "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+    "executable_sha256": "9398d354c6f3b6a031eb4b1e52dc9fed1f2fd5ba68934bc13b5aa649b955ce87",
+    "algorithm_version": "openzdm-pooled-smooth-220-v1",
+    "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+    "decisions": {
+      "KO/REVIEW": 176,
+      "KO/PASS": 169,
+      "KO/FAIL": 1224,
+      "OK/PASS": 5305,
+      "OK/FAIL": 619,
+      "OK/REVIEW": 611
+    },
+    "cli_to_mfc": {
+      "REVIEW/REVIEW": 629,
+      "PASS/PASS": 5420,
+      "FAIL/FAIL": 1830,
+      "FAIL/REVIEW": 90,
+      "PASS/REVIEW": 68,
+      "REVIEW/PASS": 54,
+      "REVIEW/FAIL": 13
+    },
+    "reasons": {
+      "budget_exhausted": 667,
+      "fast_threshold": 7314,
+      "precise_uncertain": 120,
+      "precise_threshold": 3
+    },
+    "precise_calls": 666,
+    "identical_first_scores": 8104
+  },
+  "paired": {
+    "KO_PASS": {
+      "added": 94,
+      "removed": 620,
+      "delta_pp": -33.52453792224347,
+      "ci95_pp": [
+        -36.42205370377859,
+        -30.627022140708355
+      ]
+    },
+    "OK_FAIL": {
+      "added": 423,
+      "removed": 828,
+      "delta_pp": -6.197398622800306,
+      "ci95_pp": [
+        -7.247596963372501,
+        -5.147200282228112
+      ]
+    },
+    "transitions": {
+      "KO/FAIL/FAIL": 476,
+      "KO/FAIL/PASS": 60,
+      "KO/FAIL/REVIEW": 47,
+      "KO/PASS/FAIL": 528,
+      "KO/PASS/PASS": 75,
+      "KO/PASS/REVIEW": 92,
+      "KO/REVIEW/FAIL": 220,
+      "KO/REVIEW/PASS": 34,
+      "KO/REVIEW/REVIEW": 37,
+      "OK/FAIL/FAIL": 196,
+      "OK/FAIL/PASS": 700,
+      "OK/FAIL/REVIEW": 128,
+      "OK/PASS/FAIL": 309,
+      "OK/PASS/PASS": 4020,
+      "OK/PASS/REVIEW": 380,
+      "OK/REVIEW/FAIL": 114,
+      "OK/REVIEW/PASS": 585,
+      "OK/REVIEW/REVIEW": 103
+    }
+  },
+  "by_width": {
+    "all": {
+      "baseline": {
+        "n": 8104,
+        "counts": {
+          "KO/REVIEW": 291,
+          "KO/PASS": 695,
+          "KO/FAIL": 583,
+          "OK/PASS": 4709,
+          "OK/REVIEW": 802,
+          "OK/FAIL": 1024
+        },
+        "analysis_us_p50_p95": [
+          49.917,
+          163.708
+        ]
+      },
+      "candidate": {
+        "n": 8104,
+        "counts": {
+          "KO/REVIEW": 176,
+          "KO/PASS": 169,
+          "KO/FAIL": 1224,
+          "OK/PASS": 5305,
+          "OK/FAIL": 619,
+          "OK/REVIEW": 611
+        },
+        "analysis_us_p50_p95": [
+          43.791999999999994,
+          153.251
+        ]
+      }
+    },
+    "385_to_415": {
+      "baseline": {
+        "n": 3217,
+        "counts": {
+          "KO/REVIEW": 251,
+          "KO/PASS": 560,
+          "KO/FAIL": 546,
+          "OK/REVIEW": 393,
+          "OK/FAIL": 648,
+          "OK/PASS": 819
+        },
+        "analysis_us_p50_p95": [
+          55.875,
+          180.375
+        ]
+      },
+      "candidate": {
+        "n": 3217,
+        "counts": {
+          "KO/REVIEW": 125,
+          "KO/PASS": 132,
+          "KO/FAIL": 1100,
+          "OK/PASS": 1125,
+          "OK/FAIL": 507,
+          "OK/REVIEW": 228
+        },
+        "analysis_us_p50_p95": [
+          46.0,
+          162.333
+        ]
+      }
+    },
+    "outside": {
+      "baseline": {
+        "n": 4887,
+        "counts": {
+          "KO/PASS": 135,
+          "KO/REVIEW": 40,
+          "KO/FAIL": 37,
+          "OK/PASS": 3890,
+          "OK/REVIEW": 409,
+          "OK/FAIL": 376
+        },
+        "analysis_us_p50_p95": [
+          43.916,
+          147.459
+        ]
+      },
+      "candidate": {
+        "n": 4887,
+        "counts": {
+          "KO/PASS": 37,
+          "KO/REVIEW": 51,
+          "KO/FAIL": 124,
+          "OK/PASS": 4180,
+          "OK/REVIEW": 383,
+          "OK/FAIL": 112
+        },
+        "analysis_us_p50_p95": [
+          42.208000000000006,
+          142.792
+        ]
+      }
+    }
+  },
+  "examples": [
+    {
+      "path": "test/KO/image_1332.png",
+      "sha256": "01408d05bed1128bac58531ea0d951d4f51bce08f2bd8136fc8c317b3abce5e1",
+      "label": "KO",
+      "baseline": "FAIL",
+      "candidate": "PASS",
+      "old_fast_score": "0.525531045751634",
+      "new_fast_score": "0.24376584460588027"
+    },
+    {
+      "path": "test/KO/image_1760.png",
+      "sha256": "008bad904f03a99dc0c5957c3c9dd5a67feb512ade3bb5a6819bac9cd8e17433",
+      "label": "KO",
+      "baseline": "PASS",
+      "candidate": "FAIL",
+      "old_fast_score": "0.022909507445589918",
+      "new_fast_score": "0.43276511680000757"
+    },
+    {
+      "path": "test/OK/image_926.png",
+      "sha256": "000c351028cbc9caf5233bd7afcbe3bc131bba503ca1713134f5f0e8386b277e",
+      "label": "OK",
+      "baseline": "FAIL",
+      "candidate": "PASS",
+      "old_fast_score": "0.32532308767027596",
+      "new_fast_score": "0.024584920392704813"
+    },
+    {
+      "path": "test/OK/image_2140.png",
+      "sha256": "008e9ab51b6dd18d10ead9c144e0ad36cb602021938407c44b7750d0334b4827",
+      "label": "OK",
+      "baseline": "PASS",
+      "candidate": "FAIL",
+      "old_fast_score": "0.23162663598446714",
+      "new_fast_score": "0.35962469315404477"
+    }
+  ],
+  "examples_selection": "lowest file SHA256 in each direct PASS/FAIL transition",
+  "with_part_and_batch_ids": 0,
+  "identified_parts": 0,
+  "identified_batch_descriptive_counts": {},
+  "repeat": {
+    "cohort": {
+      "batch_id": "655c83c6-1544-4734-b0c1-f760d2b0812a",
+      "n": 8104,
+      "file_sha256": "af1ae83b7a9ed31b652c8aceb4c8462158cb062de7cb9587db0034a5ab157e60",
+      "reference_sha256": "3882c452b8e8a4a6599bfeca755d9cb783f0f48d2aba889e619a331f41555e29",
+      "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+      "executable_sha256": "9398d354c6f3b6a031eb4b1e52dc9fed1f2fd5ba68934bc13b5aa649b955ce87",
+      "algorithm_version": "openzdm-pooled-smooth-220-v1",
+      "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+      "decisions": {
+        "KO/REVIEW": 168,
+        "KO/PASS": 169,
+        "KO/FAIL": 1232,
+        "OK/PASS": 5290,
+        "OK/FAIL": 616,
+        "OK/REVIEW": 629
+      },
+      "cli_to_mfc": {
+        "REVIEW/REVIEW": 617,
+        "PASS/PASS": 5455,
+        "FAIL/FAIL": 1848,
+        "FAIL/REVIEW": 93,
+        "PASS/REVIEW": 87,
+        "REVIEW/PASS": 4
+      },
+      "reasons": {
+        "budget_exhausted": 584,
+        "fast_threshold": 7295,
+        "precise_uncertain": 213,
+        "precise_threshold": 12
+      },
+      "precise_calls": 659,
+      "identical_first_scores": 8104
+    },
+    "summary": {
+      "n": 8104,
+      "counts": {
+        "KO/REVIEW": 168,
+        "KO/PASS": 169,
+        "KO/FAIL": 1232,
+        "OK/PASS": 5290,
+        "OK/FAIL": 616,
+        "OK/REVIEW": 629
+      },
+      "analysis_us_p50_p95": [
+        42.458999999999996,
+        144.875
+      ]
+    },
+    "baseline_to_repeat": {
+      "KO_PASS": {
+        "added": 91,
+        "removed": 617,
+        "delta_pp": -33.52453792224347,
+        "ci95_pp": [
+          -36.405841005169506,
+          -30.643234839317437
+        ]
+      },
+      "OK_FAIL": {
+        "added": 418,
+        "removed": 826,
+        "delta_pp": -6.243305279265494,
+        "ci95_pp": [
+          -7.29034062958833,
+          -5.196269928942656
+        ]
+      },
+      "transitions": {
+        "KO/FAIL/FAIL": 475,
+        "KO/FAIL/PASS": 58,
+        "KO/FAIL/REVIEW": 50,
+        "KO/PASS/FAIL": 537,
+        "KO/PASS/PASS": 78,
+        "KO/PASS/REVIEW": 80,
+        "KO/REVIEW/FAIL": 220,
+        "KO/REVIEW/PASS": 33,
+        "KO/REVIEW/REVIEW": 38,
+        "OK/FAIL/FAIL": 198,
+        "OK/FAIL/PASS": 691,
+        "OK/FAIL/REVIEW": 135,
+        "OK/PASS/FAIL": 301,
+        "OK/PASS/PASS": 4008,
+        "OK/PASS/REVIEW": 400,
+        "OK/REVIEW/FAIL": 117,
+        "OK/REVIEW/PASS": 591,
+        "OK/REVIEW/REVIEW": 94
+      }
+    },
+    "candidate_to_repeat": {
+      "KO_PASS": {
+        "added": 4,
+        "removed": 4,
+        "delta_pp": 0.0,
+        "ci95_pp": [
+          -0.3534407042507801,
+          0.3534407042507801
+        ]
+      },
+      "OK_FAIL": {
+        "added": 16,
+        "removed": 19,
+        "delta_pp": -0.045906656465187455,
+        "ci95_pp": [
+          -0.2233538716021352,
+          0.13154055867176032
+        ]
+      },
+      "transitions": {
+        "KO/FAIL/FAIL": 1200,
+        "KO/FAIL/REVIEW": 24,
+        "KO/PASS/PASS": 165,
+        "KO/PASS/REVIEW": 4,
+        "KO/REVIEW/FAIL": 32,
+        "KO/REVIEW/PASS": 4,
+        "KO/REVIEW/REVIEW": 140,
+        "OK/FAIL/FAIL": 600,
+        "OK/FAIL/REVIEW": 19,
+        "OK/PASS/PASS": 5223,
+        "OK/PASS/REVIEW": 82,
+        "OK/REVIEW/FAIL": 16,
+        "OK/REVIEW/PASS": 67,
+        "OK/REVIEW/REVIEW": 528
+      }
+    }
+  }
+}

@@ -13,13 +13,14 @@ from tempfile import TemporaryDirectory
 import time
 from zipfile import ZipFile
 
-from tools.evaluate_s11 import checksum, match_archive, materialize, read_csv, read_json, write_json
+from tools.evaluate_s11 import checksum, match_archive, materialize, read_csv, read_json
 
 
 EVIDENCE = Path("docs/steps/S02-evidence")
 ARCHIVE = Path("data/openzdm/Weld Aesthetical Defects.zip")
 SPLITS = {"train": 43169, "validation": 9250, "test": 9251}
 FILTERS = {"PASS": 1206, "FAIL": 1207, "REVIEW": 1208, "ERROR": 1209, "CANCELLED": 1210}
+REGISTRATION = "pooled-smooth-220-v1"
 
 
 def read_database():
@@ -71,31 +72,26 @@ def expected_folder(root, evidence):
     return expected
 
 
-def prepare_fixture(app, demo_image, destination):
-    fixture_app = destination / "app"
-    fixture_app.mkdir()
-    for path in (app, app.with_name("baseline.json"), app.with_name("defect.png"), *app.parent.glob("*.dll")):
-        copyfile(path, fixture_app / path.name)
-    settings = dict(schema_version=1, contrast_threshold=12, budget_us=2_000_000,
-                    fast_pass_max=.11, fast_fail_min=.28, precise_pass_max=0, precise_fail_min=1)
-    config = fixture_app / "selective.json"
-    write_json(config, settings)
-    write_json(fixture_app / "freeze.json", dict(schema_version=1, config_sha256={"selective": checksum(config)}))
+def prepare_fixture(demo_image, destination):
     folder = destination / "시연 입력"
     samples = Path("src/WeldScope.App/res/samples")
-    fixtures = {"정상/같음.png": (samples / "normal.png", "PASS"),
-                "불량/샘플.PNG": (demo_image, "FAIL"),
-                "검토/같음.png": (samples / "defect.png", "REVIEW"),
-                "오류/손상.png": (samples / "corrupt.png", "ERROR")}
-    for name, (source, _) in fixtures.items():
+    if checksum(demo_image) != "52a6a7759bd37831f47efaa2726233645330e63278cc4fafc4b94bf8d1b80f53":
+        raise ValueError("Expected the OPENZDM train/OK/image_10513.png fixture")
+    # First-stage scores from the frozen model. The stored run time determines the final outcome.
+    fixtures = {"정상/같음.png": (samples / "normal.png", 0.010489226697190355, "PASS"),
+                "정상/샘플.PNG": (demo_image, 0.019665122185335945, "PASS"),
+                "불량/같음.png": (samples / "defect.png", 0.7688432614002394, "FAIL"),
+                "오류/손상.png": (samples / "corrupt.png", None, "ERROR")}
+    for name, (source, _, _) in fixtures.items():
         target = folder / name
         target.parent.mkdir(parents=True, exist_ok=True)
         copyfile(source, target)
     (folder / "설명.txt").write_text("Unsupported file", encoding="utf-8")
-    return fixture_app / app.name, folder, fixtures
+    return folder, fixtures
 
 
-def verify_folder(app, root, output, evidence, fixture_image, timeout):
+def verify_folder(app, root, output, evidence, fixture_image, timeout, *, expected_hashes=None,
+                  tcp_config=REGISTRATION):
     import ctypes as c
 
     from tools.verify_s09 import capture, find_window, send, u, wait_for
@@ -105,11 +101,14 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
     output = output.resolve()
     output.mkdir(parents=True)
     if fixture_image:
-        app, root, fixtures = prepare_fixture(app, fixture_image.resolve(strict=True), output)
-        expected = {name: checksum(source) for name, (source, _) in fixtures.items()}
+        root, fixtures = prepare_fixture(fixture_image.resolve(strict=True), output)
+        expected = {name: checksum(source) for name, (source, _, _) in fixtures.items()}
+        config = Path("config/pooled-smooth-220.json")
+        config_hash = checksum(config)
+        budget_us = read_json(config)["budget_us"]
     else:
         root = root.resolve(strict=True)
-        expected = expected_folder(root, evidence)
+        expected = expected_folder(root, evidence) if expected_hashes is None else expected_hashes
     total = len(expected)
     query = read_database()
     existing = {row[0] for row in query("SELECT CAST(batch_id AS CHAR) FROM inspection_batches;")}
@@ -149,6 +148,7 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
     proxy = (fault_proxy(int(env["WELDSCOPE_MYSQL_PORT"]), b"COMMIT", True, after=b"START TRANSACTION")
              if fixture_image else nullcontext((env["WELDSCOPE_MYSQL_PORT"], None)))
     retried = False
+    busy_checked = False
     with proxy as (proxy_port, fault), app_window(
             app, output, dict(env, WELDSCOPE_MYSQL_PORT=str(proxy_port))) as (process, hwnd):
         def label(identifier):
@@ -169,6 +169,8 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
             progress = label(1203)
             if fixture_image and not retried and label(1106) == "저장 확인 필요":
                 assert fault.is_set()
+                assert request(tcp_port, "s13-busy-check", config=tcp_config)[-1] == "BUSY"
+                busy_checked = True
                 capture(hwnd, output / "02-storage-retry.png")
                 send(u.GetDlgItem(hwnd, 1108), 0xF5)
                 retried = True
@@ -178,7 +180,8 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
                 capture(hwnd, output / "02-in-progress.png")
                 progress_capture = True
                 if not fixture_image:
-                    assert request(tcp_port, "s13-busy-check")[-1] == "BUSY"
+                    assert request(tcp_port, "s13-busy-check", config=tcp_config)[-1] == "BUSY"
+                    busy_checked = True
             if time.monotonic() - began >= 15 and progress != previous:
                 print(progress, flush=True)
                 previous = progress
@@ -198,6 +201,7 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
             "FROM inspection_batch_members bm JOIN inspections i USING (inspection_id) "
             f"WHERE bm.batch_id='{batch_id}' ORDER BY bm.sequence_no;")
         counts, reasons, paths = Counter(), Counter(), {}
+        outcomes = {}
         for absolute, digest, verdict, reason in records:
             path = Path(absolute).relative_to(root).as_posix()
             assert path not in paths, path
@@ -205,28 +209,53 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
             counts[verdict] += 1
             reasons[reason] += 1
             if fixture_image:
-                assert verdict == fixtures[path][1], (path, verdict, reason)
+                outcomes[path] = (verdict, reason)
+        assert paths == expected, (len(paths), len(expected), "Paths or hashes differ")
         if fixture_image:
-            # A corrupt PNG can be hashed before decode even when validation fails.
-            assert paths.keys() == expected.keys() and all(paths[p] == expected[p] for p in paths if p != "오류/손상.png")
-        else:
-            assert paths == expected, (len(paths), len(expected), "Paths or hashes differ")
+            registrations = query(
+                "SELECT DISTINCT i.config_sha256,i.algorithm_version FROM inspection_batch_members b "
+                f"JOIN inspections i USING (inspection_id) WHERE b.batch_id='{batch_id}';")
+            assert registrations == [[config_hash, "openzdm-" + REGISTRATION]], registrations
+            attempts = query(
+                "SELECT i.source_path,a.stage,a.score,a.duration_ms,a.decision,a.reason "
+                "FROM inspection_batch_members b JOIN inspections i USING (inspection_id) "
+                f"JOIN analysis_attempts a USING (inspection_id) WHERE b.batch_id='{batch_id}';")
+            measured = {}
+            for absolute, stage, score, ms, band, reason in attempts:
+                name = Path(absolute).relative_to(root).as_posix()
+                _, expected_score, expected_band = fixtures[name]
+                assert name not in measured and stage == "POOLED_WIDTH", (name, stage)
+                assert float(score) == expected_score and band == expected_band and reason == "fast_threshold", name
+                duration_ns = round(float(ms) * 1_000_000)
+                assert duration_ns >= 0, (name, ms)
+                timed_out = duration_ns > budget_us * 1000
+                assert outcomes[name] == (("REVIEW", "budget_exhausted") if timed_out else (band, reason)), name
+                measured[name] = dict(stage=stage, score=float(score), duration_ms=float(ms),
+                                      band=band, decision=outcomes[name][0], reason=outcomes[name][1])
+            assert measured.keys() == {name for name, (_, score, _) in fixtures.items() if score is not None}
+            assert outcomes["오류/손상.png"] == ("ERROR", "unsupported_format"), outcomes
         for verdict, control in FILTERS.items():
             assert label(control).endswith(f" {counts[verdict]}"), (verdict, label(control), counts)
             send(u.GetDlgItem(hwnd, control), 0xF5)
             wait_for(lambda: send(u.GetDlgItem(hwnd, 1211), 0x1004) == min(100, counts[verdict]),
                      f"{verdict} filter row count")
         if fixture_image:
-            send(u.GetDlgItem(hwnd, FILTERS["PASS"]), 0xF5)
-            wait_for(lambda: send(u.GetDlgItem(hwnd, 1211), 0x1004) == 1, "PASS row missing")
+            verdict = next(v for v in ("FAIL", "PASS", "REVIEW") if counts[v])
+            send(u.GetDlgItem(hwnd, FILTERS[verdict]), 0xF5)
+            wait_for(lambda: send(u.GetDlgItem(hwnd, 1211), 0x1004) == counts[verdict], "Model results missing")
             select_first_history_row(u.GetDlgItem(hwnd, 1211))
             send(u.GetDlgItem(hwnd, 1216), 0xF5)
-            wait_for(lambda: "빠른 분석 기준" in label(1010), "Folder detail omitted the final reason")
+            reason_text = "시간 예산 초과" if verdict == "REVIEW" else "빠른 분석 기준"
+            wait_for(lambda: "폭별 질감" in label(1010) and reason_text in label(1010),
+                     "Folder detail omitted the stored stage or final reason")
+            selected = Path(label(1005)).relative_to(root).as_posix()
+            assert outcomes[selected][0] == verdict, (verdict, selected)
             capture(hwnd, output / "04-row-detail.png")
 
         nonce = str(time.time_ns())
-        stored = wait_until(lambda: request(tcp_port, "s13-" + nonce), lambda frame: frame[0] == "RESULT")
-        assert request(tcp_port, "s13-" + nonce) == stored, stored
+        stored = wait_until(lambda: request(tcp_port, "s13-" + nonce, config=tcp_config),
+                            lambda frame: frame[0] == "RESULT")
+        assert request(tcp_port, "s13-" + nonce, config=tcp_config) == stored, stored
 
     stopped = False
     single_file_completed = False
@@ -273,7 +302,9 @@ def verify_folder(app, root, output, evidence, fixture_image, timeout):
                   timings_us={stage: dict(n=int(n), mean=float(mean), maximum=float(maximum))
                               for stage, n, mean, maximum in timing},
                   source_paths_verified=len(paths), reopened=True, tcp_replay=True, commit_retry=retried,
-                  stopped=stopped, single_file_completed=single_file_completed)
+                  tcp_config=tcp_config, tcp_busy=busy_checked, stopped=stopped, single_file_completed=single_file_completed)
+    if fixture_image:
+        report.update(config_sha256=config_hash, budget_us=budget_us, model_measurements=measured)
     (output / "verification.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(report, flush=True)
 
@@ -290,7 +321,7 @@ def main():
     verify.add_argument("--output", type=Path, required=True)
     inputs = verify.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--input", type=Path)
-    inputs.add_argument("--fixture-image", type=Path, help="Use small fixed inputs and a known train PNG for FAIL")
+    inputs.add_argument("--fixture-image", type=Path, help="Use fixed samples including OPENZDM train/OK/image_10513.png")
     verify.add_argument("--evidence", type=Path, default=EVIDENCE)
     verify.add_argument("--timeout", type=int, default=3600)
     args = parser.parse_args()

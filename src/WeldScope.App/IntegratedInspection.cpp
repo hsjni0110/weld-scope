@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include "IntegratedInspection.h"
+#include "PooledSmoothModel.h"
 #include "LoopbackServer.h"
 
 #include <rpc.h>
@@ -14,11 +15,23 @@
 namespace weldscope {
 namespace {
 constexpr auto sourceId = "weld-01";
-constexpr auto baselineId = "baseline-v1";
-constexpr auto selectiveId = "selective-v1";
 constexpr auto sourceHash = "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3";
 constexpr auto baselineHash = "266b8fbb2b4463ba2423126bc9619d45831e7e151862f73f7aaaa88f892bedb2";
 constexpr auto selectiveHash = "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3e8eb5b17f4d1ac93";
+struct DeviceConfiguration {
+    std::string_view id;
+    const char* hash;
+    std::optional<InspectionMode> mode;
+};
+constexpr DeviceConfiguration configurations[] = {
+    {"baseline-v1", baselineHash, InspectionMode::Baseline},
+    {"selective-v1", selectiveHash, InspectionMode::Selective},
+    {"pooled-smooth-220-v1", PooledSmoothModel::configHash, InspectionMode::PooledSmooth},
+    // Previously issued request IDs still replay against their original config hashes.
+    {"spatial-48-v1", "1350a547ba50125e0841630dc32db0ce443630222e01c3f15f9006686c332b4e", std::nullopt},
+    {"pooled-400-v1", "9ca2e425b9ccbf7fb15066040bfec8b802bf1beed9716a16ce861da31b3fcf3b", std::nullopt},
+    {"pooled-width-220-v1", "16b0a27320c103254bbf96e508935a742161d9af771dd1a4563e290d35811355", std::nullopt}
+};
 constexpr auto lookupBudget = std::chrono::milliseconds(150);
 
 std::string NewId() {
@@ -109,8 +122,9 @@ std::vector<std::filesystem::path> FindInspectionFiles(const std::filesystem::pa
 }
 
 IntegratedInspection::IntegratedInspection(std::filesystem::path config, std::filesystem::path deviceImage,
-    unsigned short port, std::function<void()> beforeVerdict)
-    : config_(std::move(config)), deviceImage_(std::move(deviceImage)), beforeVerdict_(std::move(beforeVerdict)) {
+    unsigned short port, std::function<void()> beforeVerdict, InspectionMode fileMode)
+    : config_(std::move(config)), deviceImage_(std::move(deviceImage)), beforeVerdict_(std::move(beforeVerdict)),
+      fileMode_(fileMode) {
     worker_ = std::thread([this] { RunWorker(); });
     try {
         listener_ = std::thread([this, port] {
@@ -187,11 +201,8 @@ bool IntegratedInspection::StartFile(const std::filesystem::path& path) {
     const std::lock_guard lock(mutex_);
     if (!CanStartInspection() || path.empty() || !snapshot_.fileMode) return false;
     const auto mode = *snapshot_.fileMode;
-    if (mode == InspectionMode::Selective) {
-        QueueInspection({{path, {}, mode}, {}, {}, selectiveConfig_.sha256, selectiveConfig_.bytes}, "file-" + NewId());
-    } else {
-        QueueInspection({{path, config_, mode}, {}, {}, {}, {}}, "file-" + NewId());
-    }
+    const auto& config = registered_.at(mode);
+    QueueInspection({{path, {}, mode, config.model}, {}, {}, config.sha256, config.bytes}, "file-" + NewId());
     return true;
 }
 
@@ -205,9 +216,8 @@ bool IntegratedInspection::StartFolder(const std::filesystem::path& root, std::v
 
     const std::lock_guard lock(mutex_);
     if (!CanStartInspection() || !snapshot_.fileMode || !snapshot_.batchReady) return false;
-    auto config = *snapshot_.fileMode == InspectionMode::Selective ? selectiveConfig_ : RegisteredConfig{};
     auto progress = BatchProgress{NewId(), static_cast<unsigned int>(files.size()), 0, true};
-    folder_ = FolderWork{root, std::move(files), *snapshot_.fileMode, std::move(config)};
+    folder_ = FolderWork{root, std::move(files), *snapshot_.fileMode, registered_.at(*snapshot_.fileMode)};
     snapshot_.batch = std::move(progress);
     snapshot_.record = {};
     snapshot_.result.reset();
@@ -276,8 +286,7 @@ void IntegratedInspection::RunWorker() {
 
 void IntegratedInspection::Connect() {
     auto state = IntegrationState::Disconnected;
-    RegisteredConfig baseline{baselineHash, {}}, selective;
-    std::optional<InspectionMode> fileMode = InspectionMode::Baseline;
+    std::map<InspectionMode, RegisteredConfig> registered;
     bool batchReady = false;
     try {
         const InspectionHistory history(HistoryConnectionFromEnvironment());
@@ -286,49 +295,33 @@ void IntegratedInspection::Connect() {
         history.CheckBatchReady();
         batchReady = true;
     } catch (const std::exception&) {}
-    if (state == IntegrationState::Ready) {
-        try {
-            auto bytes = read_bytes(config_, config_file_limit);
-            if (sha256(bytes) == baseline.sha256) baseline.bytes = std::move(bytes);
-        } catch (const std::exception&) {}
-        try {
-            const auto folder = config_.parent_path();
-            const auto settingsPath = folder / L"selective.json";
-            const auto freezePath = folder / L"freeze.json";
-#ifdef WELDSCOPE_S11_DEPLOYED
-            const bool selectiveRequested = true;
-#else
-            const bool selectiveRequested = std::filesystem::exists(settingsPath) || std::filesystem::exists(freezePath);
-#endif
-            if (selectiveRequested) {
-                const auto frozen = read_json(read_bytes(freezePath, config_file_limit));
-                if (read_integer(frozen["schema_version"], "schema_version") != 1)
-                    throw std::invalid_argument("Unsupported selective freeze schema");
-                selective.sha256 = frozen["config_sha256"]["selective"].string();
-                auto bytes = read_bytes(settingsPath, config_file_limit);
-                if (sha256(bytes) != selective.sha256) throw std::invalid_argument("Selective settings hash mismatch");
-                parse_inspection_parameters(read_json(bytes), InspectionMode::Selective);
-                selective.bytes = std::move(bytes);
-                fileMode = InspectionMode::Selective;
-            }
-        } catch (const std::exception&) { fileMode.reset(); }
-    }
+    const auto directory = config_.parent_path();
+    try {
+        auto bytes = read_bytes(config_, config_file_limit);
+        if (sha256(bytes) == baselineHash) registered[InspectionMode::Baseline] = {baselineHash, std::move(bytes)};
+    } catch (const std::exception&) {}
+    try {
+        const auto frozen = read_json(read_bytes(directory / L"freeze.json", config_file_limit));
+        auto bytes = read_bytes(directory / L"selective.json", config_file_limit);
+        if (read_integer(frozen["schema_version"], "schema_version") == 1 &&
+            frozen["config_sha256"]["selective"].string() == selectiveHash && sha256(bytes) == selectiveHash)
+            registered[InspectionMode::Selective] = {selectiveHash, std::move(bytes)};
+    } catch (const std::exception&) {}
+    try {
+        auto bytes = read_bytes(directory / pooledSmoothConfigFile, config_file_limit);
+        auto model = std::make_shared<PooledSmoothModel>(directory, bytes);
+        registered[InspectionMode::PooledSmooth] = {PooledSmoothModel::configHash, std::move(bytes), std::move(model)};
+    } catch (const std::exception&) {}
     const std::lock_guard lock(mutex_);
-    baselineConfig_ = std::move(baseline);
-    selectiveConfig_ = std::move(selective);
-    snapshot_.fileMode = fileMode;
+    registered_ = std::move(registered);
+    snapshot_.fileMode = registered_.count(fileMode_) ? std::optional{fileMode_} : std::nullopt;
     snapshot_.batchReady = batchReady;
     SetWorkerAction(Action::Idle, state);
 }
 
 void IntegratedInspection::CreateBatchRecord() {
     try {
-        auto& folder = *folder_;
-        if (folder.config.bytes.empty()) {
-            auto bytes = read_bytes(config_, config_file_limit);
-            parse_inspection_parameters(read_json(bytes), folder.mode);
-            folder.config = {sha256(bytes), std::move(bytes)};
-        }
+        const auto& folder = *folder_;
         InspectionHistory(HistoryConnectionFromEnvironment()).CreateBatch(snapshot_.batch->batchId,
             folder.root.u8string(), folder.config.sha256, snapshot_.batch->totalFiles);
     } catch (const std::exception&) {
@@ -349,7 +342,7 @@ void IntegratedInspection::QueueNextBatchStep() {
     }
 
     const auto& folder = *folder_;
-    QueueInspection({{folder.root / folder.files[progress.savedFiles], {}, folder.mode}, {}, {}, folder.config.sha256,
+    QueueInspection({{folder.root / folder.files[progress.savedFiles], {}, folder.mode, folder.config.model}, {}, {}, folder.config.sha256,
         folder.config.bytes}, "file-" + progress.batchId + "-" + std::to_string(progress.savedFiles + 1));
 }
 
@@ -465,10 +458,11 @@ std::string IntegratedInspection::Respond(const device::Request& request, Reques
         if (lookup.result.wait_for(lookupBudget) != std::future_status::ready)
             return ErrorFrame(request.requestId, "BUSY");
         const auto existing = lookup.result.get();
+        const auto config = std::find_if(std::begin(configurations), std::end(configurations),
+            [&](const DeviceConfiguration& registration) { return registration.id == request.configId; });
         if (existing) {
-            const std::string_view hash = request.configId == baselineId ? baselineHash :
-                request.configId == selectiveId ? selectiveHash : "";
-            if (hash.empty() || existing->record.inputId != request.sourceId || existing->record.configSha256 != hash)
+            if (config == std::end(configurations) || existing->record.inputId != request.sourceId ||
+                existing->record.configSha256 != config->hash)
                 return ErrorFrame(request.requestId, "REQUEST_CONFLICT");
             return StoredResponse(existing->record);
         }
@@ -477,14 +471,11 @@ std::string IntegratedInspection::Respond(const device::Request& request, Reques
             return ErrorFrame(request.requestId, "BUSY");
         if (!CanStartInspection()) return ErrorFrame(request.requestId, "DB_UNAVAILABLE");
         if (request.sourceId != sourceId) return ErrorFrame(request.requestId, "UNKNOWN_SOURCE");
-        const bool isBaseline = request.configId == baselineId;
-        if (!isBaseline && request.configId != selectiveId) return ErrorFrame(request.requestId, "UNKNOWN_CONFIG");
-        const auto& settings = isBaseline ? baselineConfig_ : selectiveConfig_;
-        const auto expectedHash = isBaseline ? baselineHash : selectiveHash;
-        if (settings.bytes.empty() || settings.sha256 != expectedHash)
+        if (config == std::end(configurations)) return ErrorFrame(request.requestId, "UNKNOWN_CONFIG");
+        if (!config->mode || !registered_.count(*config->mode))
             return ErrorFrame(request.requestId, "CONFIG_UNAVAILABLE");
-        const auto mode = isBaseline ? InspectionMode::Baseline : InspectionMode::Selective;
-        QueueInspection({{deviceImage_, {}, mode}, std::string(request.sourceId), std::string(request.configId),
+        const auto& settings = registered_.at(*config->mode);
+        QueueInspection({{deviceImage_, {}, *config->mode, settings.model}, std::string(request.sourceId), std::string(request.configId),
             settings.sha256, settings.bytes}, std::string(request.requestId));
         return StatusFrame(request.requestId, snapshot_.record.inspectionId, "IN_PROGRESS");
     } catch (const std::exception&) {

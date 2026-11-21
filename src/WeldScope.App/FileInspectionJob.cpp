@@ -48,7 +48,7 @@ FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& req
             if (cancelled) throw InspectionCancelled{};
             if (beforePrecise) beforePrecise();
             if (cancelled) throw InspectionCancelled{};
-        });
+        }, request.model.get());
         if (cancelled) return InspectionCancelled{};
 
         InspectedFile completed;

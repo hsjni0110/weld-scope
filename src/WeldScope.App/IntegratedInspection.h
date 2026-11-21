@@ -6,6 +6,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <map>
 #include <thread>
 
 namespace weldscope {
@@ -24,7 +25,7 @@ struct IntegrationSnapshot {
     IntegrationState state = IntegrationState::Connecting;
     unsigned short port = 0;
     bool listenerFailed = false;
-    std::optional<InspectionMode> fileMode = InspectionMode::Baseline;
+    std::optional<InspectionMode> fileMode;
     bool preciseRunning = false;
     std::optional<double> saveMs;
     std::uint64_t revision = 0;
@@ -37,7 +38,7 @@ struct IntegrationSnapshot {
 class IntegratedInspection {
 public:
     IntegratedInspection(std::filesystem::path config, std::filesystem::path deviceImage, unsigned short port,
-                         std::function<void()> beforeVerdict = {});
+                         std::function<void()> beforeVerdict = {}, InspectionMode fileMode = InspectionMode::PooledSmooth);
     ~IntegratedInspection();
     IntegratedInspection(const IntegratedInspection&) = delete;
     IntegratedInspection& operator=(const IntegratedInspection&) = delete;
@@ -63,6 +64,7 @@ private:
     struct RegisteredConfig {
         std::string sha256;
         std::vector<unsigned char> bytes;
+        std::shared_ptr<const PooledSmoothModel> model = {};
     };
     struct FolderWork {
         std::filesystem::path root;
@@ -91,6 +93,7 @@ private:
 
     const std::filesystem::path config_, deviceImage_;
     const std::function<void()> beforeVerdict_;
+    const InspectionMode fileMode_;
     mutable std::mutex mutex_;
     std::condition_variable changed_;
     bool paused_ = false, closing_ = false, workerClosed_ = false, listenerClosed_ = false;
@@ -100,7 +103,7 @@ private:
     std::optional<FolderWork> folder_;
     std::optional<Action> folderRetry_;
     IntegrationSnapshot snapshot_;
-    RegisteredConfig baselineConfig_, selectiveConfig_;
+    std::map<InspectionMode, RegisteredConfig> registered_;
     std::thread worker_, listener_;
 };
 }

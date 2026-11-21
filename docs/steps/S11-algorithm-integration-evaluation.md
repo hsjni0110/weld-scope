@@ -67,6 +67,8 @@ OPENZDM(CC BY 4.0) train의 `OK/image_10513.png` 한 장을 각 경로에서 비
 
 ## 실행과 검수
 
+아래 명령은 S11 당시의 소스와 동결 실행 파일을 대상으로 한다. 현재 앱의 기본 모델과 검수 명령은 [S13 실행 절차](S13-folder-inspection-monitoring.md#관리자와-검수자-재현-명령)를 따른다.
+
 Visual Studio x64 C++ 도구, [S10 MySQL 준비](S10-record-device-integration.md), OpenCV x64 정적 설치와 S02 검증 ZIP을 사용한다. 저장소 루트의 PowerShell에서 실행한다.
 
 ```powershell

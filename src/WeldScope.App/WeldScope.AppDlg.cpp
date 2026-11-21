@@ -105,7 +105,9 @@ const wchar_t* StoredDecision(InspectionWorkState workState, std::string_view de
 
 void AppendAttempt(CString& details, std::string_view stage, std::optional<double> score, double durationMs) {
     if (!details.IsEmpty()) details += L"\n";
-    const auto* stageName = stage == "PRECISE" ? L"정밀 분석" : stage == "FAST" ? L"빠른 분석" : L"기준 분석";
+    const auto* stageName = stage == "PRECISE" ? L"정밀 분석" : stage == "POOLED_WIDTH" ? L"폭별 질감" :
+        stage == "POOLED" ? L"통합 질감" : stage == "SPATIAL" ? L"공간 분석" :
+        stage == "FAST" ? L"빠른 분석" : L"기준 분석";
     if (score) details.AppendFormat(L"%s %.4f  %.2f ms", stageName, *score, durationMs);
     else details.AppendFormat(L"%s 오류  %.2f ms", stageName, durationMs);
 }
@@ -146,19 +148,32 @@ cv::Mat RebuildSavedCandidateOverlay(const cv::Mat& bgr, const InspectionRecord&
         [](const AnalysisAttempt& stage) { return stage.score.has_value(); });
     if (attempt == record.attempts.rend()) return {};
 
-    const auto mode = attempt->stage == "BASELINE" ? InspectionMode::Baseline : InspectionMode::Selective;
-    if (record.algorithmVersion != inspection_version(mode))
-        throw std::runtime_error("The saved algorithm version is unavailable");
-    const auto path = mode == InspectionMode::Baseline ? baseline : baseline.parent_path() / L"selective.json";
+    // An image-level model only produces a pixel mask when the precise stage ran.
+    if (attempt->stage == "POOLED_WIDTH" || attempt->stage == "POOLED" || attempt->stage == "SPATIAL") return {};
+    const bool isBaseline = record.algorithmVersion == inspection_version(InspectionMode::Baseline);
+    auto path = baseline;
+    if (!isBaseline) {
+        struct SavedConfig { const char* version; const wchar_t* filename; };
+        const SavedConfig configs[] = {
+            {inspection_version(InspectionMode::Selective), L"selective.json"},
+            {inspection_version(InspectionMode::PooledSmooth), pooledSmoothConfigFile},
+            {"openzdm-spatial-48-v1", L"spatial-48.json"}, {"openzdm-pooled-400-v1", L"pooled-400.json"},
+            {"openzdm-pooled-width-220-v1", L"pooled-width-220.json"}
+        };
+        const auto saved = std::find_if(std::begin(configs), std::end(configs),
+            [&](const SavedConfig& entry) { return record.algorithmVersion == entry.version; });
+        if (saved == std::end(configs)) throw std::runtime_error("The saved algorithm version is unavailable");
+        path = baseline.parent_path() / saved->filename;
+    }
     const auto config = read_bytes(path, config_file_limit);
     if (sha256(config) != record.configSha256) throw std::runtime_error("The saved settings are unavailable");
 
     cv::Mat mask;
-    if (mode == InspectionMode::Baseline) {
+    if (isBaseline) {
         mask = inspect_baseline(bgr, parse_baseline_config(read_json(config))).mask;
     } else {
         const bool precise = attempt->stage == "PRECISE";
-        const auto settings = parse_inspection_parameters(read_json(config), mode);
+        const auto settings = parse_inspection_parameters(read_json(config), InspectionMode::Selective);
         mask = inspect_local_contrast(bgr, precise ? LocalContrastMode::Precise : LocalContrastMode::Fast,
             settings.threshold, precise ? settings.preciseBand.failMin : settings.fastBand.failMin).mask;
     }
@@ -224,7 +239,9 @@ BOOL CWeldScopeAppDlg::OnInitDialog()
     auto label = [this](CStatic& control, const wchar_t* text, UINT id, DWORD style = 0) {
         control.Create(text, WS_CHILD | WS_VISIBLE | SS_NOPREFIX | style, CRect(), this, id);
     };
-    label(title_, L"WeldScope", IDC_TITLE);
+    CString appTitle;
+    GetWindowText(appTitle);
+    label(title_, appTitle, IDC_TITLE);
     label(section_, L"검사 콘솔", IDC_SECTION);
     label(imageTitle_, L"원본 이미지", IDC_IMAGE_TITLE);
     label(imageMeta_, L"입력 대기", IDC_IMAGE_META, SS_RIGHT);
@@ -1085,8 +1102,8 @@ void CWeldScopeAppDlg::RefreshIntegration()
         start_.EnableWindow(!closeRequested_ && ready && !folderActive && snapshot.fileMode.has_value() && !selectedFile_.empty());
         stop_.EnableWindow(!closeRequested_ && inspecting && !folderActive);
     }
-    section_.SetWindowText(!snapshot.fileMode ? L"설정 오류" :
-        *snapshot.fileMode == InspectionMode::Selective ? L"선택적 검사" : L"기준 검사");
+    if (snapshot.state != IntegrationState::Connecting)
+        section_.SetWindowText(snapshot.fileMode ? L"연속 보간" : L"설정 오류");
     filePicker_.EnableWindow(!closeRequested_ && integration_ && !folderActive && !IntegrationBusy(snapshot.state) && !pending);
     retrySave_.EnableWindow(!closeRequested_ && (pending || snapshot.state == IntegrationState::Disconnected));
     retrySave_.SetWindowText(pending ? L"저장 재시도" : L"재연결");

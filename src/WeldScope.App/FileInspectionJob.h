@@ -17,6 +17,7 @@ struct FileInspectionRequest {
     std::filesystem::path path;
     std::filesystem::path config;
     InspectionMode mode = InspectionMode::Baseline;
+    std::shared_ptr<const PooledSmoothModel> model = {};
 };
 
 struct InspectedFile {

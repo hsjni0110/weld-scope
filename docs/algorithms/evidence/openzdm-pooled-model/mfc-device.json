@@ -1,0 +1,197 @@
+{
+  "executable_sha256": "9398d354c6f3b6a031eb4b1e52dc9fed1f2fd5ba68934bc13b5aa649b955ce87",
+  "config_sha256": "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b",
+  "settings": {
+    "schema_version": 1,
+    "contrast_threshold": 12,
+    "budget_us": 132,
+    "fast_pass_max": 0.24418902562879677,
+    "fast_fail_min": 0.33445160863388457,
+    "precise_pass_max": 0,
+    "precise_fail_min": 0.5498386386973741,
+    "model": "model-220.txt",
+    "outside_pass": 0.06060167201188642,
+    "outside_fail": 0.19334990845531436,
+    "width_calibration": "linear-6px-v1",
+    "model_sha256": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
+    "width_min": 385,
+    "width_max": 415
+  },
+  "version": "openzdm-pooled-smooth-220-v1",
+  "observations": [
+    {
+      "inspection_id": "eb28d545-cd91-425b-a83e-2c2a0e8541f1",
+      "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+      "decision": "REVIEW",
+      "reason": "budget_exhausted",
+      "stage": "POOLED_WIDTH",
+      "score": 0.010489226697190355,
+      "analysis_ms": 0.966375,
+      "input": "file",
+      "filename": "normal.png",
+      "observation": 1,
+      "click_to_saved_ms": 48.39866700058337
+    },
+    {
+      "inspection_id": "e550285d-813b-4698-a15b-52b3a754531b",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.06325,
+      "input": "file",
+      "filename": "defect.png",
+      "observation": 1,
+      "click_to_saved_ms": 53.011374999186955
+    },
+    {
+      "inspection_id": "bf607100-4a82-4fd3-ae4e-aea75351459e",
+      "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+      "decision": "PASS",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.010489226697190355,
+      "analysis_ms": 0.05125,
+      "input": "file",
+      "filename": "normal.png",
+      "observation": 2,
+      "click_to_saved_ms": 20.471750001888722
+    },
+    {
+      "inspection_id": "786f0ee8-8319-45f4-b1ca-f6d79c6eac42",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.045375,
+      "input": "file",
+      "filename": "defect.png",
+      "observation": 2,
+      "click_to_saved_ms": 63.51633300073445
+    },
+    {
+      "inspection_id": "2bfbc334-0683-47f3-af40-27b029e21ef1",
+      "sha256": "90737d3f52aca2b5ffcd0721659d4f721b21aceaf9b140127e82d6547448cadd",
+      "decision": "REVIEW",
+      "reason": "budget_exhausted",
+      "stage": "POOLED_WIDTH",
+      "score": 0.010489226697190355,
+      "analysis_ms": 0.193542,
+      "input": "file",
+      "filename": "normal.png",
+      "observation": 3,
+      "click_to_saved_ms": 36.03504200145835
+    },
+    {
+      "inspection_id": "7b0c4772-4ba8-460b-98f2-6b604560d9ea",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.0465,
+      "input": "file",
+      "filename": "defect.png",
+      "observation": 3,
+      "click_to_saved_ms": 24.182124998333165
+    },
+    {
+      "inspection_id": "4d7bd8e8-4d37-47f4-96e7-229df3f05b24",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.045625,
+      "input": "TCP",
+      "observation": 1,
+      "frame": [
+        "RESULT",
+        "research-27850bc338cb4f02ac9f1e3e332ad89b-0",
+        "4d7bd8e8-4d37-47f4-96e7-229df3f05b24",
+        "FAIL"
+      ],
+      "polling_ms": 51.38587500186986
+    },
+    {
+      "inspection_id": "128bc7eb-2dc2-4e0e-afd4-f8487fb41926",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.046209,
+      "input": "TCP",
+      "observation": 2,
+      "frame": [
+        "RESULT",
+        "research-27850bc338cb4f02ac9f1e3e332ad89b-1",
+        "128bc7eb-2dc2-4e0e-afd4-f8487fb41926",
+        "FAIL"
+      ],
+      "polling_ms": 81.80125000217231
+    },
+    {
+      "inspection_id": "84a9ba0d-0d87-49b7-abef-f0b9fa487de0",
+      "sha256": "4a08fa2c6274e603f18358134092e8f697cc81f78a36f472577bca81bc0de3f3",
+      "decision": "FAIL",
+      "reason": "fast_threshold",
+      "stage": "POOLED_WIDTH",
+      "score": 0.7688432614002394,
+      "analysis_ms": 0.064916,
+      "input": "TCP",
+      "observation": 3,
+      "frame": [
+        "RESULT",
+        "research-27850bc338cb4f02ac9f1e3e332ad89b-2",
+        "84a9ba0d-0d87-49b7-abef-f0b9fa487de0",
+        "FAIL"
+      ],
+      "polling_ms": 57.798124998953426
+    }
+  ],
+  "legacy": {
+    "baseline-v1": {
+      "frame": [
+        "RESULT",
+        "research-27850bc338cb4f02ac9f1e3e332ad89bbaseline-v1",
+        "5a013edb-9109-41ed-902c-f0e4fdb45647",
+        "FAIL"
+      ],
+      "attempts": [
+        [
+          "BASELINE",
+          "0.9690217391304348",
+          "FAIL",
+          "dark_pixel_ratio",
+          "0.044166"
+        ]
+      ]
+    },
+    "selective-v1": {
+      "frame": [
+        "RESULT",
+        "research-27850bc338cb4f02ac9f1e3e332ad89bselective-v1",
+        "91373025-d444-454d-9e26-407dfab7633c",
+        "PASS"
+      ],
+      "attempts": [
+        [
+          "FAST",
+          "0.11570048309178745",
+          "PASS",
+          "fast_threshold",
+          "0.120916"
+        ]
+      ]
+    }
+  },
+  "history_after_restart": true,
+  "replay_after_restart": true,
+  "replay_rows": 1,
+  "corrupt_model_rejected": true,
+  "replay_with_corrupt_model": true,
+  "default_without_manifest": "selective-v1"
+}
