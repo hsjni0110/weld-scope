@@ -1,5 +1,7 @@
 # S09 파일 검사 통합
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S09-file-inspection-integration.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 **상태**　사용자 결과 검수 대기
 
 MFC에서 단일 로컬 PNG를 선택해 S04 기준 엔진으로 검사한다. 원본과 후보 오버레이, 판정과 후보 점수, 읽기·분석 시간, 현재 실행 이력을 한 창에서 확인할 수 있다. [로드맵](../ROADMAP.md) · [ADR 0009](../adr/0009-mfc-file-inspection.md) · [PRD F01·F02·F06·F10](https://chatgpt.com/space/page_b35b9c74caac81918226ccdc9e38769e)

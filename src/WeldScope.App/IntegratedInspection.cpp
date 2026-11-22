@@ -21,16 +21,17 @@ constexpr auto selectiveHash = "65db00364fbd04baae490e602881bfcd97307d2449f3f6b3
 struct DeviceConfiguration {
     std::string_view id;
     const char* hash;
-    std::optional<InspectionMode> mode;
+    bool acceptsNew;
 };
 constexpr DeviceConfiguration configurations[] = {
-    {"baseline-v1", baselineHash, InspectionMode::Baseline},
-    {"selective-v1", selectiveHash, InspectionMode::Selective},
-    {"pooled-smooth-220-v1", PooledSmoothModel::configHash, InspectionMode::PooledSmooth},
+    {"baseline-v1", baselineHash, false},
+    {"selective-v1", selectiveHash, false},
+    {"pooled-smooth-220-v1", "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b", false},
+    {inspectionConfigId, PooledSmoothModel::configHash, true},
     // Previously issued request IDs still replay against their original config hashes.
-    {"spatial-48-v1", "1350a547ba50125e0841630dc32db0ce443630222e01c3f15f9006686c332b4e", std::nullopt},
-    {"pooled-400-v1", "9ca2e425b9ccbf7fb15066040bfec8b802bf1beed9716a16ce861da31b3fcf3b", std::nullopt},
-    {"pooled-width-220-v1", "16b0a27320c103254bbf96e508935a742161d9af771dd1a4563e290d35811355", std::nullopt}
+    {"spatial-48-v1", "1350a547ba50125e0841630dc32db0ce443630222e01c3f15f9006686c332b4e", false},
+    {"pooled-400-v1", "9ca2e425b9ccbf7fb15066040bfec8b802bf1beed9716a16ce861da31b3fcf3b", false},
+    {"pooled-width-220-v1", "16b0a27320c103254bbf96e508935a742161d9af771dd1a4563e290d35811355", false}
 };
 constexpr auto lookupBudget = std::chrono::milliseconds(150);
 
@@ -68,11 +69,8 @@ void RecordAnalysisOutcome(InspectionRecord& record, const FileInspectionResult&
     if (const auto* inspected = std::get_if<InspectedFile>(&result)) {
         record.decision = outcome_name(inspected->outcome);
         record.reason = inspected->reason;
-        for (const auto& attempt : inspected->attempts) {
-            const auto durationMs = std::chrono::duration<double, std::milli>(attempt.elapsed).count();
-            record.attempts.push_back({attempt.stage, attempt.score, outcome_name(attempt.outcome),
-                attempt.reason, durationMs});
-        }
+        record.attempts.push_back({inspectionStage, inspected->score, record.decision, inspected->reason,
+            inspected->analysisMs});
     } else if (const auto* failure = std::get_if<FileInspectionFailure>(&result)) {
         record.decision = "ERROR";
         record.reason = FailureReason(*failure);
@@ -122,9 +120,8 @@ std::vector<std::filesystem::path> FindInspectionFiles(const std::filesystem::pa
 }
 
 IntegratedInspection::IntegratedInspection(std::filesystem::path config, std::filesystem::path deviceImage,
-    unsigned short port, std::function<void()> beforeVerdict, InspectionMode fileMode)
-    : config_(std::move(config)), deviceImage_(std::move(deviceImage)), beforeVerdict_(std::move(beforeVerdict)),
-      fileMode_(fileMode) {
+    unsigned short port, std::function<void()> beforeVerdict)
+    : config_(std::move(config)), deviceImage_(std::move(deviceImage)), beforeVerdict_(std::move(beforeVerdict)) {
     worker_ = std::thread([this] { RunWorker(); });
     try {
         listener_ = std::thread([this, port] {
@@ -172,8 +169,8 @@ void IntegratedInspection::QueueInspection(Job job, std::string requestId) {
     record.requestId = std::move(requestId);
     record.inputId = job.sourceId.empty() ? record.requestId : job.sourceId;
     record.sourcePath = job.input.path.u8string();
-    record.configSha256 = job.configSha256;
-    record.algorithmVersion = inspection_version(job.input.mode);
+    record.configSha256 = PooledSmoothModel::configHash;
+    record.algorithmVersion = inspectionVersion;
     record.datasetVersion = job.sourceId.empty() ? "local-file" : "openzdm-14025630";
     if (folder_) {
         record.batchId = snapshot_.batch->batchId;
@@ -181,7 +178,6 @@ void IntegratedInspection::QueueInspection(Job job, std::string requestId) {
     }
     snapshot_.record = std::move(record);
     snapshot_.result.reset();
-    snapshot_.preciseRunning = false;
     snapshot_.saveMs.reset();
     job_ = std::move(job);
     cancelled_ = false;
@@ -199,10 +195,8 @@ bool IntegratedInspection::HasActiveInspection() const {
 
 bool IntegratedInspection::TryStartFile(const std::filesystem::path& path) {
     const std::lock_guard lock(mutex_);
-    if (!CanStartInspection() || path.empty() || !snapshot_.fileMode) return false;
-    const auto mode = *snapshot_.fileMode;
-    const auto& config = registered_.at(mode);
-    QueueInspection({{path, {}, mode, config.model}, {}, {}, config.sha256, config.bytes}, "file-" + NewId());
+    if (!CanStartInspection() || path.empty() || !snapshot_.modelReady) return false;
+    QueueInspection({{path, {}, model_}, {}, {}}, "file-" + NewId());
     return true;
 }
 
@@ -215,13 +209,12 @@ bool IntegratedInspection::TryStartFolder(const std::filesystem::path& root, std
         })) return false;
 
     const std::lock_guard lock(mutex_);
-    if (!CanStartInspection() || !snapshot_.fileMode || !snapshot_.batchReady) return false;
+    if (!CanStartInspection() || !snapshot_.modelReady || !snapshot_.batchReady) return false;
     auto progress = BatchProgress{NewId(), static_cast<unsigned int>(files.size()), 0, true};
-    folder_ = FolderWork{root, std::move(files), *snapshot_.fileMode, registered_.at(*snapshot_.fileMode)};
+    folder_ = FolderWork{root, std::move(files), model_};
     snapshot_.batch = std::move(progress);
     snapshot_.record = {};
     snapshot_.result.reset();
-    snapshot_.preciseRunning = false;
     snapshot_.saveMs.reset();
     SetWorkerAction(Action::CreateBatch, IntegrationState::Saving);
     return true;
@@ -286,7 +279,7 @@ void IntegratedInspection::RunWorker() {
 
 void IntegratedInspection::Connect() {
     auto state = IntegrationState::Disconnected;
-    std::map<InspectionMode, RegisteredConfig> registered;
+    std::shared_ptr<const PooledSmoothModel> model;
     bool batchReady = false;
     try {
         const InspectionHistory history(HistoryConnectionFromEnvironment());
@@ -295,26 +288,13 @@ void IntegratedInspection::Connect() {
         history.CheckBatchReady();
         batchReady = true;
     } catch (const std::exception&) {}
-    const auto directory = config_.parent_path();
     try {
-        auto bytes = read_bytes(config_, config_file_limit);
-        if (sha256(bytes) == baselineHash) registered[InspectionMode::Baseline] = {baselineHash, std::move(bytes)};
-    } catch (const std::exception&) {}
-    try {
-        const auto frozen = read_json(read_bytes(directory / L"freeze.json", config_file_limit));
-        auto bytes = read_bytes(directory / L"selective.json", config_file_limit);
-        if (read_integer(frozen["schema_version"], "schema_version") == 1 &&
-            frozen["config_sha256"]["selective"].string() == selectiveHash && sha256(bytes) == selectiveHash)
-            registered[InspectionMode::Selective] = {selectiveHash, std::move(bytes)};
-    } catch (const std::exception&) {}
-    try {
-        auto bytes = read_bytes(directory / pooledSmoothConfigFile, config_file_limit);
-        auto model = std::make_shared<PooledSmoothModel>(directory, bytes);
-        registered[InspectionMode::PooledSmooth] = {PooledSmoothModel::configHash, std::move(bytes), std::move(model)};
+        const auto bytes = read_bytes(config_, config_file_limit);
+        model = std::make_shared<PooledSmoothModel>(config_.parent_path(), bytes);
     } catch (const std::exception&) {}
     const std::lock_guard lock(mutex_);
-    registered_ = std::move(registered);
-    snapshot_.fileMode = registered_.count(fileMode_) ? std::optional{fileMode_} : std::nullopt;
+    model_ = std::move(model);
+    snapshot_.modelReady = static_cast<bool>(model_);
     snapshot_.batchReady = batchReady;
     SetWorkerAction(Action::Idle, state);
 }
@@ -323,7 +303,7 @@ void IntegratedInspection::CreateBatchRecord() {
     try {
         const auto& folder = *folder_;
         InspectionHistory(HistoryConnectionFromEnvironment()).CreateBatch(snapshot_.batch->batchId,
-            folder.root.u8string(), folder.config.sha256, snapshot_.batch->totalFiles);
+            folder.root.u8string(), PooledSmoothModel::configHash, snapshot_.batch->totalFiles);
     } catch (const std::exception&) {
         MarkBatchActionForRetry(Action::CreateBatch);
         return;
@@ -342,8 +322,8 @@ void IntegratedInspection::QueueNextBatchStep() {
     }
 
     const auto& folder = *folder_;
-    QueueInspection({{folder.root / folder.files[progress.savedFiles], {}, folder.mode, folder.config.model}, {}, {}, folder.config.sha256,
-        folder.config.bytes}, "file-" + progress.batchId + "-" + std::to_string(progress.savedFiles + 1));
+    QueueInspection({{folder.root / folder.files[progress.savedFiles], {}, folder.model}, {}, {}},
+        "file-" + progress.batchId + "-" + std::to_string(progress.savedFiles + 1));
 }
 
 void IntegratedInspection::MarkBatchActionForRetry(Action action) {
@@ -374,13 +354,8 @@ void IntegratedInspection::AnalyzeCurrentFile() {
     InspectionEvidence evidence;
     FileInspectionResult result = FileInspectionFailure::Analysis;
     try {
-        const auto* fixedConfig = job_->fixedConfig.empty() ? nullptr : &job_->fixedConfig;
-        result = inspect_file_with_evidence(job_->input, cancelled_, evidence, fixedConfig,
-            job_->sourceId.empty() ? "" : sourceHash, [this] {
-                const std::lock_guard lock(mutex_);
-                snapshot_.preciseRunning = true;
-                ++snapshot_.revision;
-            });
+        result = inspect_file_with_evidence(job_->input, cancelled_, evidence,
+            job_->sourceId.empty() ? "" : sourceHash);
         if (beforeVerdict_) beforeVerdict_();
     } catch (const std::exception&) { result = FileInspectionFailure::Analysis; }
 
@@ -472,11 +447,10 @@ std::string IntegratedInspection::Respond(const device::Request& request, Reques
         if (!CanStartInspection()) return ErrorFrame(request.requestId, "DB_UNAVAILABLE");
         if (request.sourceId != sourceId) return ErrorFrame(request.requestId, "UNKNOWN_SOURCE");
         if (config == std::end(configurations)) return ErrorFrame(request.requestId, "UNKNOWN_CONFIG");
-        if (!config->mode || !registered_.count(*config->mode))
+        if (!config->acceptsNew || !model_)
             return ErrorFrame(request.requestId, "CONFIG_UNAVAILABLE");
-        const auto& settings = registered_.at(*config->mode);
-        QueueInspection({{deviceImage_, {}, *config->mode, settings.model}, std::string(request.sourceId), std::string(request.configId),
-            settings.sha256, settings.bytes}, std::string(request.requestId));
+        QueueInspection({{deviceImage_, {}, model_}, std::string(request.sourceId), std::string(request.configId)},
+                        std::string(request.requestId));
         return StatusFrame(request.requestId, snapshot_.record.inspectionId, "IN_PROGRESS");
     } catch (const std::exception&) {
         const std::lock_guard lock(mutex_);

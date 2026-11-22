@@ -34,24 +34,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegratedInspection.cpp">
       <Filter>작업 제어</Filter>
     </ClCompile>
-    <ClInclude Include="..\WeldScope.Core\BaselineInspection.h">
-      <Filter>영상 분석</Filter>
-    </ClInclude>
-    <ClCompile Include="..\WeldScope.Core\BaselineInspection.cpp">
-      <Filter>영상 분석</Filter>
-    </ClCompile>
-    <ClInclude Include="..\WeldScope.Core\LocalContrastInspection.h">
-      <Filter>영상 분석</Filter>
-    </ClInclude>
-    <ClCompile Include="..\WeldScope.Core\LocalContrastInspection.cpp">
-      <Filter>영상 분석</Filter>
-    </ClCompile>
-    <ClInclude Include="..\WeldScope.Core\SelectiveInspectionPolicy.h">
-      <Filter>영상 분석</Filter>
-    </ClInclude>
-    <ClCompile Include="..\WeldScope.Core\SelectiveInspectionPolicy.cpp">
-      <Filter>영상 분석</Filter>
-    </ClCompile>
     <ClInclude Include="..\WeldScope.FileInspection\AnalysisPipeline.h">
       <Filter>영상 분석</Filter>
     </ClInclude>

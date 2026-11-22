@@ -1,4 +1,4 @@
-# S12 의존성 및 출처
+# 배포 의존성 및 출처
 
 | 구성 | 확인한 버전과 고지 |
 |---|---|
@@ -19,7 +19,6 @@
 |---|---|
 | `defect.png` | `train/KO/image_1.png` |
 | `samples/normal.png` | `train/OK/image_1.png` |
-| `samples/image_10513.png` | `train/OK/image_10513.png` |
 | `samples/corrupt.png` | 오류 검사에 쓰는 자체 제작 비이미지 |
 
-패키지 안의 OPENZDM PNG는 원본 바이트를 유지한다. 앱 화면에서는 크기를 조정하고 검사로 계산한 후보를 오버레이한다.
+패키지 안의 OPENZDM PNG는 원본 바이트를 유지한다. 앱 화면에서는 원본의 비율을 유지해 표시한다.

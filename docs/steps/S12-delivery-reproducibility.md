@@ -1,5 +1,7 @@
 # S12 전달과 재현
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S12-delivery-reproducibility.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 **상태**　구현 및 로컬 실행 검증 완료 · 사용자 결과 검수 대기
 
 **구현 기준**　`307112c` · S11 병합
@@ -36,7 +38,7 @@ S11의 x64 Release 빌드와 동결 설정을 재사용했다. 실행 ZIP과 평
 
 ## 패키지 실행 검증
 
-[패키지 실행 안내](S12-run-package.md)에 따라 저장소 밖에서 공백과 한글이 있는 경로에 압축을 풀었다. 별도 현재 작업 디렉터리와 Windows 시스템 PATH를 사용했고, Windows에 설치된 VC++ 런타임과 원본 MySQL DLL 세 개를 사용했다. 빈 전용 루프백 MySQL 스키마에 연결했다.
+[패키지 실행 안내](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S12-run-package.md)에 따라 저장소 밖에서 공백과 한글이 있는 경로에 압축을 풀었다. 별도 현재 작업 디렉터리와 Windows 시스템 PATH를 사용했고, Windows에 설치된 VC++ 런타임과 원본 MySQL DLL 세 개를 사용했다. 빈 전용 루프백 MySQL 스키마에 연결했다.
 
 | 시연 | 실제 관찰 |
 |---|---|

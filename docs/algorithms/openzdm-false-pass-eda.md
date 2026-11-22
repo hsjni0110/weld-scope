@@ -2,9 +2,26 @@
 
 이 문서는 OPENZDM 연구 결과와 MFC 반영 판단의 기준이다. `KO → PASS`는 실제 불량이 자동 통과한 경우, `OK → FAIL`은 정상이 자동 탈락한 경우다. `REVIEW`는 사람이 확인할 보류이며 정답 처리하지 않는다. 두 오류의 분모는 각각 전체 불량과 전체 정상이다.
 
-**채택한 연구 모델은 220개 나무와 연속 폭 경계를 사용하는 검사기다.** 같은 OPENZDM 사진에서 기존 S12보다 불량 통과와 정상 오판이 함께 줄었다. 새 부품·촬영 배치에서의 자동 출하 승인은 보류한다. 외부 실물 용접 누락 사진을 두 번 모두 자동 통과시켰고, 부품과 촬영 배치가 식별되는 독립 시험 및 현장의 허용 오류율이 필요하다.
+## 버전 2 검수
+
+**새 검사는 LightGBM 모델 하나가 사진 한 장의 판정을 결정한다.** 학습된 나무 220개와 폭별 판정선은 유지했다. 두 판정선 사이의 점수만 검토 대상으로 보낸다. 분석 시간은 기록하고 판정 계산에 사용하지 않는다. 설정 ID와 이력 호환은 [ADR 0014](../adr/0014-lightgbm-only-inspection.md)를 따른다.
+
+교차 분할 유사 사진을 제외한 OPENZDM 시험 사진 8,104장의 CLI 실행 결과다.
+
+| 실제 정답 | 정상 판정 | 불량 판정 | 검토 필요 | 합계 |
+|---|---:|---:|---:|---:|
+| 불량 | 173 (FN) | 1,253 (TP) | 143 | 1,569 |
+| 정상 | 5,373 (TN) | 625 (FP) | 537 | 6,535 |
+
+CLI 두 번의 실행에서 점수, 판정, 이유가 8,104장 모두 일치했고 처리 오류는 0건이었다. 같은 파일을 MFC 폴더 검사로 저장한 결과도 CLI와 8,104장 모두 일치했다. 검토 필요 680장의 사유는 모두 판정 기준 사이였다. 부품과 촬영 배치를 식별할 수 있는 새 생산 데이터에 대한 평가는 별도다.
+
+최종 x64 앱에서 정상·불량·검토 필요를 각각 확인했다. 폴더 검사 검수에서 저장 확인 응답이 끊긴 뒤 재시도, 검사 중지, 재시작 후 이력 조회를 확인했다. 이전 앱으로 저장한 세 종류의 장비 요청은 최종 앱에서 같은 검사 ID와 판정으로 재전송됐다. 이전 설정 ID로 보낸 신규 요청은 거부됐다. 배포 ZIP은 공백이 포함된 영문 경로에서 실행했고, 96 DPI 축소 창과 키보드 포커스를 확인했다. 한글 경로의 ZIP 폴더에서는 이 환경의 실습용 MySQL 시작이 실패했으며, 125% 이상 확대 화면은 검수 범위에 포함되지 않았다. [검증 집계와 산출물 해시](evidence/lightgbm-v2/verification.json)
+
+파일·폴더 UI와 CLI·TCP의 설정 파일은 [설정 안내](../../config/README.md)에서 확인할 수 있다.
 
 ## 실제 MFC 검수
+
+아래는 밝기 기반 추가 검사와 132µs 보류가 있던 이전 빌드의 연구 및 검수 기록이다. 위 버전 2 표와 판정 규칙을 구분해 읽는다.
 
 **포트폴리오 x64 앱의 기본 파일·폴더 검사기는 연속 보간 220개 나무 모델이다.** 일반 ZIP을 풀고 `WeldScope-Start.cmd`를 열면 런처가 전용 MySQL과 DLL을 준비한다. 장비 요청의 설정 ID는 `pooled-smooth-220-v1`, 저장되는 버전은 `openzdm-pooled-smooth-220-v1`이다. 아래 표는 이 모델을 기본 앱에 채택하기 전 같은 공개 영상으로 측정한 결과다. [실행 안내](../steps/S13-run-package.md) · [모델과 설정](../../config/pooled-smooth-220.json)
 
@@ -54,13 +71,13 @@ OPENZDM은 전기차 배터리 용접의 **외관**을 사진 한 장마다 정�
 
 ## 동결 모델의 타당성 점검
 
-사진을 가로 여덟 구간과 세로 띠로 나눠 각 칸의 밝기·흩어짐·가로세로 밝기 변화를 읽었다. 가로 위치를 그대로 둔 가운데 칸 모델은 같은 칸을 밝기순으로 정렬한 모델보다 검증에서 불량 통과가 225→196장, 정상 오판이 588→529장이었다. 예를 들어 어두운 점이 똑같이 세 군데 있어도 중앙 한곳에 연달아 있는지 양 끝에 나뉘어 있는지가 구분에 쓰인다. 같은 가로·세로 크기의 정상·불량 10,645쌍에서도 폭별 모델의 AUC는 **0.819**였다. 이는 불량 사진에 더 높은 점수를 준 비율로, 동점은 절반으로 센다. 짝을 만들 수 있는 사진은 3,790장이었고 한 사진이 여러 짝에 들어간다. [위치 대조와 동결 증거](evidence/openzdm-eda-spatial-policy.json) · [검산 코드](../../tools/audit_openzdm_validity.py)
+사진을 가로 여덟 구간과 세로 띠로 나눠 각 칸의 밝기·흩어짐·가로세로 밝기 변화를 읽었다. 가로 위치를 그대로 둔 가운데 칸 모델은 같은 칸을 밝기순으로 정렬한 모델보다 검증에서 불량 통과가 225→196장, 정상 오판이 588→529장이었다. 예를 들어 어두운 점이 똑같이 세 군데 있어도 중앙 한곳에 연달아 있는지 양 끝에 나뉘어 있는지가 구분에 쓰인다. 같은 가로·세로 크기의 정상·불량 10,645쌍에서도 폭별 모델의 AUC는 **0.819**였다. 이는 불량 사진에 더 높은 점수를 준 비율로, 동점은 절반으로 센다. 짝을 만들 수 있는 사진은 3,790장이었고 한 사진이 여러 짝에 들어간다. [위치 대조와 동결 증거](evidence/openzdm-eda-spatial-policy.json) · [검산 코드](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/audit_openzdm_validity.py)
 
 **위치를 아는 것과 결함 위치를 아는 것은 다르다.** W031은 눈에 띄는 구간의 후보가 70/468픽셀(15.0%)이었지만, 사진의 전체 검사 영역으로 나누면 324/3,600(9.0%)가 돼 초기 연구 규칙에서 통과했다. 위치별 모델은 이 불량을 잡았다. W002는 정상, W005는 불량이지만 둘 다 잔점이 많아 위치별 모델도 두 장 모두 탈락시켰다. 이 예시는 라벨을 가리고 외관을 기록했던 검증 사진이다. 공식 라벨은 개별 자국의 불량 여부까지 알려주지 않는다. [실제 사진 6장](evidence/openzdm-blind-cases.png) · [관찰 원문](evidence/openzdm-blind-observations.csv)
 
 ### 폭별 모델과 단일 모델
 
-폭 385~415픽셀은 train 불량 비율이 43.2%, 나머지 폭은 3.9%였다. 폭 구간만으로 검증 사진에 0·1점을 매겨도 AUC가 0.796이다. 폭별 모델은 각 구간에서 학습한 회귀 나무 중 첫 48개의 점수를 평균하고, 애매한 점수에는 공용 정밀 분석을 호출한다. 같은 사진과 나무 설정으로 모든 폭을 함께 학습한 단일 모델과 두 회 비교했다. 전체 검증 AUC는 폭별 0.922, 단일 0.921이었다. 폭별 모델은 정상 오판을 46·51장 줄였지만 불량 통과는 1장 감소·2장 증가했고 보류는 19·23장 늘었다. **불량을 잡으려면 반드시 두 모델이 필요하다는 근거는 약하다.** [폭별 학습 대조](../../tools/evaluate_openzdm_widths.py) · [재학습·반복 측정](evidence/openzdm-validity-audit.json)
+폭 385~415픽셀은 train 불량 비율이 43.2%, 나머지 폭은 3.9%였다. 폭 구간만으로 검증 사진에 0·1점을 매겨도 AUC가 0.796이다. 폭별 모델은 각 구간에서 학습한 회귀 나무 중 첫 48개의 점수를 평균하고, 애매한 점수에는 공용 정밀 분석을 호출한다. 같은 사진과 나무 설정으로 모든 폭을 함께 학습한 단일 모델과 두 회 비교했다. 전체 검증 AUC는 폭별 0.922, 단일 0.921이었다. 폭별 모델은 정상 오판을 46·51장 줄였지만 불량 통과는 1장 감소·2장 증가했고 보류는 19·23장 늘었다. **불량을 잡으려면 반드시 두 모델이 필요하다는 근거는 약하다.** [폭별 학습 대조](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/evaluate_openzdm_widths.py) · [재학습·반복 측정](evidence/openzdm-validity-audit.json)
 
 ### 한 열을 바꾼 대조
 
@@ -87,7 +104,7 @@ OPENZDM은 전기차 배터리 용접의 **외관**을 사진 한 장마다 정�
 
 ### 밝기와 국소 무늬를 함께 학습한 단일 모델
 
-가로 64, 세로 16개 지점에서 표면을 읽어 밝기와 여러 거리에서의 밝기 차이를 계산한다. 예를 들어 밝은 바탕 한가운데의 작은 어두운 부분과, 사진 전체가 고르게 어두운 경우를 구별할 정보를 남긴다. 기존 회귀 나무는 각 나무의 점수를 평균냈다. 새 부스팅 모델에서는 앞선 나무들이 잘 구분하지 못한 사진을 다음 나무의 학습에 반영한다. 학습은 LightGBM, 실제 판독은 C++가 수행한다. 100·220·400개 나무를 검증에서 비교해 400개를 선택했다. 두 번 학습한 모델의 해시가 같았고 별도 258장의 원 학습기·C++ 판독 점수가 일치했다. [학습·선택·동결 코드](../../tools/evaluate_openzdm_boost.py)
+가로 64, 세로 16개 지점에서 표면을 읽어 밝기와 여러 거리에서의 밝기 차이를 계산한다. 예를 들어 밝은 바탕 한가운데의 작은 어두운 부분과, 사진 전체가 고르게 어두운 경우를 구별할 정보를 남긴다. 기존 회귀 나무는 각 나무의 점수를 평균냈다. 새 부스팅 모델에서는 앞선 나무들이 잘 구분하지 못한 사진을 다음 나무의 학습에 반영한다. 학습은 LightGBM, 실제 판독은 C++가 수행한다. 100·220·400개 나무를 검증에서 비교해 400개를 선택했다. 두 번 학습한 모델의 해시가 같았고 별도 258장의 원 학습기·C++ 판독 점수가 일치했다. [학습·선택·동결 코드](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/evaluate_openzdm_boost.py)
 
 | 같은 주 시험 8,104장, 새로 짝지은 1회 / 2회 | 불량 통과 / 1,569 | 정상 오판 / 6,535 |
 |---|---:|---:|
@@ -102,7 +119,7 @@ OPENZDM은 전기차 배터리 용접의 **외관**을 사진 한 장마다 정�
 ### 최종 220개 나무와 연속 폭 경계
 
 1. **점수를 만드는 법을 바꿨다.** 1,024개 표본 지점에서 뽑은 밝기·무늬 특징 518개를 하나의 모델이 읽는다. 두 폭 구간에 같은 나무를 쓴다. 나무는 “이 칸의 밝기 변화가 기준보다 큰가?” 같은 질문을 순서대로 묻고 각 답으로 점수를 보탠다. 낮은 최종 점수는 자동 통과 쪽이다. 점수 0.10을 불량 확률 10%로 해석할 근거는 없다. [특징 계산과 나무 입력](../../src/WeldScope.FileInspection/PooledTexture.h) · [실제 C++ 나무 판독](../../src/WeldScope.FileInspection/CompactBoostedTrees.h)
-2. **폭별 실패를 선발 조건에 넣었다.** 첫 폭별 경계 후보들은 검증에서 모두 탈락했다. 다음 실험은 경계 결정 자료에서 기존 모델의 폭별 불량 통과 수의 80%를 목표로 한 번 더 경계를 계산했다. 검증 두 회에서 양쪽 폭 각각의 두 오류가 기존 공간 모델 이하여야 하고 보류 10%·정밀 25% 이하여야 한다는 조건으로 220개를 골랐다. 이 80%는 연구용 경계 선택 기준이다. [경계 선택 코드](../../tools/calibrate_openzdm_defect_priority.py) · [폭별 검산](../../tools/evaluate_openzdm_boost_widths.py)
+2. **폭별 실패를 선발 조건에 넣었다.** 첫 폭별 경계 후보들은 검증에서 모두 탈락했다. 다음 실험은 경계 결정 자료에서 기존 모델의 폭별 불량 통과 수의 80%를 목표로 한 번 더 경계를 계산했다. 검증 두 회에서 양쪽 폭 각각의 두 오류가 기존 공간 모델 이하여야 하고 보류 10%·정밀 25% 이하여야 한다는 조건으로 220개를 골랐다. 이 80%는 연구용 경계 선택 기준이다. [경계 선택 코드](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/calibrate_openzdm_defect_priority.py) · [폭별 검산](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/evaluate_openzdm_boost_widths.py)
 3. **한 픽셀에서 판정이 급변하는 문제를 줄였다.** 가로 약 400픽셀을 64곳에서 읽으면 약 6픽셀마다 한 번 읽는다. 이 간격을 근거로 두 경계(384.5·415.5픽셀) 양쪽 6픽셀에서만 통과·탈락선을 직선으로 잇기로 먼저 정했다. 예를 들어 폭 415→416에서 같은 점수 0.16의 통과선은 약 0.160→0.145가 된다. 다른 폭을 시험해 유리한 숫자를 고르는 절차는 없었다. 같은 편집본 53장에서 **폭만으로** 판정이 달라진 횟수는 21→5, 직접 PASS↔FAIL은 2→0이었다. 원본과 편집본을 직접 비교해도 변화는 22→11, 직접 반전은 3→0이었다. [경계 보간 함수](../../src/WeldScope.FileInspection/InterpolatedScoreBand.h) · [53장별 결과](evidence/openzdm-pooled-model/boundary.json)
 
 | 동일 주 시험, 검사기 실행 순서를 뒤집은 1회 / 2회 | 불량 통과 / 1,569 | 정상 오판 / 6,535 | 보류 / 8,104 | 정밀 호출 | 분석 p95 |
@@ -122,7 +139,7 @@ OPENZDM은 전기차 배터리 용접의 **외관**을 사진 한 장마다 정�
 
 ## 외부 사진과 실제 부품·배치의 구분
 
-Zender 연구진과 제조사가 발표한 실제 용접 사진 중, 정답을 알 수 있고 눈금·글자 표시가 없는 그림 2의 c·d·e를 판독했다. 논문 그림에서 정사각형을 잘라 저자가 기술한 128×128픽셀로 축소했다. OPENZDM 원본의 높이는 22~70픽셀이고 시야도 다르다. 원자료는 제조사 허가 대상이며 세 그림에 부품·촬영 배치 식별자는 없다. [원본 사진과 저자 설명](https://pmc.ncbi.nlm.nih.gov/articles/PMC12693759/figure/sensors-25-07301-f002/) · [가공·재현 코드](../../tools/replay_external_weld_panels.py)
+Zender 연구진과 제조사가 발표한 실제 용접 사진 중, 정답을 알 수 있고 눈금·글자 표시가 없는 그림 2의 c·d·e를 판독했다. 논문 그림에서 정사각형을 잘라 저자가 기술한 128×128픽셀로 축소했다. OPENZDM 원본의 높이는 22~70픽셀이고 시야도 다르다. 원자료는 제조사 허가 대상이며 세 그림에 부품·촬영 배치 식별자는 없다. [원본 사진과 저자 설명](https://pmc.ncbi.nlm.nih.gov/articles/PMC12693759/figure/sensors-25-07301-f002/) · [가공·재현 코드](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tools/replay_external_weld_panels.py)
 
 | 외부 실물 사례 | 저자 정답 | 폭별 48개 나무 | 공통 경계 400개 | 최종 연속 경계 220개 |
 |---|---|---|---|---|
@@ -144,56 +161,13 @@ Zender 연구진과 제조사가 발표한 실제 용접 사진 중, 정답을 �
 
 ## 재현
 
-저장소 루트의 PowerShell을 사용한다. 실습 환경은 Windows x64, VC++ 런타임, MySQL Community 8.4.13과 이 저장소의 S11 공개 원본을 사용했다. 검수 기록을 비교할 수 있도록 출력에는 새 폴더명을 준다. [S11 입력 준비](../steps/S11-algorithm-integration-evaluation.md) · [실습 환경 준비](../steps/S13-run-package.md)
-
-아래는 최종 C++ 점수와 실제 MFC 이력을 대조하는 명령이다. `measure`는 PNG별 빠른 점수·정밀 호출·132µs 적용 후 판정까지 쓴다. `cohort`는 독립 MySQL을 띄우고 실제 MFC 폴더 검사·이력 재열기를 실행한다. GUI 검사에는 대화형 Windows 세션이 필요하다.
+Windows x64 Release에서 [구현 계획의 빌드 절차](../superpowers/plans/2026-11-22-lightgbm-only.md#작업-4-최종-검수)로 CLI를 준비한다. 검증용 ZIP은 [배포 실행 안내](../steps/S13-run-package.md)를 따른다. 각 출력 폴더는 새 경로를 지정한다.
 
 ```powershell
-$dir = 'artifacts/OPENZDM-EDA'
-$manifest = 'artifacts/S11/evaluation/inputs/test-primary.json'
-$config = 'config/pooled-smooth-220.json'
-$runner = "$dir/boost-smooth-build/Release/openzdm_smooth.exe"
-$app = 'artifacts/S13/WeldScope/WeldScope.App.exe'
-& $runner measure $manifest $config "$dir/final-replay-new.csv"
-.tools/python/python.exe -W error -m tools.verify_research_mfc cohort $app "$dir/mfc-replay-new" --cohort $manifest "$dir/final-replay-new.csv" openzdm-pooled-smooth-220-v1
-```
-
-연구의 검증과 시험은 같은 순서·역순의 두 실행에서 대조 모델도 함께 측정한다. C++ 앱은 동결한 나무 파일과 설정을 읽으므로 학습용 Python 환경 없이 판독한다. 아래 OpenCV 빌드를 준비한 뒤 최종 연구 실행기를 다시 만들려면 CMake 소스 디렉터리에 `tools/openzdm_boost_smooth`, 빌드 디렉터리에 `artifacts/OPENZDM-EDA/boost-smooth-build`, 빌드 타깃에 `openzdm_smooth`를 지정한다. 일반 MFC 빌드와 패키징은 S13 재현 명령을 따른다. [검증과 시험 코드](../../tools/evaluate_openzdm_smooth.py) · [동결된 연구 설정 원본](evidence/openzdm-pooled-model/config.json) · [실행에 쓰는 220개 나무](../../config/model-220.txt) · [일반 앱 빌드와 ZIP 생성](../steps/S13-folder-inspection-monitoring.md#관리자와-검수자-재현-명령)
-
-공용 모델 소스가 이동하기 전의 동결 기록은 이동한 소스에 한해 커밋 `7102863`의 바이트를 확인한다. 실행 파일, 설정, 모델, 데이터는 동결 기록에 적힌 파일과 비교한다. 이 기록을 검증할 때 `git` 명령을 찾을 수 없으면 `WELDSCOPE_GIT`에 Git 실행 파일 경로를 지정한다. 새로 동결한 평가에는 현재 소스 경로가 기록된다.
-
-<details>
-<summary>이전 공간 모델의 대조와 OpenCV 빌드 재현</summary>
-
-아래 첫 명령은 이전 공간 모델의 판정을 재현한다. 두 번째 명령은 같은 크기 대조, 단일 모델 재학습, 한 열 편집, 사진 역순 검산을 수행한다. [동결한 공간 모델 설정](evidence/openzdm-spatial-model/config.json)
-
-```powershell
-$runner = 'artifacts/OPENZDM-EDA/budget-build/Release/openzdm_shape.exe'
-& $runner whole artifacts/S11/evaluation/inputs/test.json docs/algorithms/evidence/openzdm-spatial-model/config.json artifacts/OPENZDM-EDA/spatial-replay-new.csv
-.tools/python/python.exe -W error -m tools.audit_openzdm_validity --output artifacts/OPENZDM-EDA/validity-new
-```
-
-실행 파일을 새로 만들 때는 OpenCV의 기계학습 모듈 `ml`을 함께 빌드한다. 아래는 이 연구에 사용한 x64 Release 설정이다. 원본 소스와 Python 위치는 저장소의 S04 및 S11 준비 절차를 따른다.
-
-```powershell
-$cvbuild = 'artifacts/OPENZDM-EDA/opencv-shape'
-$build = 'artifacts/OPENZDM-EDA/budget-build'
-$cvflags = @(
-    '-DCMAKE_SYSTEM_NAME=Windows', '-DCMAKE_SYSTEM_PROCESSOR=AMD64',
-    '-DBUILD_LIST=core,imgproc,imgcodecs,ml', '-DBUILD_SHARED_LIBS=OFF', '-DBUILD_WITH_STATIC_CRT=OFF',
-    '-DBUILD_TESTS=OFF', '-DBUILD_PERF_TESTS=OFF', '-DBUILD_EXAMPLES=OFF', '-DBUILD_opencv_apps=OFF',
-    '-DBUILD_JAVA=OFF', '-DBUILD_opencv_python3=OFF', '-DCMAKE_POLICY_VERSION_MINIMUM=3.10',
-    '-DCMAKE_POLICY_DEFAULT_CMP0177=NEW', '-DWITH_ADE=OFF', '-DWITH_IPP=OFF', '-DWITH_ITT=OFF',
-    '-DWITH_OPENCL=OFF', '-DWITH_JPEG=OFF', '-DWITH_TIFF=OFF', '-DWITH_WEBP=OFF', '-DWITH_OPENEXR=OFF',
-    '-DWITH_OPENJPEG=OFF', '-DWITH_JASPER=OFF', '-DWITH_AVIF=OFF', '-DWITH_JPEGXL=OFF', '-DWITH_DIRECTX=OFF',
-    '-DWITH_PROTOBUF=OFF', '-DWITH_PNG=ON', '-DBUILD_PNG=ON', '-DBUILD_ZLIB=ON'
-)
-cmake -S .tools/opencv/opencv-4.13.0 -B $cvbuild -G 'Visual Studio 18 2026' -A x64 @cvflags
-cmake --build $cvbuild --config Release --target INSTALL --parallel 4
-$opencv = (Resolve-Path "$cvbuild/install/x64/vc18/staticlib").Path
 $python = (Resolve-Path .tools/python/python.exe).Path
-cmake -S tools/openzdm_eda -B $build -G 'Visual Studio 18 2026' -A x64 "-DOpenCV_DIR=$opencv" "-DPython3_EXECUTABLE=$python" '-DCMAKE_CXX_FLAGS_RELEASE=/O2' -DOPENZDM_SHAPE_STUDY=ON
-cmake --build $build --config Release --target openzdm_shape
+& $python -m tools.prepare_inspection_inputs --output artifacts/lightgbm-v2/openzdm
+$cli = 'artifacts/lightgbm-v2/build/Release/weldscope_inspect.exe'
+& $cli --config config/pooled-smooth-220.json --manifest artifacts/lightgbm-v2/openzdm/inputs/test-primary.json --evaluation-split test --output artifacts/lightgbm-v2/cli-check
 ```
 
-</details>
+이전 정책의 빌드, 학습, 동결 및 검수 도구는 [교체 전 커밋의 재현 절차](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/algorithms/openzdm-false-pass-eda.md#재현)에 있다.

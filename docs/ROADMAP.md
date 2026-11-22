@@ -27,7 +27,8 @@
 | [S10 기록과 장비 통합](steps/S10-record-device-integration.md) | 입력부터 저장까지 동작하는 검사 콘솔 | S05, S06, S09 | TCP 입력 → 검사 → 이력 저장과 재조회 | 파일 경로도 동일 흐름 사용. 재전송, 큐 포화, DB 장애, 미저장 상태를 실제 통합 경로에서 확인 | main 병합. x64 Release와 실제 MySQL에서 저장·재전송·장애 복구 검증 |
 | [S11 알고리즘 통합과 평가](steps/S11-algorithm-integration-evaluation.md) | 선택적 분석이 연결된 최종 앱과 비교 결과 | S07, S08, S10 | 같은 입력에서 네 검사 경로의 결과와 시간 비교 | 검증 데이터로 정책 동결 후 시험 평가. 유출률, 보류율, 오류, p50/p95 공개. UI의 분석 단계와 결과 일치 | main 병합. x64 MFC 및 실제 MySQL, 동결 시험 두 차례 검증 |
 | [S12 전달과 재현](steps/S12-delivery-reproducibility.md) | 실행 패키지, 시연, 포트폴리오 | S11 | 정리된 실행 환경에서 패키지 실행과 전체 시연 | 의존성·라이선스·재현 절차 확인. 낡은 코드와 문서 제거. Windows 가상머신 측정 조건 명시 | 사용자 결과 검수 대기. 로컬 ZIP·격리 실행·동결 시험 재현 확인 |
-| [S13 폴더 일괄 검사와 모니터링](steps/S13-folder-inspection-monitoring.md) | 폴더 검사, 판정별 모니터링, 전체 GUI E2E | S12 | 폴더 선택, 검사 시작, 결과 필터와 이력 조회 | OPENZDM 61,670장에 대해 실제 MFC·MySQL·화면 집계와 원본 해시 대조 | 단계 검수 대기. S13 당시 전체 GUI E2E 61,670장 검증. 이후 포트폴리오 기본 검사기 채택은 [ADR 0013](adr/0013-portfolio-default-inspection.md) |
+| [S13 폴더 일괄 검사와 모니터링](steps/S13-folder-inspection-monitoring.md) | 폴더 검사, 판정별 모니터링, 전체 GUI E2E | S12 | 폴더 선택, 검사 시작, 결과 필터와 이력 조회 | OPENZDM 61,670장에 대해 실제 MFC·MySQL·화면 집계와 원본 해시 대조 | 단계 검수 대기. S13 당시 전체 GUI E2E 61,670장 검증. 이후 포트폴리오 기본 검사기 채택은 [ADR 0014](adr/0014-lightgbm-only-inspection.md) |
+| [S14 LightGBM 단일 판정](superpowers/plans/2026-11-22-lightgbm-only.md) | 단일 모델과 이전 검사 경로 정리 | S13과 ADR 0014 | 파일·폴더·가상 장비 검사, 과거 이력 조회 | 공용 판정, UI, ZIP, 새 시험 집계의 일치 | 사용자 검수 대기. [버전 2 검수 기록](algorithms/openzdm-false-pass-eda.md#버전-2-검수) |
 | B01 다중 조명 실험 | CSEM-MISD 별도 추가 관측 데모 | S12, 별도 범위 승인 | 동일 부품의 조명 변경과 관측 예산별 결과 | 이용 조건 확인, 부품 단위 분할, 정상 포함 데이터 사용. 용접 결과와 분리 | 선택 확장 |
 
 S02는 Mac에서 수행할 수 있다. S05와 S06은 먼저 간단한 샘플 결과 계약을 사용하되 도메인 상태 이름을 따로 만들지 않는다. 결과 계약이 달라지면 관련 시연 fixture도 같은 변경에서 갱신한다.

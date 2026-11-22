@@ -8,17 +8,9 @@ BEGIN_MESSAGE_MAP(InspectionImageView, CWnd)
     ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
-void InspectionImageView::SetImages(cv::Mat original, cv::Mat overlay)
+void InspectionImageView::SetImage(cv::Mat original)
 {
     original_ = std::move(original);
-    overlay_ = std::move(overlay);
-    Invalidate(FALSE);
-}
-
-void InspectionImageView::SetCandidateVisible(bool visible)
-{
-    if (showCandidate_ == visible) return;
-    showCandidate_ = visible;
     Invalidate(FALSE);
 }
 
@@ -37,7 +29,7 @@ void InspectionImageView::OnPaint()
         dc.DrawText(L"표시할 이미지 없음", bounds, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         return;
     }
-    const auto& image = showCandidate_ && HasCandidate() ? overlay_ : original_;
+    const auto& image = original_;
     const int padding = MulDiv(32, GetDpiForWindow(m_hWnd), 96);
     const double scale = (std::min)(static_cast<double>((std::max)(1, bounds.Width() - padding)) / image.cols,
         static_cast<double>((std::max)(1, bounds.Height() - padding)) / image.rows);

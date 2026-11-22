@@ -1,5 +1,7 @@
 # S06 가상 장비 통신
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S06-device-communication.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 구현과 루프백 검증을 마쳤다. 사용자 결과 검수 대기 상태다. S01을 선행 조건으로 하며 기준 `main`은 S05가 병합된 `f225e6a`다. [로드맵](../ROADMAP.md) · [PRD F08](https://chatgpt.com/space/page_b35b9c74caac81918226ccdc9e38769e)
 
 ## 목표와 범위

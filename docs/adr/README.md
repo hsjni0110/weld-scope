@@ -31,6 +31,6 @@
 | [0010](0010-record-device-integration.md) | 기록과 장비 통합 계약 | 승인 | [S10 단계 기록](../steps/S10-record-device-integration.md) |
 | [0011](0011-algorithm-integration-evaluation.md) | 공용 검사 호출과 S11 평가 기준 | 승인 | [S11 실행 기록](../steps/S11-algorithm-integration-evaluation.md) |
 | [0012](0012-folder-inspection-monitoring.md) | 폴더 검사와 묶음별 결과 저장 | 승인 | [S13 실행과 검수](../steps/S13-folder-inspection-monitoring.md) |
-| [0013](0013-portfolio-default-inspection.md) | 포트폴리오 앱의 기본 검사기 | 승인 | [MFC 검수와 적용 범위](../algorithms/openzdm-false-pass-eda.md#실제-mfc-검수) |
+| [0014](0014-lightgbm-only-inspection.md) | LightGBM 단일 판정과 과거 이력 호환 | 승인 | [버전 2 검수](../algorithms/openzdm-false-pass-eda.md#버전-2-검수) |
 
 엔진 경계, 상태 계약, TCP·DB 계약은 해당 단계에서 ADR로 구체화한다. 표에 없는 제안을 승인된 결정으로 간주하지 않는다.

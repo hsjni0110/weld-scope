@@ -9,11 +9,10 @@
     <WeldScopeOpenCvRoot Condition="'$(WeldScopeOpenCvRoot)' == '' and '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)..\..\.tools\opencv\install-x64$(WeldScopeOpenCvInstallSuffix)</WeldScopeOpenCvRoot>
     <WeldScopeOpenCvLibDir>$(WeldScopeOpenCvRoot)\$(WeldScopeOpenCvArch)\vc18\staticlib</WeldScopeOpenCvLibDir>
     <WeldScopeOpenCvHal Condition="'$(Platform)' == 'ARM64'">tegra_hal.lib;</WeldScopeOpenCvHal>
-    <WeldScopeBaselineConfig>$(MSBuildThisFileDirectory)..\..\config\baseline.json</WeldScopeBaselineConfig>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\WeldScope.Core;$(MSBuildThisFileDirectory)..\WeldScope.FileInspection;$(WeldScopeOpenCvRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\WeldScope.FileInspection;$(WeldScopeOpenCvRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
@@ -25,7 +24,7 @@
     <Error Condition="'$(WeldScopeOpenCvRoot)' == '' or !Exists('$(WeldScopeOpenCvLibDir)\opencv_imgcodecs4130$(WeldScopeOpenCvSuffix).lib')"
            Text="WeldScope needs the matching OpenCV 4.13.0 static install for $(Platform)|$(Configuration). Run tools/setup-opencv-s04.ps1 -Platform $(Platform) -Configuration $(Configuration) for ARM64 or x64." />
   </Target>
-  <Target Name="CopyWeldScopeBaselineConfig" AfterTargets="Build">
-    <Copy SourceFiles="$(WeldScopeBaselineConfig)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  <Target Name="CopyWeldScopeModel" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\config\pooled-smooth-220.json;$(MSBuildThisFileDirectory)..\..\config\model-220.txt" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

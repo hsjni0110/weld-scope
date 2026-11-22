@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
         reachedVerdict = true;
         verdictChanged.notify_all();
         verdictChanged.wait(lock, [&] { return !holdVerdict; });
-    }, InspectionMode::Baseline);
+    });
     auto snapshot = inspection.Snapshot();
     const auto deadline = std::chrono::steady_clock::now() + 15s;
     while ((!snapshot.port || snapshot.state == IntegrationState::Connecting) &&

@@ -14,24 +14,22 @@
 #include <variant>
 
 namespace weldscope {
-// 파일 검사에 필요한 원본과 설정 경로를 전달한다. PooledSmooth에는 등록된 모델도 필요하다.
+// 검증해 읽은 모델이 있으면 검사에 재사용한다. 독립 실행은 설정 경로에서 모델을 읽는다.
 struct FileInspectionRequest {
     std::filesystem::path path;
     std::filesystem::path config;
-    InspectionMode mode = InspectionMode::Baseline;
     std::shared_ptr<const PooledSmoothModel> model = {};
 };
 
-// 판정, 근거와 화면 표시용 BGRA 영상. 표시할 후보가 없으면 overlay는 비어 있다.
+// 판정, 근거와 화면 표시용 BGRA 원본 영상.
 struct InspectedFile {
     std::filesystem::path path;
     std::string inputHash;
-    cv::Mat original, overlay;
+    cv::Mat original;
     InspectionOutcome outcome = InspectionOutcome::Error;
     std::optional<double> score;
     std::string reason;
-    std::vector<InspectionAttempt> attempts;
-    double loadMs{}, analysisMs{};
+    double analysisMs{};
 };
 
 // 검사 중 취소 요청을 확인했다. 파일 오류나 최종 판정과 구분하는 결과다.
@@ -47,11 +45,9 @@ struct InspectionEvidence {
     std::string sourceSha256;
     std::string configSha256;
 };
-// 고정 설정을 제공하면 파일에서 다시 읽지 않는다. 원본 지문을 지정하면 실제 원본과 일치해야 한다.
-// evidence에는 확보한 바이트의 지문을 기록한다. beforePrecise는 정밀 분석 직전에 호출한다.
+// 원본과 설정 지문을 기록하고, 장비가 지정한 원본과 바이트가 다른 경우 거부한다.
 FileInspectionResult inspect_file_with_evidence(const FileInspectionRequest& request, const std::atomic_bool& cancelled,
-    InspectionEvidence& evidence, const std::vector<unsigned char>* fixedConfig = nullptr,
-    std::string_view expectedSourceHash = {}, const std::function<void()>& beforePrecise = {});
+    InspectionEvidence& evidence, std::string_view expectedSourceHash = {});
 
 // 화면이 읽는 작업 상태. Cancelled나 Closing에서도 워커 회수가 남아 있을 수 있다.
 enum class InspectionJobState { Empty, Ready, Running, Complete, Cancelled, Error, Closing };

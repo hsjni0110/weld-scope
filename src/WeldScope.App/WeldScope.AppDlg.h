@@ -58,7 +58,6 @@ protected:
     // 화면을 막지 않고 진행 중인 검사에 중지를 요청한다.
     afx_msg void OnStop();
     // 원본에 후보 표시를 덧그릴지 갱신한다. 검사를 다시 돌리지 않는다.
-    afx_msg void OnToggleCandidate();
     // 검사 타이머에서 백그라운드 상태를 읽고 완료 결과를 회수한다.
     afx_msg void OnTimer(UINT_PTR id);
     // 제목 표시줄의 닫기를 취소 및 종료 처리와 같은 경로로 보낸다.
@@ -162,7 +161,7 @@ private:
     CBrush whiteBrush_{RGB(255, 255, 255)}, backgroundBrush_{RGB(243, 246, 250)};
     CStatic title_, section_, imageTitle_, imageMeta_, fileName_, resultTitle_, verdict_,
         statusTitle_, status_, detail_, historyTitle_, historyNote_;
-    CButton filePicker_, start_, stop_, candidate_;
+    CButton filePicker_, start_, stop_;
     CListCtrl history_;
     InspectionImageView image_;
     std::optional<weldscope::InspectionOutcome> verdictValue_;

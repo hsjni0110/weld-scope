@@ -11,7 +11,7 @@ S04의 기준 알고리즘 `global-dark-ratio-v1`은 사진 전체에서 어두�
 | $T$ | `intensity_threshold` | 0 이상 255 이하의 정수 | 개별 픽셀을 후보로 표시하는 밝기 기준 |
 | $R$ | `fail_ratio` | 0 이상 1 이하의 유한한 실수 | 사진을 FAIL로 판정하는 후보 비율 기준 |
 
-실행에 사용할 설정값의 기준은 [baseline.json](../../config/baseline.json)이다.
+실행에 사용할 설정값의 기준은 [baseline.json](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/config/baseline.json)이다.
 
 ## 계산과 판정
 
@@ -26,7 +26,7 @@ $$
 
 4. **사진 단위 판정.** $\text{score} \ge R$이면 **FAIL**, $\text{score} < R$이면 **PASS**다. 부적합한 이미지나 설정은 엔진에서 거절한다. CLI가 이미지별 읽기·검사 오류를 기록할 때는 **ERROR**로 표시하고 점수를 비워 둔다.
 
-구현은 [BaselineInspection.cpp](../../src/WeldScope.Core/BaselineInspection.cpp#L14), 오류 기록은 [CLI 처리 코드](../../src/WeldScope.Cli/main.cpp#L145)에 있다.
+구현은 [BaselineInspection.cpp](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/src/WeldScope.Core/BaselineInspection.cpp#L14), 오류 기록은 [CLI 처리 코드](../../src/WeldScope.Cli/main.cpp#L145)에 있다.
 
 ### 손으로 확인하는 예
 
@@ -37,7 +37,7 @@ S04 기준 설정을 적용한 2×2 예다. 밝기가 기준과 같은 칸과 �
 | 흑백 밝기 | 0 | 128 | 129 | 255 |
 | 마스크 값 | 255 | 255 | 0 | 0 |
 
-후보는 네 칸 중 두 칸이라 점수는 $2/4=0.5$다. 판정 기준과 같으므로 **FAIL**이다. [C++ 테스트](../../tests/baseline_inspection_tests.cpp#L16)는 이 예로 두 등호 경계, 마스크와 원본 보존을 검증한다.
+후보는 네 칸 중 두 칸이라 점수는 $2/4=0.5$다. 판정 기준과 같으므로 **FAIL**이다. [C++ 테스트](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/tests/baseline_inspection_tests.cpp#L16)는 이 예로 두 등호 경계, 마스크와 원본 보존을 검증한다.
 
 ## 이 방법을 선택한 이유
 

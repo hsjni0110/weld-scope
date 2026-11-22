@@ -1,5 +1,7 @@
 ﻿# S04 C++ 기준 검사
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S04-baseline-inspection.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 상태는 사용자 검수 완료다. S04 구현과 리뷰 수정은 main의 병합 커밋 `8bc0b75`에 포함됐다. 아래 결과는 실제 C++ 실행의 **train 개발 자료 집계**다. 독립 평가 사용 정책은 보류 상태다.
 
 ## 왜: 비교할 수 있는 첫 실제 검사
@@ -24,7 +26,7 @@ S03은 화면 흐름을 확인하기 위해 미리 지정한 판정을 표시했
 
 ### 파일 입력 검증
 
-실행에 사용한 설정은 [baseline.json](../../config/baseline.json)과 증거의 설정 해시로 확인한다.
+실행에 사용한 설정은 [baseline.json](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/config/baseline.json)과 증거의 설정 해시로 확인한다.
 
 원본 ZIP과 추출 파일의 해시를 검증하고 원본 크기를 유지한다. 입력은 8비트 3채널 PNG, 최대 파일 16MiB·1,600만 픽셀이다. PNG 서명과 IHDR 크기를 **디코딩 전에** 검사하며 깊이·채널은 엔진 경계에서도 검사한다. 손상·누락·해시 불일치는 ERROR로 남기고 가짜 점수를 만들지 않는다.
 

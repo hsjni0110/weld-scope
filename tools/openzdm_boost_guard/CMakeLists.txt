@@ -1,8 +1,0 @@
-cmake_minimum_required(VERSION 3.24)
-project(OpenZdmBoostGuard LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
-add_compile_options(/EHsc)
-add_subdirectory(../.. weldscope)
-add_executable(openzdm_boost_guard runner.cpp)
-target_link_libraries(openzdm_boost_guard PRIVATE weldscope_inspection_input)
-target_compile_options(openzdm_boost_guard PRIVATE /W4 /WX /utf-8 /permissive-)

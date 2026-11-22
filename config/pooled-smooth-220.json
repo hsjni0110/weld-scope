@@ -1,16 +1,12 @@
 {
-  "schema_version": 1,
-  "contrast_threshold": 12,
-  "budget_us": 132,
-  "fast_pass_max": 0.24418902562879677,
-  "fast_fail_min": 0.33445160863388457,
-  "precise_pass_max": 0,
-  "precise_fail_min": 0.5498386386973741,
+  "schema_version": 2,
   "model": "model-220.txt",
   "outside_pass": 0.06060167201188642,
   "outside_fail": 0.19334990845531436,
   "width_calibration": "linear-6px-v1",
   "model_sha256": "be5757704e81fead857dec225bc340320c8e2816db67fb75bb07e3f7a9636455",
   "width_min": 385,
-  "width_max": 415
+  "width_max": 415,
+  "inside_pass": 0.24418902562879677,
+  "inside_fail": 0.33445160863388457
 }

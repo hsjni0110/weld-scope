@@ -1,5 +1,7 @@
 # S08 선택적 정밀 분석
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S08-selective-inspection-policy.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 **상태**　사용자 결과 검수 대기
 
 **목표**　빠른 점수가 불확실한 경우에만 정밀 분석을 최대 한 번 호출하고, 시간 예산과 결과에 따라 PASS·FAIL·REVIEW·ERROR를 반환한다.

@@ -1,10 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$AppDir,
-    [Parameter(Mandatory)][string]$Inspect,
-    [Parameter(Mandatory)][string]$TwoStageSample,
-    [Parameter(Mandatory)][string]$Output,
-    [switch]$FolderInspection
+    [Parameter(Mandatory)][string]$Output
 )
 
 $ErrorActionPreference = 'Stop'
@@ -52,49 +49,29 @@ if ([IO.Path]::GetExtension($destination) -ne '.zip' -or (Test-Path -LiteralPath
 $sampleDir = Join-Path $repo 'src/WeldScope.App/res/samples'
 $opencv = Join-Path $repo '.tools/opencv/install-x64'
 $docs = Join-Path $repo 'docs/steps'
-$files = [ordered]@{
-    'WeldScope.App.exe'        = Join-Path $app 'WeldScope.App.exe'
-    'weldscope_inspect.exe'    = $Inspect
-    'baseline.json'            = Join-Path $app 'baseline.json'
-    'freeze.json'              = Join-Path $app 'freeze.json'
-    'selective.json'           = Join-Path $app 'selective.json'
-    'defect.png'               = Join-Path $app 'defect.png'
-    'samples/normal.png'       = Join-Path $sampleDir 'normal.png'
-    'samples/image_10513.png'  = $TwoStageSample
-    'samples/corrupt.png'      = Join-Path $sampleDir 'corrupt.png'
-    'db/schema.sql'            = Join-Path $repo 'db/s05/schema.sql'
-    'README.md'                = Join-Path $docs 'S12-run-package.md'
-    'THIRD-PARTY-NOTICES.md'   = Join-Path $docs 'S12-third-party-notices.md'
-    'licenses/OpenCV.txt'     = Join-Path $opencv 'LICENSE'
-    'licenses/libpng.txt'     = Join-Path $opencv 'etc/licenses/libpng-LICENSE'
-    'licenses/zlib.txt'       = Join-Path $opencv 'etc/licenses/zlib-LICENSE'
-}
-if ($FolderInspection) {
-    $files['README.md'] = Join-Path $docs 'S13-run-package.md'
-    $files['db/s13.sql'] = Join-Path $repo 'db/s13/schema.sql'
-    $files['WeldScope-Start.cmd'] = Join-Path $PSScriptRoot 'WeldScope-Start.cmd'
-    $files['Start-WeldScope-Practice.ps1'] = Join-Path $PSScriptRoot 'Start-WeldScope-Practice.ps1'
-}
-
-$freezePath = Join-Path $docs 'S11-evidence/freeze.json'
-$freeze = Get-Content -LiteralPath $freezePath -Raw -Encoding UTF8 | ConvertFrom-Json
-$demo = Get-Content -LiteralPath (Join-Path $docs 'S11-evidence/demo/comparison.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$expectedHashes = @{
-    'freeze.json'             = (Get-FileHash -LiteralPath $freezePath).Hash
-    'baseline.json'           = $freeze.config_sha256.baseline
-    'selective.json'          = $freeze.config_sha256.selective
-    'defect.png'              = (Get-FileHash -LiteralPath (Join-Path $sampleDir 'defect.png')).Hash
-    'samples/image_10513.png' = $demo.modes.selective.image_sha256
-}
-
-# Archived S12 builds predate the model. Supply the current assets when packaging those builds.
-$configDir = Join-Path $repo 'config'
-$modelDir = if ($FolderInspection) { $app } else { $configDir }
 $manifestName = 'pooled-smooth-220.json'
 $weightsName = 'model-220.txt'
-$files[$manifestName] = Join-Path $modelDir $manifestName
-$files[$weightsName] = Join-Path $modelDir $weightsName
-$expectedHashes[$manifestName] = '6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b'
+$files = [ordered]@{
+    'WeldScope.App.exe'           = Join-Path $app 'WeldScope.App.exe'
+    $manifestName                 = Join-Path $app $manifestName
+    $weightsName                  = Join-Path $app $weightsName
+    'defect.png'                  = Join-Path $app 'defect.png'
+    'samples/normal.png'          = Join-Path $sampleDir 'normal.png'
+    'samples/corrupt.png'         = Join-Path $sampleDir 'corrupt.png'
+    'db/schema.sql'               = Join-Path $repo 'db/s05/schema.sql'
+    'db/s13.sql'                  = Join-Path $repo 'db/s13/schema.sql'
+    'README.md'                  = Join-Path $docs 'S13-run-package.md'
+    'THIRD-PARTY-NOTICES.md'      = Join-Path $docs 'S12-third-party-notices.md'
+    'licenses/OpenCV.txt'        = Join-Path $opencv 'LICENSE'
+    'licenses/libpng.txt'        = Join-Path $opencv 'etc/licenses/libpng-LICENSE'
+    'licenses/zlib.txt'          = Join-Path $opencv 'etc/licenses/zlib-LICENSE'
+    'WeldScope-Start.cmd'         = Join-Path $PSScriptRoot 'WeldScope-Start.cmd'
+    'Start-WeldScope-Practice.ps1'= Join-Path $PSScriptRoot 'Start-WeldScope-Practice.ps1'
+}
+$expectedHashes = @{
+    $manifestName = '6b85803c90e4dfa5d58ed7f181a91d5b0f3176d92522272c5cd85d0cbd9f2955'
+    'defect.png' = (Get-FileHash -LiteralPath (Join-Path $sampleDir 'defect.png')).Hash
+}
 
 $parent = [IO.Path]::GetDirectoryName($destination)
 [IO.Directory]::CreateDirectory($parent) | Out-Null

@@ -1,11 +1,8 @@
 #pragma once
 #include <filesystem>
 #include <string>
-#include <opencv2/core.hpp>
 
 namespace weldscope {
-// 영상 산출물을 PNG로 인코딩해 지정 경로에 쓴다. 인코딩이나 쓰기가 실패하면 예외를 던진다.
-void write_png(const std::filesystem::path& path, const cv::Mat& image);
 // 문자열 바이트를 지정 경로에 그대로 쓴다. 파일이 있으면 덮어쓴다.
 void write_text(const std::filesystem::path& path, const std::string& text);
 // 한 CSV 필드를 큰따옴표로 감싸고 내부 큰따옴표를 두 번 적는다.

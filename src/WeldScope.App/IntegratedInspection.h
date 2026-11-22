@@ -10,7 +10,6 @@
 #include <filesystem>
 #include <functional>
 #include <future>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -34,13 +33,12 @@ struct BatchProgress {
 };
 
 // 화면이 조정기의 내부 상태를 직접 참조하지 않고 읽을 수 있는 복사본.
-// port가 0이면 수신 포트가 준비되지 않았다. fileMode가 비어 있으면 파일 검사를 시작할 수 없다.
+// port가 0이면 수신 포트가 준비되지 않았다. modelReady가 false이면 파일 검사를 시작할 수 없다.
 struct IntegrationSnapshot {
     IntegrationState state = IntegrationState::Connecting;
     unsigned short port = 0;
     bool listenerFailed = false;
-    std::optional<InspectionMode> fileMode;
-    bool preciseRunning = false;
+    bool modelReady = false;
     std::optional<double> saveMs;
     std::uint64_t revision = 0;
     InspectionRecord record;
@@ -55,7 +53,7 @@ public:
     // 워커와 루프백 리스너를 시작한다. 포트 0이면 운영체제가 선택하고 Snapshot에서 확인할 수 있다.
     // beforeVerdict는 분석 호출이 반환된 뒤 워커에서 호출하는 검수용 콜백이다.
     IntegratedInspection(std::filesystem::path config, std::filesystem::path deviceImage, unsigned short port,
-                         std::function<void()> beforeVerdict = {}, InspectionMode fileMode = InspectionMode::PooledSmooth);
+                         std::function<void()> beforeVerdict = {});
     // 종료를 요청한 뒤 워커와 리스너가 끝날 때까지 기다린다.
     ~IntegratedInspection();
     IntegratedInspection(const IntegratedInspection&) = delete;
@@ -84,20 +82,12 @@ private:
     struct Job {
         FileInspectionRequest input;
         std::string sourceId, configId;
-        std::string configSha256;
-        std::vector<unsigned char> fixedConfig;
         bool commitUnconfirmed = false;
-    };
-    struct RegisteredConfig {
-        std::string sha256;
-        std::vector<unsigned char> bytes;
-        std::shared_ptr<const PooledSmoothModel> model = {};
     };
     struct FolderWork {
         std::filesystem::path root;
         std::vector<std::filesystem::path> files;
-        InspectionMode mode;
-        RegisteredConfig config;
+        std::shared_ptr<const PooledSmoothModel> model;
     };
     struct RequestLookup {
         std::string requestId;
@@ -120,7 +110,6 @@ private:
 
     const std::filesystem::path config_, deviceImage_;
     const std::function<void()> beforeVerdict_;
-    const InspectionMode fileMode_;
     mutable std::mutex mutex_;
     std::condition_variable changed_;
     bool paused_ = false, closing_ = false, workerClosed_ = false, listenerClosed_ = false;
@@ -130,7 +119,7 @@ private:
     std::optional<FolderWork> folder_;
     std::optional<Action> folderRetry_;
     IntegrationSnapshot snapshot_;
-    std::map<InspectionMode, RegisteredConfig> registered_;
+    std::shared_ptr<const PooledSmoothModel> model_;
     std::thread worker_, listener_;
 };
 }

@@ -3,7 +3,6 @@
 #include "CompactBoostedTrees.h"
 #include "InspectionInput.h"
 #include "InterpolatedScoreBand.h"
-#include "SelectiveInspectionPolicy.h"
 
 #include <filesystem>
 #include <sstream>
@@ -16,7 +15,7 @@ namespace weldscope {
 class PooledSmoothModel {
 public:
     // 등록된 설정 바이트를 식별하는 SHA-256 값.
-    static constexpr auto configHash = "6a557520c10a26ec9ce7dc9585916c57b9dab34a421bc6650bf3d2227dfa7d7b";
+    static constexpr auto configHash = "6b85803c90e4dfa5d58ed7f181a91d5b0f3176d92522272c5cd85d0cbd9f2955";
 
     // 설정과 모델 파일의 지문을 모두 확인한다. 일치하지 않으면 std::invalid_argument를 던진다.
     PooledSmoothModel(const std::filesystem::path& directory, const std::vector<unsigned char>& manifest)
@@ -34,7 +33,10 @@ public:
 private:
     static cv::FileStorage checked_settings(const std::vector<unsigned char>& manifest) {
         if (sha256(manifest) != configHash) throw std::invalid_argument("Frozen manifest hash mismatch");
-        return read_json(manifest);
+        auto settings = read_json(manifest);
+        if (read_integer(settings["schema_version"], "schema_version") != 2)
+            throw std::invalid_argument("Unsupported LightGBM settings");
+        return settings;
     }
     static pooled_texture::CompactBoostedTrees load_trees(const std::filesystem::path& directory,
             const cv::FileStorage& settings) {
@@ -44,7 +46,7 @@ private:
         return pooled_texture::CompactBoostedTrees(stream);
     }
     PooledSmoothModel(const std::filesystem::path& directory, const cv::FileStorage& settings)
-        : inside_{settings["fast_pass_max"].real(), settings["fast_fail_min"].real()},
+        : inside_{settings["inside_pass"].real(), settings["inside_fail"].real()},
           outside_{settings["outside_pass"].real(), settings["outside_fail"].real()},
           trees_(load_trees(directory, settings)) {}
 

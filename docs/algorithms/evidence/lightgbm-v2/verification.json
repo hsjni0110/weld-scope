@@ -1,0 +1,44 @@
+{
+  "version": "openzdm-pooled-smooth-220-v2",
+  "config_sha256": "6b85803c90e4dfa5d58ed7f181a91d5b0f3176d92522272c5cd85d0cbd9f2955",
+  "manifest_sha256": "9934d8f5045003704c35c7778b24fb053788a31342ca8893b4dfb2fbd8f3af7a",
+  "cli_runs_matching": 8104,
+  "mfc_matches_cli": 8104,
+  "mfc_cohort_executable_sha256": "cf5b608228a8acf66d1a86fb1ebf3885d5b3d3dc60fd7a4ad05f1f0a7d2f9d56",
+  "mfc_cohort_csv_sha256": "743921f437717fd6041fee6279d8b02058c82bdc34bba015fd280809c37c8fd8",
+  "outcomes": {
+    "KO/REVIEW": 143,
+    "KO/PASS": 173,
+    "KO/FAIL": 1253,
+    "OK/PASS": 5373,
+    "OK/FAIL": 625,
+    "OK/REVIEW": 537
+  },
+  "reasons": {
+    "score_between_limits": 680,
+    "score_threshold": 7424
+  },
+  "errors": 0,
+  "cli_csv_sha256": [
+    "693ad5c573debcdb162b8bcd981deecb5e35ed56e70725a61dfcbd6a47d13c0b",
+    "ee0607bba52d37d83dc432a14185b0b31851ca292e06cbae6b4724aa485d9420"
+  ],
+  "release_mfc_sha256": "83392ccff50c2b4dc74c51f1317d6dd65a04f9b51904766be1c0c1c4eabdbdb0",
+  "zip_sha256": "aa6408d2ee91d17720e7f158d93389254d2ba413b77a61c4071e9ce52fc02f56",
+  "release_gui": {
+    "files_and_tcp": 12,
+    "legacy_replayed": [
+      "baseline-v1",
+      "pooled-smooth-220-v1",
+      "selective-v1"
+    ],
+    "history_after_restart": true,
+    "corrupt_model_rejected": true,
+    "missing_manifest_rejected": true,
+    "folder_save_retry": true,
+    "folder_stop": true,
+    "packaged_tcp_verdict": "FAIL",
+    "packaged_compact_keyboard_focus": true,
+    "verified_dpi": 96
+  }
+}

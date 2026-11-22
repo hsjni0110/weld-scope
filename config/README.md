@@ -1,9 +1,3 @@
 # 검사 설정
 
-[pooled-smooth-220.json](pooled-smooth-220.json)과 [model-220.txt](model-220.txt)는 x64 MFC의 기본 파일·폴더 검사에 쓰는 동결 설정과 가중치다. [기본 검사기 결정](../docs/adr/0013-portfolio-default-inspection.md)
-
-[baseline.json](baseline.json)은 S04 실행 설정의 기준이다. 키의 의미, 판정 수식과 선택 근거는 [전역 어두운 픽셀 비율](../docs/algorithms/global-dark-ratio.md)에 있다.
-
-[local-contrast.json](local-contrast.json)은 S07 빠른·정밀 분석의 공통 개발 설정이다. [S07 검사 방식과 비교 결과](../docs/steps/S07-improved-inspection.md)를 참조한다.
-
-설정 변경 후 실행할 때는 새 출력 디렉터리를 사용한다. 결과에 기록된 설정 파일의 SHA-256으로 실행을 구분한다.
+[pooled-smooth-220.json](pooled-smooth-220.json)은 버전 2의 폭별 판정 경계와 모델 지문이다. [model-220.txt](model-220.txt)는 학습된 나무 220개의 가중치다. 파일·폴더·CLI·TCP 검사는 이 두 파일을 사용한다. 로더는 설정과 가중치의 SHA-256을 확인한다. [판정과 호환 계약](../docs/adr/0014-lightgbm-only-inspection.md)

@@ -1,5 +1,4 @@
 #include "InspectionFiles.h"
-#include <opencv2/imgcodecs.hpp>
 #include <fstream>
 #include <stdexcept>
 
@@ -9,16 +8,6 @@ void write_text(const std::filesystem::path& path, const std::string& text)
     std::ofstream output(path, std::ios::binary);
     output.exceptions(std::ios::failbit | std::ios::badbit);
     output.write(text.data(), static_cast<std::streamsize>(text.size()));
-    output.close();
-}
-
-void write_png(const std::filesystem::path& path, const cv::Mat& image)
-{
-    std::vector<unsigned char> encoded;
-    if (!cv::imencode(".png", image, encoded)) throw std::runtime_error("PNG encoding failed");
-    std::ofstream output(path, std::ios::binary);
-    output.exceptions(std::ios::failbit | std::ios::badbit);
-    output.write(reinterpret_cast<const char*>(encoded.data()), static_cast<std::streamsize>(encoded.size()));
     output.close();
 }
 

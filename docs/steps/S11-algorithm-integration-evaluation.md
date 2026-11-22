@@ -1,5 +1,7 @@
 ﻿# S11 알고리즘 통합과 평가
 
+> 교체 전 커밋에서 실행한 결과다. 이 문서의 빌드·검수 도구는 [당시 소스](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S11-algorithm-integration-evaluation.md)에 있다. 현행 버전 2는 [실행 안내](S13-run-package.md)를 따른다.
+
 **상태**　main 병합
 
 S04 기준 검사와 S07 국소 대비를 S08 선택 정책에 연결했다. CLI, MFC 파일 처리, TCP가 같은 C++ 분석 호출을 사용한다. 실행 시작점은 S10을 병합한 `e4824b0`이다. [로드맵](../ROADMAP.md) · [ADR 0011](../adr/0011-algorithm-integration-evaluation.md)

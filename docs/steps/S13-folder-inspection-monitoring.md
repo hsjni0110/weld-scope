@@ -10,7 +10,7 @@
 
 Windows에서 WeldScope를 열고 **폴더 검사 → 폴더 선택 → 검사 시작**을 누른다. 하위 폴더까지 검색한 PNG 수를 시작 전에 확인한다. 검사 중에는 진행 상황을 보고, 완료 후에는 **정상**, **불량**, **검토 필요**, **처리 오류**를 눌러 해당 결과만 확인한다. 결과를 선택하면 기존 원본·후보 오버레이, 단계별 점수·시간, 최종 판정 사유를 표시한다. 앱을 다시 열어 저장된 폴더 검사 결과를 조회할 수 있다.
 
-검수 환경에서는 더블클릭으로 앱과 전용 MySQL을 연다. 런타임과 MySQL 경로는 처음 한 번 준비한다. 현재 x64 배포본의 파일·폴더 기본 모델은 연속 보간이다. 아래 61,670장 집계는 S13 당시의 선택적 검사 결과다. [패키지 실행 안내](S13-run-package.md) · [기본 모델 채택 결정](../adr/0013-portfolio-default-inspection.md) · [새 모델 검수](../algorithms/openzdm-false-pass-eda.md#실제-mfc-검수)
+검수 환경에서는 더블클릭으로 앱과 전용 MySQL을 연다. 런타임과 MySQL 경로는 처음 한 번 준비한다. 현재 x64 배포본은 버전 2의 LightGBM 단일 판정을 사용한다. 아래 61,670장 집계는 S13 당시의 선택적 검사 결과다. [패키지 실행 안내](S13-run-package.md) · [기본 모델 채택 결정](../adr/0014-lightgbm-only-inspection.md) · [버전 2 검수](../algorithms/openzdm-false-pass-eda.md#버전-2-검수)
 
 ## 화면 구성
 
@@ -75,30 +75,6 @@ S13 개발 초기에는 S11의 **132µs** 설정으로 실습한 네 건이 모�
 
 ## 관리자와 검수자 재현 명령
 
-저장소 루트에서 [S11 x64 빌드 조건](S11-algorithm-integration-evaluation.md#실행과-검수)과 S02 원본 ZIP을 준비한다. 기존 DB를 사용하려면 `db/s05/schema.sql`이 적용된 DB에 관리자가 `db/s13/schema.sql`을 적용한다. Windows VM에서 기존 스테이징 MFC를 사용하는 예는 아래와 같다.
+현재 앱 및 ZIP은 [빌드와 ZIP 생성](S13-run-package.md#빌드와-zip-생성)을 따른다. 버전 2의 폴더 검수에는 [현행 검수 기록과 재현 절차](../algorithms/openzdm-false-pass-eda.md#재현)를 사용한다.
 
-```powershell
-$python = (Resolve-Path .tools/python/python.exe).Path
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/build-s10.ps1 -OutputRoot artifacts/S13 -StagedMfc artifacts/S10/vs-x64
-& $python -m tools.verify_folder_e2e prepare --output artifacts/S13/OPENZDM
-```
-
-검수용 DB는 루프백 MySQL을 사용한다. [접속 변수와 첫 로그인](S12-run-package.md#mysql-연결)을 설정한 셸에서 실행한다. 검증 도구는 전용 DB의 로컬 관리자만 사용해 결과를 조회한다.
-
-```powershell
-$app = 'artifacts/S13/x64/Release/WeldScope.App.exe'
-& $python -m tools.verify_folder_e2e verify --app $app --fixture-image artifacts/S13/OPENZDM/train/OK/image_10513.png --output artifacts/S13/gui-fixture-new
-& $python -m tools.verify_folder_e2e verify --app $app --input artifacts/S13/OPENZDM --output artifacts/S13/gui-full-new
-```
-
-S13 당시 소규모 검수용 설정에서는 정상·불량·검토 필요·처리 오류가 각각 1건이었다. 현재의 작은 검수는 배포 설정 그대로 공개 PNG 세 장과 손상 파일을 넣어 저장된 점수와 시간으로 예상 판정을 대조한다. 두 경로에서 커밋 응답 유실 뒤 재시도, 검사 중지, 한 장 검사 완료, 이력 조회와 TCP 재전송을 확인한다. [S13 당시 판정 필터](S13-evidence/04-row-detail.png) · [저장 재시도 화면](S13-evidence/02-storage-retry.png) · [기존 검수 기록](S13-evidence/fixture-verification.json)
-
-S13 스키마가 없는 DB에서는 폴더 검사 준비 상태를 표시하고 단일 파일 검사는 계속 실행된다. 실제 x64 앱으로 기존 스키마에 검사 결과 1건을 저장해 확인했다. 최종 ZIP을 푼 뒤 실행 런처로 전용 DB를 준비하고 동봉된 PNG 3장을 앱에서 폴더 검사했다. 기본 화면과 축소한 창을 96 DPI에서 확인했다.
-
-x64 CTest 8개, Python 일반 검사 65개, 기존 ARM64 단일 파일 실제 창 검사 24개가 통과했다. Python 발견 검사에서 건너뛴 CLI 전용 11개는 CTest에서 실행했다.
-
-패키지는 기존 x64 CLI와 다음 명령으로 만든다. 새 출력 경로를 지정하며, 해제한 폴더 안의 `WeldScope-Start.cmd`로 실행한다.
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/package-s12.ps1 -FolderInspection -AppDir artifacts/S13/x64/Release -Inspect artifacts/S11/build/Release/weldscope_inspect.exe -TwoStageSample artifacts/S13/OPENZDM/train/OK/image_10513.png -Output artifacts/S13/WeldScope-folder-win-x64-new.zip
-```
+이 문서의 이전 판정 방식으로 전체 61,670장을 다시 검사하려면 [교체 전 커밋의 S13 재현 명령](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/steps/S13-folder-inspection-monitoring.md#관리자와-검수자-재현-명령)에 있는 소스와 도구를 사용한다.

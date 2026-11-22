@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BaselineInspection.h"
+#include <opencv2/core.hpp>
 #include <cstddef>
 #include <filesystem>
 #include <stdexcept>
@@ -27,14 +27,8 @@ private:
     FileInspectionFailure reason_;
 };
 
-// 설정에서 읽은 밝기 경계와 불량 비율. 각 알고리즘이 허용 범위를 검사한다.
-struct InspectionSettings {
-    int threshold;
-    double failRatio;
-};
-
-// 실행 파일 옆에 있는 기준 검사 설정 경로를 반환한다. 실행 경로를 확인하지 못하면 예외를 던진다.
-std::filesystem::path baseline_config_path();
+// 실행 파일 옆에 있는 모델 설정 경로를 반환한다. 실행 경로를 확인하지 못하면 예외를 던진다.
+std::filesystem::path model_config_path();
 // limit 바이트까지 파일을 그대로 읽는다. 접근 실패와 크기 초과는 InspectionInputError로 구분한다.
 std::vector<unsigned char> read_bytes(const std::filesystem::path& path, std::size_t limit);
 // 디코딩 전 원본 바이트를 기준으로 소문자 16진수 64자리 지문을 반환한다.
@@ -45,10 +39,4 @@ cv::FileStorage read_json(const std::vector<unsigned char>& bytes);
 cv::Mat decode_png(const std::vector<unsigned char>& bytes);
 // 필수 정수 필드를 int로 읽는다. 누락, 타입 오류, 범위 초과는 필드 이름과 함께 알린다.
 int read_integer(const cv::FileNode& node, const char* name);
-// 스키마 버전 1에서 지정한 경계 키와 수치형 fail_ratio를 읽는다.
-InspectionSettings read_inspection_settings(const cv::FileStorage& json, const char* thresholdKey);
-// intensity_threshold와 fail_ratio를 읽어 값의 범위까지 확인한 기준 검사 설정을 만든다.
-BaselineConfig parse_baseline_config(const cv::FileStorage& json);
-// BGR 원본과 같은 크기의 8비트 단일 채널 마스크를 받는다. 원본을 보존하고 색을 입힌 복사본을 반환한다.
-cv::Mat make_candidate_overlay(const cv::Mat& bgr, const cv::Mat& mask);
 }

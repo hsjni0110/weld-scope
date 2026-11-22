@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <bcrypt.h>
 #include "InspectionInput.h"
+#include "AnalysisPipeline.h"
 #include <opencv2/imgcodecs.hpp>
 #include <algorithm>
 #include <cstdint>
@@ -41,14 +42,14 @@ void validate_png_end(const std::vector<unsigned char>& bytes)
 }
 }
 
-std::filesystem::path baseline_config_path()
+std::filesystem::path model_config_path()
 {
     std::wstring executable(32768, L'\0');
     const DWORD capacity = static_cast<DWORD>(executable.size());
     const DWORD length = ::GetModuleFileNameW(nullptr, executable.data(), capacity);
     if (!length || length >= capacity) throw std::runtime_error("Executable path unavailable");
     executable.resize(length);
-    return std::filesystem::path(executable).parent_path() / L"baseline.json";
+    return std::filesystem::path(executable).parent_path() / pooledSmoothConfigFile;
 }
 
 std::vector<unsigned char> read_bytes(const std::filesystem::path& path, std::size_t limit)
@@ -118,26 +119,4 @@ int read_integer(const cv::FileNode& node, const char* name)
     return static_cast<int>(value);
 }
 
-InspectionSettings read_inspection_settings(const cv::FileStorage& json, const char* thresholdKey)
-{
-    if (read_integer(json["schema_version"], "schema_version") != 1)
-        throw std::invalid_argument("Unsupported config schema");
-    if (!json["fail_ratio"].isInt() && !json["fail_ratio"].isReal())
-        throw std::invalid_argument("Numeric fail_ratio required");
-    return {read_integer(json[thresholdKey], thresholdKey), static_cast<double>(json["fail_ratio"])};
-}
-
-BaselineConfig parse_baseline_config(const cv::FileStorage& json)
-{
-    const auto settings = read_inspection_settings(json, "intensity_threshold");
-    return BaselineConfig(settings.threshold, settings.failRatio);
-}
-
-cv::Mat make_candidate_overlay(const cv::Mat& bgr, const cv::Mat& mask)
-{
-    cv::Mat colored = bgr.clone(), overlay;
-    colored.setTo(cv::Scalar(0, 191, 255), mask);
-    cv::addWeighted(bgr, 0.55, colored, 0.45, 0, overlay);
-    return overlay;
-}
 }

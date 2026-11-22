@@ -2,8 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <WeldScopeMySqlRoot Condition="'$(WeldScopeMySqlRoot)' == ''">$(MSBuildThisFileDirectory)..\..\.tools\mysql-8.4.13-winx64</WeldScopeMySqlRoot>
-    <WeldScopeS11Freeze Condition="'$(WeldScopeS11Freeze)' == ''">$(MSBuildThisFileDirectory)..\..\docs\steps\S11-evidence\freeze.json</WeldScopeS11Freeze>
-    <WeldScopeS11Selective Condition="'$(WeldScopeS11Selective)' == ''">$(MSBuildThisFileDirectory)..\..\docs\steps\S11-evidence\config\selective.json</WeldScopeS11Selective>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -27,8 +25,5 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Device\Protocol.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\WeldScope.Storage\InspectionHistory.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <CopyFileToFolders Include="$(WeldScopeMySqlRoot)\lib\libmysql.dll;$(WeldScopeMySqlRoot)\bin\libssl-3-x64.dll;$(WeldScopeMySqlRoot)\bin\libcrypto-3-x64.dll;$(MSBuildThisFileDirectory)res\samples\defect.png" />
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\config\pooled-smooth-220.json;$(MSBuildThisFileDirectory)..\..\config\model-220.txt" />
-    <CopyFileToFolders Include="$(WeldScopeS11Freeze)"><DestinationFileName>freeze.json</DestinationFileName></CopyFileToFolders>
-    <CopyFileToFolders Include="$(WeldScopeS11Selective)"><DestinationFileName>selective.json</DestinationFileName></CopyFileToFolders>
   </ItemGroup>
 </Project>

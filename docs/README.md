@@ -11,6 +11,7 @@
 | 디자인 스킬, 화면과 UI 문구 | [UI UX 원칙](standards/ui-ux.md) |
 | 문서 수명, 삭제, 완료 점검 | [문서 관리](standards/maintenance.md) |
 | 중요한 아키텍처 결정 | [ADR 목록과 절차](adr/README.md) |
+| 현행 LightGBM 단일 판정, 장비 설정과 이력 호환 | [ADR 0014](adr/0014-lightgbm-only-inspection.md) |
 | S04 기준 알고리즘의 계산식, 선택 근거, 점수 해석 | [전역 어두운 픽셀 비율](algorithms/global-dark-ratio.md) |
 | OPENZDM 불량 통과·정상 오판의 원인, MFC에서의 개선과 현장 적용 조건 | [연구 결과와 최종 판정](algorithms/openzdm-false-pass-eda.md) · [실제 MFC 검수](algorithms/openzdm-false-pass-eda.md#실제-mfc-검수) |
 

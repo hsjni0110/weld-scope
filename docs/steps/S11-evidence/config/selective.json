@@ -1,9 +1,0 @@
-{
-  "schema_version": 1,
-  "contrast_threshold": 12,
-  "budget_us": 132,
-  "fast_pass_max": 0.2657745480326125,
-  "fast_fail_min": 0.3083329049503933,
-  "precise_pass_max": 0,
-  "precise_fail_min": 0.5498386386973741
-}

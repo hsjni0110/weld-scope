@@ -1,5 +1,5 @@
 #pragma once
-#include "SelectiveInspectionPolicy.h"
+#include "AnalysisPipeline.h"
 #include <algorithm>
 
 namespace pooled_texture {

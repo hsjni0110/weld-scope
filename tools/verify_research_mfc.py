@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MYSQL = ROOT / '.tools/mysql-8.4.13-winx64'
 
 
-def verify(check, executable, output, cohort_options=()):
+def verify(check, executable, output, cohort_options=(), legacy_executable=None, review_image=None):
     executable = executable.resolve(strict=True)
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -68,9 +68,13 @@ def verify(check, executable, output, cohort_options=()):
                             '--port=' + port, '--user=research_app', '--get-server-public-key', schema,
                             '-e', 'SELECT 1'], env=dict(env, MYSQL_PWD=password), check=True,
                            stdout=subprocess.DEVNULL)
-            verifier = {'legacy': 'tools.verify_s11_gui', 'portfolio': 'tools.verify_portfolio_mfc', 'folder': 'tools.verify_folder_e2e',
+            verifier = {'portfolio': 'tools.verify_portfolio_mfc', 'folder': 'tools.verify_folder_e2e',
                         'cohort': 'tools.verify_mfc_model_cohort'}[check]
             arguments = [executable, output / 'gui', *cohort_options]
+            if check == 'portfolio' and legacy_executable:
+                arguments.extend(['--legacy-executable', legacy_executable.resolve(strict=True)])
+            if check == 'portfolio' and review_image:
+                arguments.extend(['--review-image', review_image.resolve(strict=True)])
             if check == 'folder':
                 arguments = ['verify', '--app', executable, '--output', output / 'gui', '--fixture-image',
                              ROOT / 'artifacts/S13/OPENZDM/train/OK/image_10513.png', '--timeout', '180']
@@ -88,11 +92,13 @@ def verify(check, executable, output, cohort_options=()):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('check', choices=('legacy', 'portfolio', 'folder', 'cohort'))
+    parser.add_argument('check', choices=('portfolio', 'folder', 'cohort'))
     parser.add_argument('executable', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--cohort', nargs=3, metavar=('MANIFEST', 'REFERENCE_CSV', 'VERSION'))
+    parser.add_argument('--legacy-executable', type=Path)
+    parser.add_argument('--review-image', type=Path)
     args = parser.parse_args()
     if (args.check == 'cohort') != bool(args.cohort):
         parser.error('The cohort check requires --cohort MANIFEST REFERENCE_CSV VERSION')
-    verify(args.check, args.executable, args.output, args.cohort or ())
+    verify(args.check, args.executable, args.output, args.cohort or (), args.legacy_executable, args.review_image)
