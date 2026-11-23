@@ -30,10 +30,9 @@ $env:WELDSCOPE_MYSQL_DATABASE = 'weldscope_s05'
 $env:WELDSCOPE_MYSQL_CA_FILE = (Resolve-Path .secrets/mysql-ca.pem).Path
 $appPassword = Read-Host 'MySQL app password' -AsSecureString
 $env:WELDSCOPE_MYSQL_PASSWORD = [System.Net.NetworkCredential]::new('', $appPassword).Password
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/demo-s05.ps1
 ```
 
-마지막 줄 `S05 checks passed`와 그 앞의 저장·조회·재전송·충돌·롤백 결과를 확인한다. 시연은 매번 새 ID를 사용한다. 샘플은 OPENZDM의 S04 실행 결과 일부를 고정한 값으로, 영상 처리 없이 저장 계약을 검증한다.
+시연에 사용한 [S05 검증 스크립트](https://github.com/hsjni0110/weld-scope/blob/94be8e2c663941eeb427ade6eaa219d38a03d049/tools/demo-s05.ps1)는 당시 커밋에서 실행한다. 저장·조회·재전송·충돌·롤백 결과 뒤에 `S05 checks passed`가 표시된다. 시연은 매번 새 ID를 사용한다. 샘플은 OPENZDM의 S04 실행 결과 일부를 고정한 값으로, 영상 처리 없이 저장 계약을 검증한다.
 
 S10 이전 스키마로 이미 준비한 개발 DB에서 현재 저장 모듈을 실행하려면 [S05 → S10 마이그레이션](../../db/s10/migrate-from-s05.sql)을 한 번 적용한다. 새 DB는 현재 `db/s05/schema.sql`로 초기화한다.
 
@@ -66,12 +65,11 @@ Get-Content db/s05/01-app-permissions.sql -Raw | & "$mysql/bin/mysql.exe" @admin
 $env:MYSQL_PWD = $env:WELDSCOPE_MYSQL_PASSWORD
 & "$mysql/bin/mysql.exe" --no-defaults --get-server-public-key -h 127.0.0.1 -P 33359 -u weldscope_app weldscope_s05 -e 'SELECT 1'
 Remove-Item Env:MYSQL_PWD
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/demo-s05.ps1
 .tools/python/python.exe tools/verify_s05_integration.py artifacts/S05/build/Release/weldscope_history.exe "$mysql/bin/mysql.exe"
 & "$mysql/bin/mysqladmin.exe" @admin shutdown
 ```
 
-첫 앱 계정 로그인은 서버 공개 키를 사용해 MySQL 인증 캐시를 채운다. 이후 시연 콘솔이 같은 계정으로 접속한다. 통합 검사는 루프백 테스트 인스턴스 관리자 계정으로 테이블 잠금을 잡아 두 저장 요청이 동시에 대기하는지 확인한다. 이어 트랜잭션 직전과 서버 커밋 확인 직후에 각각 연결을 끊고, 서버에 직접 재접속해 조회 및 재전송한다. 두 스크립트의 성공 문구는 각각 `S05 checks passed`와 `S05 database integration checks passed`다.
+첫 앱 계정 로그인은 서버 공개 키를 사용해 MySQL 인증 캐시를 채운다. 이후 시연 콘솔이 같은 계정으로 접속한다. 통합 검사는 루프백 테스트 인스턴스 관리자 계정으로 테이블 잠금을 잡아 두 저장 요청이 동시에 대기하는지 확인한다. 이어 트랜잭션 직전과 서버 커밋 확인 직후에 각각 연결을 끊고, 서버에 직접 재접속해 조회 및 재전송한다. 통합 검사의 성공 문구는 `S05 database integration checks passed`다.
 
 ## 관찰 결과
 

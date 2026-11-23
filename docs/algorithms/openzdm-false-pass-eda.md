@@ -23,7 +23,7 @@ CLI 두 번의 실행에서 점수, 판정, 이유가 8,104장 모두 일치했�
 
 아래는 밝기 기반 추가 검사와 132µs 보류가 있던 이전 빌드의 연구 및 검수 기록이다. 위 버전 2 표와 판정 규칙을 구분해 읽는다.
 
-**포트폴리오 x64 앱의 기본 파일·폴더 검사기는 연속 보간 220개 나무 모델이다.** 일반 ZIP을 풀고 `WeldScope-Start.cmd`를 열면 런처가 전용 MySQL과 DLL을 준비한다. 장비 요청의 설정 ID는 `pooled-smooth-220-v1`, 저장되는 버전은 `openzdm-pooled-smooth-220-v1`이다. 아래 표는 이 모델을 기본 앱에 채택하기 전 같은 공개 영상으로 측정한 결과다. [실행 안내](../steps/S13-run-package.md) · [모델과 설정](../../config/pooled-smooth-220.json)
+**이전 x64 배포본은 연속 보간 220개 나무 모델과 선택적 추가 검사를 사용했다.** 일반 ZIP을 풀고 `WeldScope-Start.cmd`를 열면 런처가 전용 MySQL과 DLL을 준비한다. 장비 요청의 설정 ID는 `pooled-smooth-220-v1`, 저장되는 버전은 `openzdm-pooled-smooth-220-v1`이다. 아래 표는 이 모델을 기본 앱에 채택하기 전 같은 공개 영상으로 측정한 결과다. [당시 모델과 설정](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/config/pooled-smooth-220.json)
 
 **일반 배포본 재검수.** 기존 실행 폴더에 설치한 최종 x64 Release 앱으로 같은 8,104장을 다시 검사했다. 동결 C++ 실행기의 첫 점수와 8,104장 모두 일치했다. 불량 통과는 **172/1,569(10.96%)**, 정상 오판은 **619/6,535(9.47%)**, 보류는 **751/8,104(9.27%)**, 처리 오류는 0건이었다. 정밀 호출은 670건이었다. 앞서 시작 화면 표시 수정 직전의 빌드에서는 동일 모델의 보류가 816/8,104(10.07%)로 연구 상한을 넘었다. 두 실행은 같은 사진을 검사했으며 시간 예산 때문에 보류 수가 달라질 수 있다.
 
@@ -153,21 +153,61 @@ Zender 연구진과 제조사가 발표한 실제 용접 사진 중, 정답을 �
 
 현장 검수에는 **사진 경로, 사진 정답, 실제 부품 ID, 촬영 배치 ID**가 함께 필요하다. 예를 들어 같은 부품을 월요일에 다섯 번 찍었다면 사진 다섯 장이 부품 다섯 개를 대표하지 않는다. 학습·경계 선택 때 본 부품과 촬영 배치를 제외한 뒤, 운영자가 사전에 정한 불량 통과율·정상 오판율·보류율 한도를 각 배치에서 확인해야 한다. 허용 한도와 측정 단위(사진·부품), 최소 표본 및 불확실성 기준도 시험 전에 고정해야 한다. 현재 MFC가 발급하는 폴더 묶음 번호는 **검사 실행 ID**다. 이 값으로 사진의 촬영 배치를 복원할 수 없다. 여러 업체의 서로 다른 결함 기준을 합쳐 하나의 현장 수치를 만드는 것도 부적절하다.
 
+### LightGBM 판정 명세
+
+**입력 특징 518개.** 흑백 사진에서 가로 64곳과 세로 16곳을 표본으로 읽습니다. 8×4칸으로 묶으면 한 칸에 표본 32개가 들어갑니다. 한 표본의 가운데 밝기를 $c$, 좌우 또는 위아래의 밝기를 $a,b$로 놓습니다. 이웃이 사진 밖이면 가장자리 픽셀을 사용합니다.
+
+| 칸마다 계산하는 값 | 개수 |
+|---|---:|
+| 평균, 표준편차, 최솟값, 최댓값 | 4 |
+| 이웃 차이 $\lvert a-b\rvert$의 평균, 가로·세로 × 거리 1·4픽셀 | 4 |
+| $a+b-2c$의 양수와 음수 크기 평균, 가로·세로 × 거리 4픽셀 | 4 |
+| $\lvert a+b-2c\rvert$의 평균, 가로·세로 × 거리 1픽셀 | 2 |
+
+칸별 값을 왼쪽 위부터 배열에 넣습니다. 가로줄 4개의 칸 평균과 전체 칸 평균을 뒤에 붙입니다.
+
+$$
+\text{입력 수}=(32\text{칸}+4\text{줄}+1\text{전체})\times14=518
+$$
+
+**C++ 실행.** 앱은 설정과 모델의 파일 지문을 확인합니다. 나무의 분기 정보를 8바이트짜리 노드 배열로 읽어 둡니다. 분기마다 특징 번호, 비교값, 자식 위치를 사용합니다.
+
+```text
+특징 = 흑백 PNG에서 계산한 518개 값
+합계 = 0
+
+나무 220개를 하나씩 읽는다
+    첫 노드에서 시작
+    끝에 닿을 때까지 특징값 > 비교값이면 오른쪽, 아니면 왼쪽
+    끝에 적힌 값을 합계에 더한다
+
+점수 = 1 / (1 + exp(-합계))
+정상선, 불량선 = 사진 폭으로 계산한 두 기준
+점수 <= 정상선이면 정상 반환
+점수 >= 불량선이면 불량 반환
+나머지는 검토 필요 반환
+```
+
 ### C++와 MFC를 따라 읽는 순서
 
 1. `PooledSmoothModel::score`는 사진을 숫자 목록으로 바꾼 뒤 학습된 나무에 전달한다. `band(width)`는 사진의 폭에 맞는 통과선과 탈락선을 돌려준다. 한 번 읽은 모델은 여러 사진이 함께 쓴다. [모델을 읽고 점수를 내는 C++ 코드](../../src/WeldScope.FileInspection/PooledSmoothModel.h)
-2. `analyze_image`는 빠른 점수·소요 시간을 정책에 주고, 필요할 때만 정밀 함수를 실행한다. 코드의 `[&] { … }`는 그때 실행할 작은 함수다. 같은 점수여도 제한 시간을 넘으면 최종 결과는 보류가 될 수 있다. [공용 분석 파이프라인](../../src/WeldScope.FileInspection/AnalysisPipeline.cpp)
+2. `analyze_image`는 모델 점수를 폭별 두 판정선과 비교한다. 분석 시간은 별도로 기록한다. [공용 분석 파이프라인](../../src/WeldScope.FileInspection/AnalysisPipeline.cpp)
 3. `RecordAnalysisOutcome`는 각 단계의 점수·시간과 최종 판정을 기록에 옮긴다. `InspectionHistory::Save`가 저장하고, 동일한 장비 요청이 다시 오면 `StoredResponse`가 저장했던 검사 ID와 판정을 돌려준다. 원본 파일과 설정의 해시는 어떤 사진을 어떤 모델로 검사했는지 대조하는 지문이다. [MFC의 저장과 장비 응답](../../src/WeldScope.App/IntegratedInspection.cpp)
 
 ## 재현
 
-Windows x64 Release에서 [구현 계획의 빌드 절차](../superpowers/plans/2026-11-22-lightgbm-only.md#작업-4-최종-검수)로 CLI를 준비한다. 검증용 ZIP은 [배포 실행 안내](../steps/S13-run-package.md)를 따른다. 각 출력 폴더는 새 경로를 지정한다.
+Visual Studio x64 개발 콘솔에서 저장소 루트로 이동해 CLI를 빌드한다. MFC 배포 ZIP은 별도의 [배포 실행 안내](../steps/S13-run-package.md)를 따른다. 각 검사 출력은 새 경로를 지정한다.
 
 ```powershell
 $python = (Resolve-Path .tools/python/python.exe).Path
+$opencv = (Resolve-Path .tools/opencv/install-x64/x64/vc18/staticlib).Path
+cmake -S . -B artifacts/lightgbm-v2/build -G 'Visual Studio 18 2026' -A x64 "-DOpenCV_DIR=$opencv" "-DPython3_EXECUTABLE=$python"
+cmake --build artifacts/lightgbm-v2/build --config Release --target weldscope_inspect
 & $python -m tools.prepare_inspection_inputs --output artifacts/lightgbm-v2/openzdm
 $cli = 'artifacts/lightgbm-v2/build/Release/weldscope_inspect.exe'
 & $cli --config config/pooled-smooth-220.json --manifest artifacts/lightgbm-v2/openzdm/inputs/test-primary.json --evaluation-split test --output artifacts/lightgbm-v2/cli-check
 ```
 
 이전 정책의 빌드, 학습, 동결 및 검수 도구는 [교체 전 커밋의 재현 절차](https://github.com/hsjni0110/weld-scope/blob/ce2d6f0/docs/algorithms/openzdm-false-pass-eda.md#재현)에 있다.
+
+[이전 포트폴리오 상세 기록](https://github.com/hsjni0110/weld-scope/blob/94be8e2c663941eeb427ade6eaa219d38a03d049/docs/portfolio/README.md)

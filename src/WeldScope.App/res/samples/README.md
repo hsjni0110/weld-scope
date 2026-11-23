@@ -11,4 +11,4 @@ OPENZDM, *2D image dataset for the presence or absence of aesthetical defects on
 - `corrupt.png`는 오류 복구 확인용 합성 비이미지이며 원본 데이터가 아니다.
 - 파일별 SHA-256과 크기는 `provenance.json`에서 확인한다.
 
-이 폴더는 S03의 출처 기록과 S04·S09 회귀 검사에 쓰이는 파일을 보관한다. S09 앱은 선택한 파일을 읽는다. 재생성은 프로젝트 루트에서 `.tools/python/python.exe tools/prepare_s03_assets.py`로 실행하며 로컬 S02 ZIP이 필요하다.
+이 폴더는 S03의 출처 기록과 S04·S09 회귀 검사에 쓰이는 파일을 보관한다. S09 앱은 선택한 파일을 읽는다. 이 파일을 만든 [샘플 준비 스크립트](https://github.com/hsjni0110/weld-scope/blob/94be8e2c663941eeb427ade6eaa219d38a03d049/tools/prepare_s03_assets.py)는 당시 커밋에서 확인할 수 있다. 재생성에는 로컬 S02 ZIP이 필요하다.
